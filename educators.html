@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For Special Educators & Freelance Teachers — NeuroSaathi</title>
+<meta name="description" content="List your services on NeuroSaathi. Connect with families looking for special educators and freelance teachers who understand their child's needs.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#1A1A1A">
+<link rel="canonical" href="https://www.neurosaathi.co.in/educators.html">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" href="/images/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared-styles.css">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://qvuenvngwgcknawfsnxl.supabase.co; object-src 'none'; base-uri 'self'; frame-ancestors 'none';">
+<style>
+  body{background:#F8FAFC;font-family:'Manrope',sans-serif}
+  .prof-nav{background:#1A1A1A;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+  .prof-nav a{color:#fff;text-decoration:none;font-weight:800;font-size:14px}
+  .prof-hero{background:linear-gradient(135deg,#1A1A1A,#2B2B2B);padding:60px 24px;text-align:center}
+  .prof-form-wrap{max-width:640px;margin:-40px auto 60px;padding:0 20px}
+  .prof-form{background:#fff;border-radius:24px;padding:36px;box-shadow:0 20px 50px rgba(0,0,0,.12)}
+  .prof-field{margin-bottom:18px}
+  .prof-field label{display:block;font-size:13px;font-weight:800;color:#1A1A1A;margin-bottom:6px}
+  .prof-field input,.prof-field select,.prof-field textarea{width:100%;border:2px solid #E5E7EB;border-radius:10px;padding:11px 14px;font-family:inherit;font-size:14px;outline:none;box-sizing:border-box}
+  .prof-field input:focus,.prof-field select:focus,.prof-field textarea:focus{border-color:#FF6B1A}
+</style>
+</head>
+<body>
+
+<nav class="prof-nav">
+  <a href="/index.html">🏠 NeuroSaathi</a>
+  <a href="/parents.html">For Parents</a>
+</nav>
+
+<div class="prof-hero">
+  <div style="font-size:12px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#FF6B1A;margin-bottom:12px">FOR SPECIAL EDUCATORS</div>
+  <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,38px);font-weight:800;color:#fff;max-width:700px;margin:0 auto 14px">
+    Help families find the right support, at the right pace
+  </h1>
+  <p style="font-size:15px;color:rgba(255,255,255,.6);max-width:520px;margin:0 auto">
+    List your services once. Parents looking for special educators and freelance teachers in their city find you directly.
+  </p>
+</div>
+
+<div class="prof-form-wrap">
+  <div class="prof-form">
+
+    <div id="profFormStep1">
+      <h2 style="font-family:'Fraunces',serif;font-size:20px;font-weight:800;color:#1A1A1A;margin-bottom:20px">Create your account</h2>
+      <div class="prof-field">
+        <label>Email</label>
+        <input type="email" id="profEmail" placeholder="you@example.com">
+      </div>
+      <div class="prof-field">
+        <label>Password</label>
+        <input type="password" id="profPassword" placeholder="Minimum 6 characters">
+      </div>
+      <button onclick="profSignupOrLogin()" style="width:100%;background:linear-gradient(135deg,#FF6B1A,#FF8C42);color:#fff;border:none;border-radius:50px;padding:14px;font-family:inherit;font-size:15px;font-weight:900;cursor:pointer">Continue →</button>
+      <div style="text-align:center;margin-top:14px;font-size:13px;color:#78716C">Already have an account? Just enter your email &amp; password and continue.</div>
+    </div>
+
+    <form id="profFormStep2" style="display:none" onsubmit="submitProfessionalRegistration(event)">
+      <h2 style="font-family:'Fraunces',serif;font-size:20px;font-weight:800;color:#1A1A1A;margin-bottom:20px">Your professional profile</h2>
+
+      <div class="prof-field">
+        <label>Display name (shown to parents) *</label>
+        <input type="text" id="profDisplayName" required placeholder="e.g. Dr. Priya Sharma">
+      </div>
+
+      <div class="prof-field">
+        <label>Certification / qualification number (optional, for verification)</label>
+        <input type="text" id="profRegNumber" placeholder="e.g. RCI registration number, if applicable">
+      </div>
+
+      <div class="prof-field">
+        <label>Certifying body (optional)</label>
+        <input type="text" id="profRegBody" placeholder="e.g. RCI, or your training institute">
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="prof-field">
+          <label>City *</label>
+          <input type="text" id="profCity" required placeholder="e.g. Mumbai">
+        </div>
+        <div class="prof-field">
+          <label>State</label>
+          <input type="text" id="profState" placeholder="e.g. Maharashtra">
+        </div>
+      </div>
+
+      <div class="prof-field">
+        <label>Languages spoken (comma separated)</label>
+        <input type="text" id="profLanguages" placeholder="e.g. English, Hindi, Marathi">
+      </div>
+
+      <div class="prof-field">
+        <label>Conditions you specialise in (comma separated)</label>
+        <input type="text" id="profConditions" placeholder="e.g. Autism, ADHD, Speech Delay">
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="prof-field">
+          <label>Consultation fee — from (₹)</label>
+          <input type="number" id="profFeeMin" placeholder="e.g. 500">
+        </div>
+        <div class="prof-field">
+          <label>Consultation fee — up to (₹)</label>
+          <input type="number" id="profFeeMax" placeholder="e.g. 1500">
+        </div>
+      </div>
+
+      <div class="prof-field">
+        <label>Short bio</label>
+        <textarea id="profBio" rows="3" placeholder="A few lines about your experience and approach"></textarea>
+      </div>
+
+      <button type="submit" id="profSubmitBtn" style="width:100%;background:linear-gradient(135deg,#FF6B1A,#FF8C42);color:#fff;border:none;border-radius:50px;padding:14px;font-family:inherit;font-size:15px;font-weight:900;cursor:pointer">Submit for Verification →</button>
+      <div style="text-align:center;margin-top:12px;font-size:12.5px;color:#78716C">Your profile stays hidden from parent searches until our team verifies your registration details.</div>
+    </form>
+
+    <div id="profSuccess" style="display:none;text-align:center;padding:20px 0">
+      <div style="font-size:48px;margin-bottom:14px">✅</div>
+      <h2 style="font-family:'Fraunces',serif;font-size:20px;font-weight:800;color:#1A1A1A;margin-bottom:10px">Submitted for verification</h2>
+      <p style="font-size:14px;color:#57534E;line-height:1.6">Our team will verify your details and activate your profile. You'll be notified by email once you're live and visible to parents searching in your city.</p>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+const NS_URL = 'https://qvuenvngwgcknawfsnxl.supabase.co';
+const NS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2dWVudm5nd2dja25hd2ZzbnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MzI1OTksImV4cCI6MjA5ODMwODU5OX0.MZgac469tvi9Xq9gyaRbHDc9t88Ww9dN8ldZ8JvKGVI';
+let _sb = null;
+async function getSupabase(){
+  if(_sb) return _sb;
+  _sb = window.supabase.createClient(NS_URL, NS_KEY);
+  return _sb;
+}
+
+async function profSignupOrLogin(){
+  const email = document.getElementById('profEmail').value.trim();
+  const password = document.getElementById('profPassword').value;
+  if(!email || !password || password.length < 6){
+    alert('Please enter a valid email and a password of at least 6 characters.');
+    return;
+  }
+  try{
+    const sb = await getSupabase();
+    // Try login first; if the account doesn't exist yet, sign up instead.
+    let { error: loginError } = await sb.auth.signInWithPassword({ email, password });
+    if(loginError){
+      const { error: signupError } = await sb.auth.signUp({ email, password });
+      if(signupError){ alert('Could not create account: ' + signupError.message); return; }
+    }
+    document.getElementById('profFormStep1').style.display = 'none';
+    document.getElementById('profFormStep2').style.display = 'block';
+  }catch(e){
+    alert('Something went wrong. Please try again.');
+    console.error(e);
+  }
+}
+
+async function submitProfessionalRegistration(event){
+  event.preventDefault();
+  const btn = document.getElementById('profSubmitBtn');
+  const origText = btn.textContent;
+  btn.textContent = 'Submitting...';
+  btn.disabled = true;
+
+  try{
+    const sb = await getSupabase();
+    const { data: userData } = await sb.auth.getUser();
+    const userId = userData?.user?.id;
+    if(!userId){ alert('Please sign in again.'); btn.textContent = origText; btn.disabled = false; return; }
+
+    const toArray = (val) => val.split(',').map(s => s.trim()).filter(Boolean);
+
+    const payload = {
+      user_id: userId,
+      professional_type: 'special_educator',
+      display_name: document.getElementById('profDisplayName').value.trim(),
+      registration_body: document.getElementById('profRegBody').value.trim() || null,
+      city: document.getElementById('profCity').value.trim(),
+      state: document.getElementById('profState').value.trim() || null,
+      languages_spoken: toArray(document.getElementById('profLanguages').value),
+      conditions_specialised: toArray(document.getElementById('profConditions').value),
+      consultation_fee_min: document.getElementById('profFeeMin').value ? parseInt(document.getElementById('profFeeMin').value) : null,
+      consultation_fee_max: document.getElementById('profFeeMax').value ? parseInt(document.getElementById('profFeeMax').value) : null,
+      bio: document.getElementById('profBio').value.trim() || null,
+    };
+    // Note: registration_number_encrypted is intentionally NOT written here —
+    // it requires server-side encryption, not a plaintext client-side write.
+    // The registration number entered above is for our team's manual
+    // verification process, communicated separately (e.g. via email/support),
+    // not stored in this table from the browser.
+
+    if(!payload.professional_type || !payload.display_name || !payload.city){
+      alert('Please fill in all required fields (marked *).');
+      btn.textContent = origText; btn.disabled = false;
+      return;
+    }
+
+    const { error } = await sb.from('professionals').upsert(payload, { onConflict: 'user_id' });
+    if(error){
+      alert('Could not submit your registration: ' + error.message);
+      btn.textContent = origText; btn.disabled = false;
+      return;
+    }
+
+    document.getElementById('profFormStep2').style.display = 'none';
+    document.getElementById('profSuccess').style.display = 'block';
+  }catch(e){
+    alert('Something went wrong. Please try again.');
+    console.error(e);
+    btn.textContent = origText; btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>

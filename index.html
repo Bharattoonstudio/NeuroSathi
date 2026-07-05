@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroSaathi — Every Child Can Shine</title>
+<meta name="description" content="If you're worried about your child's development, you don't have to figure it out alone. Free educational screening tools, guidance, and a directory of professionals for autism, ADHD, and 20+ conditions — for families everywhere.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#FFF9F0">
+<link rel="canonical" href="https://www.neurosaathi.co.in/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.neurosaathi.co.in/">
+<meta property="og:title" content="NeuroSaathi — Every Child Can Shine">
+<meta property="og:description" content="Free educational screening tools, guidance, and a directory of professionals for autism, ADHD, and 20+ conditions — for the whole care circle around a child, anywhere in the world.">
+<meta property="og:image" content="https://www.neurosaathi.co.in/images/og-image.png">
+<meta property="og:site_name" content="NeuroSaathi">
+<meta property="og:locale" content="en_IN">
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="NeuroSaathi">
+<link rel="icon" type="image/png" href="/images/favicon.png">
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&display=swap" rel="stylesheet">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none';">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important} }
+  body{font-family:'Manrope',sans-serif;color:#292524;background:#FFFDFA;line-height:1.5}
+  a{color:inherit}
+  img{max-width:100%;display:block}
+  .wrap{max-width:1160px;margin:0 auto;padding-left:24px;padding-right:24px}
+  .eyebrow{font-size:12px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#0D7D74}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:800;color:#262322}
+  .muted{color:#57534E}
+
+  /* ── Header ── */
+  header.site{position:sticky;top:0;z-index:40;background:transparent;border-bottom:1px solid transparent;transition:background .3s ease,box-shadow .3s ease,border-color .3s ease}
+  header.site.scrolled{background:rgba(255,253,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid rgba(0,0,0,.05);box-shadow:0 4px 20px rgba(0,0,0,.04)}
+  header.site.scrolled .site-nav{padding-top:12px;padding-bottom:12px}
+  .site-nav{transition:padding .3s ease}
+  .site-nav{display:flex;align-items:center;gap:12px;padding:16px 24px;max-width:1160px;margin:0 auto}
+  .logo-mark-img{width:36px;height:36px;object-fit:contain;border-radius:10px;flex-shrink:0}
+  .logo-text{font-family:'Fraunces',serif;font-weight:800;font-size:18px;color:#0D5C4A}
+  .nav-cta{margin-left:auto;background:linear-gradient(135deg,#134E4A,#0D6660);color:#fff;text-decoration:none;font-weight:800;font-size:13.5px;padding:10px 20px;border-radius:50px;transition:transform .2s ease,box-shadow .2s ease;box-shadow:0 4px 14px rgba(19,78,74,.2)}
+  .nav-cta:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(19,78,74,.28)}
+  .nav-cta:active{transform:translateY(0) scale(.97)}
+
+  /* ── Hero ── */
+  .hero{background:linear-gradient(170deg,#FFF9F0 0%,#FDF3E7 40%,#EAF4F6 100%);padding:64px 24px 56px}
+  .hero-grid{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:center}
+  @media (max-width:900px){ .hero-grid{grid-template-columns:1fr} }
+  .hero h1{font-size:clamp(30px,4.6vw,50px);line-height:1.22;margin:16px 0 18px}
+  .hero-sub{font-size:17px;color:#57534E;margin-bottom:22px;max-width:520px}
+  .hero-points{list-style:none;margin-bottom:30px}
+  .hero-points li{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:#44403C;margin-bottom:10px}
+  .hero-points li::before{content:'✓';color:#0D7D74;font-weight:800;flex-shrink:0}
+  .hero-ctas{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:32px}
+  .btn-primary{background:linear-gradient(135deg,#134E4A,#0D6660);color:#fff;text-decoration:none;font-weight:800;font-size:15.5px;padding:16px 30px;border-radius:50px;box-shadow:0 10px 28px rgba(19,78,74,.25);transition:transform .2s ease,box-shadow .2s ease}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(19,78,74,.32)}
+  .btn-primary:active{transform:translateY(0) scale(.98);box-shadow:0 6px 18px rgba(19,78,74,.28)}
+  .btn-secondary{background:#fff;color:#134E4A;text-decoration:none;font-weight:800;font-size:15.5px;padding:16px 30px;border-radius:50px;border:2px solid #134E4A;transition:transform .2s ease,box-shadow .2s ease,background .2s ease}
+  .btn-secondary:hover{background:#F0FAF8;transform:translateY(-2px);box-shadow:0 8px 20px rgba(19,78,74,.12)}
+  .btn-secondary:active{transform:translateY(0) scale(.98)}
+  .trust-row{display:flex;flex-wrap:wrap;gap:10px}
+  .trust-pill{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:50px;padding:9px 16px;font-size:12.5px;font-weight:700;color:#44403C;box-shadow:0 3px 10px rgba(0,0,0,.04)}
+  .hero-img-wrap{border-radius:28px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.14);aspect-ratio:4/5;background:#F1F5F4}
+  .hero-img-wrap img{width:100%;height:100%;object-fit:cover}
+
+  /* ── Section shell ── */
+  .section{padding:76px 24px}
+  .section-head{max-width:640px;margin:0 auto 44px;text-align:center}
+  .section-head h2{font-size:clamp(24px,3.4vw,34px);line-height:1.3;margin:12px 0 12px}
+  .section-head p{color:#57534E;font-size:15px}
+
+  /* ── Journey cards ── */
+  .journey-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px;max-width:1100px;margin:0 auto}
+  .journey-card{background:#fff;border-radius:20px;padding:28px 24px;box-shadow:0 8px 24px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.04);transition:transform 0.25s ease, box-shadow 0.25s ease}
+  .journey-card:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(0,0,0,0.08)}
+  .journey-q{font-size:14px;font-weight:800;color:#0D7D74;margin-bottom:10px}
+  .journey-arrow{font-size:18px;color:#D6D3D1;margin:10px 0}
+  .journey-a{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:#262322;margin-bottom:8px}
+  .journey-desc{font-size:13.5px;color:#78716C}
+
+  /* ── Story banner ── */
+  .story-banner{position:relative;max-width:1100px;margin:0 auto;border-radius:28px;overflow:hidden;min-height:420px;box-shadow:0 20px 55px rgba(0,0,0,.16)}
+  .story-slide{position:absolute;inset:0;opacity:0;transition:opacity 1s ease;pointer-events:none}
+  .story-slide.active{opacity:1;pointer-events:auto}
+  .story-slide-img{position:absolute;inset:0;background-size:cover;background-position:center}
+  @media (prefers-reduced-motion:no-preference){ .story-slide-img{animation:kenBurnsSlow 16s ease-in-out infinite alternate} }
+  @keyframes kenBurnsSlow{from{transform:scale(1)}to{transform:scale(1.06)}}
+  .story-overlay{position:absolute;inset:0;background:linear-gradient(100deg,rgba(255,249,240,.96) 0%,rgba(255,249,240,.82) 38%,rgba(255,249,240,.15) 68%,transparent 100%)}
+  .story-content{position:relative;height:100%;display:flex;flex-direction:column;justify-content:center;padding:48px;max-width:540px;min-height:420px}
+  .story-tag{display:inline-block;background:#D6F0EC;color:#0D7D74;border-radius:20px;padding:5px 15px;font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;width:fit-content}
+  .story-heading{font-size:clamp(22px,3.4vw,32px);margin-bottom:12px}
+  .story-desc{font-size:14.5px;color:#57534E;margin-bottom:22px;line-height:1.65}
+  .story-dots{position:absolute;bottom:24px;left:48px;display:flex;gap:8px;z-index:3}
+  .story-dot{width:9px;height:9px;padding:0;border:none;border-radius:50%;background:rgba(0,0,0,.15);cursor:pointer}
+  .story-dot:focus{outline:2px solid #0D7D74;outline-offset:2px}
+  .story-dot.active{background:#0D7D74}
+
+  /* ── Ecosystem cards ── */
+  .eco-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;max-width:1160px;margin:0 auto}
+  .eco-card{background:#fff;border-radius:20px;overflow:hidden;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.06);transition:transform .25s ease,box-shadow .25s ease;display:flex;flex-direction:column}
+  .eco-card:hover{transform:translateY(-6px);box-shadow:0 18px 44px rgba(0,0,0,.12)}
+  .eco-img{width:100%;height:200px;object-fit:cover;background:#F1F5F4}
+  .eco-body{padding:24px}
+  .eco-tag{font-size:11.5px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#0D7D74;margin-bottom:8px}
+  .eco-title{font-size:19px;margin-bottom:8px}
+  .eco-desc{font-size:13.5px;color:#57534E;margin-bottom:14px}
+  .eco-link{font-size:13px;font-weight:800;color:#B45309}
+
+  /* ── Timeline ── */
+  .timeline{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;position:relative}
+  @media (max-width:800px){ .timeline{grid-template-columns:1fr} }
+  .tl-step{text-align:center;position:relative}
+  .tl-num{width:48px;height:48px;border-radius:50%;background:#134E4A;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;margin:0 auto 14px}
+  .tl-title{font-family:'Fraunces',serif;font-weight:800;font-size:17px;margin-bottom:6px}
+  .tl-desc{font-size:13px;color:#78716C}
+
+  /* ── Trust cards ── */
+  .trust-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:18px;max-width:1100px;margin:0 auto}
+  .trust-card{background:#fff;border-radius:20px;padding:22px;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.06);transition:transform .25s ease,box-shadow .25s ease}
+  .trust-icon{font-size:26px;margin-bottom:10px}
+  .trust-title{font-weight:800;font-size:14px;margin-bottom:4px}
+  .trust-desc{font-size:12.5px;color:#78716C}
+  .trust-card:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(0,0,0,.09)}
+
+  /* ── Relatable stories (honestly NOT labeled as verified testimonials) ── */
+  .rel-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;max-width:1100px;margin:0 auto}
+  .rel-card{background:#fff;border-radius:20px;padding:26px;box-shadow:0 8px 24px rgba(0,0,0,.06);transition:transform .25s ease,box-shadow .25s ease}
+  .rel-quote{font-size:14.5px;color:#44403C;line-height:1.6;margin-bottom:14px;font-style:italic}
+  .rel-name{font-size:13px;font-weight:800;color:#0D7D74}
+  .rel-card:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(0,0,0,.09)}
+
+  footer.site{background:#1A1A1A;color:rgba(255,255,255,.6);text-align:center;padding:36px 20px;font-size:13px}
+  footer.site a{color:rgba(255,255,255,.85);text-decoration:underline}
+
+  /* ── Mobile sticky CTA ── */
+  .sticky-cta{display:none;position:fixed;bottom:0;left:0;right:0;z-index:50;background:#fff;padding:12px 16px;box-shadow:0 -6px 20px rgba(0,0,0,.1)}
+  @media (max-width:640px){ .sticky-cta{display:block} body{padding-bottom:72px} }
+  .sticky-cta a{display:block;text-align:center;background:linear-gradient(135deg,#134E4A,#0D6660);color:#fff;text-decoration:none;font-weight:800;padding:14px;border-radius:50px;font-size:15px;transition:transform .2s ease}
+  .sticky-cta a:active{transform:scale(.97)}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <nav class="site-nav" aria-label="Primary">
+    <img src="data:image/png;base64,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" alt="NeuroSaathi logo" class="logo-mark-img">
+    <span class="logo-text">NeuroSaathi</span>
+    <a class="nav-cta" href="/parents.html#tests">Take a Free Educational Screening</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ══════ HERO ══════ -->
+  <section class="hero">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">Every Child Can Shine ✨</div>
+        <h1>If you're worried about your child's development, you don't have to figure it out alone.</h1>
+        <p class="hero-sub">The beginning of a global neuro support portal — bringing educational screening tools, guidance, and a professional directory into one place.</p>
+        <ul class="hero-points">
+          <li>Start with a free educational screening</li>
+          <li>Understand what your child needs</li>
+          <li>Connect with trusted professionals</li>
+          <li>Support your child with confidence</li>
+        </ul>
+        <div class="hero-ctas">
+          <a class="btn-primary" href="/parents.html#tests">Take a Free Educational Screening</a>
+          <a class="btn-secondary" href="#ecosystem">Explore NeuroSaathi</a>
+        </div>
+        <div class="trust-row">
+          <span class="trust-pill">✅ Verified Professionals</span>
+          <span class="trust-pill">📊 Evidence Based</span>
+          <span class="trust-pill">🔒 Private &amp; Secure</span>
+          <span class="trust-pill">🧩 20+ Conditions Supported</span>
+          <span class="trust-pill">🌍 Available Worldwide</span>
+        </div>
+        <p style="font-size:12.5px;color:#78716C;margin-top:18px;max-width:520px;line-height:1.6">
+          ⚠️ NeuroSaathi is an educational platform, not a healthcare provider. Screening tools are for educational awareness only and are not a medical diagnosis. Always consult a qualified professional for assessment or treatment.
+          <a href="/medical-disclaimer.html" style="color:#0D7D74;font-weight:700">Medical Disclaimer</a> ·
+          <a href="/educational-disclaimer.html" style="color:#0D7D74;font-weight:700">Educational Disclaimer</a>
+        </p>
+      </div>
+      <div class="hero-img-wrap">
+        <img src="/story-child-happy.jpg" loading="eager" decoding="async" alt="A parent and child sharing a warm, joyful moment together" onerror="this.parentElement.style.background='linear-gradient(135deg,#FDE68A,#F2A65A)';this.remove()">
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ HOW WE HELP (journey cards) ══════ -->
+  <section class="section" aria-labelledby="help-heading">
+    <div class="section-head">
+      <div class="eyebrow">How We Help</div>
+      <h2 id="help-heading">A clear next step, whatever stage you're at</h2>
+    </div>
+    <div class="journey-grid">
+      <div class="journey-card">
+        <div class="journey-q">Is my child developing normally?</div>
+        <div class="journey-arrow">↓</div>
+        <div class="journey-a">Take a screening</div>
+        <div class="journey-desc">Free, evidence-based educational screening tools for autism, ADHD, and more — results in minutes. Not a medical diagnosis.</div>
+      </div>
+      <div class="journey-card">
+        <div class="journey-q">What should I do next?</div>
+        <div class="journey-arrow">↓</div>
+        <div class="journey-a">Get expert guidance</div>
+        <div class="journey-desc">Step-by-step guidance for real situations — meltdowns, speech delays, school concerns.</div>
+      </div>
+      <div class="journey-card">
+        <div class="journey-q">Who can help?</div>
+        <div class="journey-arrow">↓</div>
+        <div class="journey-a">Find verified professionals</div>
+        <div class="journey-desc">Doctors, therapists, and special educators — searchable by your city and specific need.</div>
+      </div>
+      <div class="journey-card">
+        <div class="journey-q">How do I support my child every day?</div>
+        <div class="journey-arrow">↓</div>
+        <div class="journey-a">Daily resources</div>
+        <div class="journey-desc">Practical routines, government scheme guidance, and a library of learning resources.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ STORY BANNER ══════ -->
+  <section class="section" style="padding-top:0" aria-label="Stories from the NeuroSaathi journey">
+    <div class="story-banner" id="storyBanner" role="region" aria-roledescription="carousel" aria-label="NeuroSaathi journey stories" tabindex="0"
+         onmouseenter="pauseStory()" onmouseleave="resumeStory()" onkeydown="storyKey(event)">
+
+      <div class="story-slide active" data-slide="0">
+        <div class="story-slide-img" style="background-image:url('/story-child-therapy.jpg')"></div>
+        <div class="story-overlay"></div>
+        <div class="story-content">
+          <span class="story-tag">Early Screening</span>
+          <h3 class="story-heading">Catching it early changes everything</h3>
+          <p class="story-desc">A five-minute educational screening today can help you recognise patterns early — not a diagnosis, but often the first real step.</p>
+          <a class="btn-primary" style="width:fit-content" href="/parents.html#tests">Start a Screening →</a>
+        </div>
+      </div>
+
+      <div class="story-slide" data-slide="1">
+        <div class="story-slide-img" style="background-image:url('/story-child-guidance.jpg')"></div>
+        <div class="story-overlay"></div>
+        <div class="story-content">
+          <span class="story-tag" style="background:#DDEAFB;color:#1E40AF">Expert Support</span>
+          <h3 class="story-heading">Real guidance, from people who understand</h3>
+          <p class="story-desc">Verified doctors, therapists, and educators — searchable by city, specialty, and the exact support your family needs.</p>
+          <a class="btn-primary" style="width:fit-content" href="/parents.html#map">Find Professionals →</a>
+        </div>
+      </div>
+
+      <div class="story-slide" data-slide="2">
+        <div class="story-slide-img" style="background-image:url('/story-autism-awareness.jpg')"></div>
+        <div class="story-overlay"></div>
+        <div class="story-content">
+          <span class="story-tag" style="background:#FDE9D6;color:#9A3412">Daily Activities</span>
+          <h3 class="story-heading">Support that fits into everyday life</h3>
+          <p class="story-desc">Practical routines, sensory-friendly activities, and government scheme guidance — built for real Indian households.</p>
+          <a class="btn-primary" style="width:fit-content" href="/parents.html#resources">Browse Resources →</a>
+        </div>
+      </div>
+
+      <div class="story-slide" data-slide="3">
+        <div class="story-slide-img" style="background-image:url('/story-adhd-child.jpg')"></div>
+        <div class="story-overlay"></div>
+        <div class="story-content">
+          <span class="story-tag" style="background:#F3E8FF;color:#6D28D9">Care Circle</span>
+          <h3 class="story-heading">No one should navigate this alone</h3>
+          <p class="story-desc">Parents, doctors, therapists, educators, and trusted caregivers — everyone around a child, in one supportive place.</p>
+          <a class="btn-primary" style="width:fit-content" href="#ecosystem">See the Ecosystem →</a>
+        </div>
+      </div>
+
+      <div class="story-dots" role="tablist" aria-label="Story navigation">
+        <button class="story-dot active" data-dot="0" onclick="goToStory(0)" aria-label="Story 1 of 4" role="tab"></button>
+        <button class="story-dot" data-dot="1" onclick="goToStory(1)" aria-label="Story 2 of 4" role="tab"></button>
+        <button class="story-dot" data-dot="2" onclick="goToStory(2)" aria-label="Story 3 of 4" role="tab"></button>
+        <button class="story-dot" data-dot="3" onclick="goToStory(3)" aria-label="Story 4 of 4" role="tab"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ FIVE USER ECOSYSTEM ══════ -->
+  <section class="section" id="ecosystem" aria-labelledby="eco-heading">
+    <div class="section-head">
+      <div class="eyebrow">The NeuroSaathi Ecosystem</div>
+      <h2 id="eco-heading">One place for everyone around a child</h2>
+      <p>Parents typically spend significant money and weeks piecing this together alone. NeuroSaathi brings it into one place — most of it free to start.</p>
+    </div>
+    <div class="eco-grid">
+
+      <a class="eco-card" href="/parents.html" aria-label="For Parents">
+        <img class="eco-img" src="/story-child-happy.jpg" loading="lazy" decoding="async" alt="Parent and child in a joyful moment" onerror="this.style.background='linear-gradient(135deg,#FDE68A,#F2A65A)';this.removeAttribute('src')">
+        <div class="eco-body">
+          <div class="eco-tag">For Parents</div>
+          <div class="eco-title">Take a breath</div>
+          <div class="eco-desc">Free educational screening, step-by-step guidance, and a community that truly understands what you're going through.</div>
+          <div class="eco-link">Explore for parents →</div>
+        </div>
+      </a>
+
+      <a class="eco-card" href="/professionals.html" aria-label="For Doctors and Therapists">
+        <img class="eco-img" src="/story-child-therapy.jpg" loading="lazy" decoding="async" alt="A therapist working encouragingly with a child" onerror="this.style.background='linear-gradient(135deg,#BFDBFE,#60A5FA)';this.removeAttribute('src')">
+        <div class="eco-body">
+          <div class="eco-tag">For Doctors &amp; Therapists</div>
+          <div class="eco-title">Connect with families who need you</div>
+          <div class="eco-desc">Be found by families actively searching for your specialty, in your city.</div>
+          <div class="eco-link">Explore for professionals →</div>
+        </div>
+      </a>
+
+      <a class="eco-card" href="/educators.html" aria-label="For Special Educators">
+        <img class="eco-img" src="/story-child-guidance.jpg" loading="lazy" decoding="async" alt="A special educator guiding a child with warmth and patience" onerror="this.style.background='linear-gradient(135deg,#DDD6FE,#A78BFA)';this.removeAttribute('src')">
+        <div class="eco-body">
+          <div class="eco-tag">For Special Educators</div>
+          <div class="eco-title">Make a lasting impact</div>
+          <div class="eco-desc">Bring your specialized teaching skills directly to families looking for exactly what you offer.</div>
+          <div class="eco-link">Explore for educators →</div>
+        </div>
+      </a>
+
+      <a class="eco-card" href="/caregivers.html" aria-label="Babysitters and Home Tutors">
+        <img class="eco-img" src="/story-autism-awareness.jpg" loading="lazy" decoding="async" alt="A caring moment between a caregiver and a child" onerror="this.style.background='linear-gradient(135deg,#FECACA,#F87171)';this.removeAttribute('src')">
+        <div class="eco-body">
+          <div class="eco-tag">Babysitters &amp; Home Tutors</div>
+          <div class="eco-title">Find each other, safely</div>
+          <div class="eco-desc">A space to connect — with clear guidance that parents independently verify anyone before deciding.</div>
+          <div class="eco-link">Explore this space →</div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ══════ HOW IT WORKS ══════ -->
+  <section class="section" style="background:#FAF7F2" aria-labelledby="how-heading">
+    <div class="section-head">
+      <div class="eyebrow">How It Works</div>
+      <h2 id="how-heading">Four simple steps</h2>
+    </div>
+    <div class="timeline">
+      <div class="tl-step"><div class="tl-num">1</div><div class="tl-title">Screen</div><div class="tl-desc">Take a free, evidence-based educational screening in minutes.</div></div>
+      <div class="tl-step"><div class="tl-num">2</div><div class="tl-title">Understand</div><div class="tl-desc">Get a clear, plain-language explanation of what it means.</div></div>
+      <div class="tl-step"><div class="tl-num">3</div><div class="tl-title">Connect</div><div class="tl-desc">Find verified professionals matched to your child's needs.</div></div>
+      <div class="tl-step"><div class="tl-num">4</div><div class="tl-title">Support</div><div class="tl-desc">Access daily resources built for real, everyday life.</div></div>
+    </div>
+  </section>
+
+  <!-- ══════ WHY PARENTS TRUST US ══════ -->
+  <section class="section" aria-labelledby="trust-heading">
+    <div class="section-head">
+      <div class="eyebrow">Why Parents Trust Us</div>
+      <h2 id="trust-heading">Built with care, not just code</h2>
+    </div>
+    <div class="trust-grid">
+      <div class="trust-card"><div class="trust-icon">✅</div><div class="trust-title">Verified Professionals</div><div class="trust-desc">Every listed doctor and therapist goes through verification.</div></div>
+      <div class="trust-card"><div class="trust-icon">📊</div><div class="trust-title">Evidence Based</div><div class="trust-desc">Screening tools used and trusted by developmental specialists.</div></div>
+      <div class="trust-card"><div class="trust-icon">🏛️</div><div class="trust-title">Government Resources</div><div class="trust-desc">Clear guidance on UDID, Niramaya, and other schemes.</div></div>
+      <div class="trust-card"><div class="trust-icon">🔒</div><div class="trust-title">Private &amp; Secure</div><div class="trust-desc">Your family's information stays confidential, always.</div></div>
+      <div class="trust-card"><div class="trust-icon">🗣️</div><div class="trust-title">Multiple Languages</div><div class="trust-desc">Support available in English and regional Indian languages.</div></div>
+      <div class="trust-card"><div class="trust-icon">🤝</div><div class="trust-title">Community Support</div><div class="trust-desc">You're never navigating this alone.</div></div>
+    </div>
+  </section>
+
+  <!-- ══════ RELATABLE STORIES — honestly NOT labeled as verified testimonials ══════ -->
+  <section class="section" style="background:#FAF7F2" aria-labelledby="stories-heading">
+    <div class="section-head">
+      <div class="eyebrow">You're Not Alone</div>
+      <h2 id="stories-heading">Stories many parents relate to</h2>
+      <p>NeuroSaathi is newly launched — these are common experiences shared by families, not verified customer reviews.</p>
+    </div>
+    <div class="rel-grid">
+      <div class="rel-card">
+        <p class="rel-quote">"Every birthday someone asks why he still doesn't speak. We kept hearing 'give it more time' — every month felt longer than the last."</p>
+        <div class="rel-name">A parent navigating speech delay — Mumbai</div>
+      </div>
+      <div class="rel-card">
+        <p class="rel-quote">"School only calls when something goes wrong. We weren't looking for excuses — we were looking for someone who understood."</p>
+        <div class="rel-name">A parent navigating ADHD — Delhi</div>
+      </div>
+      <div class="rel-card">
+        <p class="rel-quote">"Family said he would grow out of it. Deep down, we knew he needed support — not judgment."</p>
+        <div class="rel-name">A parent navigating autism — Bengaluru</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  <p style="max-width:640px;margin:0 auto 18px;color:rgba(255,255,255,.5);line-height:1.6">
+    NeuroSaathi is an educational information platform. It does not provide medical diagnosis, treatment, or healthcare services, and is not a substitute for professional medical advice.
+  </p>
+  <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> ·
+  <a href="/medical-disclaimer.html">Medical Disclaimer</a> ·
+  <a href="/educational-disclaimer.html">Educational Disclaimer</a> ·
+  <a href="/emergency-disclaimer.html">Emergency Disclaimer</a> ·
+  <a href="/limitation-of-liability.html">Limitation of Liability</a> ·
+  <a href="mailto:info@neurosaathi.co.in">Contact</a>
+</footer>
+
+<div class="sticky-cta">
+  <a href="/parents.html#tests">Take a Free Educational Screening</a>
+</div>
+
+<script>
+let storyIndex = 0;
+let storyTimer = null;
+let storyPaused = false;
+const STORY_COUNT = 4;
+
+function goToStory(idx){
+  document.querySelectorAll('.story-slide').forEach((s,i)=> s.classList.toggle('active', i===idx));
+  document.querySelectorAll('.story-dot').forEach((d,i)=> d.classList.toggle('active', i===idx));
+  storyIndex = idx;
+}
+function advanceStory(){
+  if(storyPaused) return;
+  goToStory((storyIndex + 1) % STORY_COUNT);
+}
+function pauseStory(){ storyPaused = true; }
+function resumeStory(){ storyPaused = false; }
+function storyKey(e){
+  if(e.key === 'ArrowRight') goToStory((storyIndex + 1) % STORY_COUNT);
+  else if(e.key === 'ArrowLeft') goToStory((storyIndex - 1 + STORY_COUNT) % STORY_COUNT);
+}
+storyTimer = setInterval(advanceStory, 7000);
+
+// ── Nav: glass effect + shrink, only once scrolled ──
+const siteHeader = document.querySelector('header.site');
+function updateHeaderScrollState(){
+  siteHeader.classList.toggle('scrolled', window.scrollY > 8);
+}
+window.addEventListener('scroll', updateHeaderScrollState, { passive: true });
+updateHeaderScrollState();
+
+// ── Fade-up reveal on scroll, respecting reduced-motion ──
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(!prefersReducedMotion && 'IntersectionObserver' in window){
+  const revealTargets = document.querySelectorAll('.journey-card, .eco-card, .trust-card, .rel-card');
+  revealTargets.forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(16px)';
+    el.style.transition = 'opacity .6s ease, transform .6s ease';
+  });
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  revealTargets.forEach(el => revealObserver.observe(el));
+
+  // Hero image: gentle scale-in on load, not scroll-triggered (it's above the fold)
+  const heroImg = document.querySelector('.hero-img-wrap img');
+  if(heroImg){
+    heroImg.style.transform = 'scale(.97)';
+    heroImg.style.opacity = '0';
+    heroImg.style.transition = 'transform .8s ease, opacity .8s ease';
+    requestAnimationFrame(() => {
+      heroImg.style.transform = 'scale(1)';
+      heroImg.style.opacity = '1';
+    });
+  }
+}
+</script>
+
+</body>
+</html>

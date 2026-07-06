@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroSarathi — Every Child Can Shine</title>
+<meta name="description" content="If you're worried about your child's development, you don't have to figure it out alone. Free educational screening tools, guidance, and a directory of professionals for autism, ADHD, and 20+ conditions — for families everywhere.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#FFF9F0">
+<link rel="canonical" href="https://www.neurosarathi.com/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.neurosarathi.com/">
+<meta property="og:title" content="NeuroSarathi — Every Child Can Shine">
+<meta property="og:description" content="Free educational screening tools, guidance, and a directory of professionals for autism, ADHD, and 20+ conditions — for the whole care circle around a child, anywhere in the world.">
+<meta property="og:image" content="https://www.neurosarathi.com/images/og-image.png">
+<meta property="og:site_name" content="NeuroSarathi">
+<meta property="og:locale" content="en_IN">
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="NeuroSarathi">
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Bharattoonstudio/NeuroSathi/main/neurosarathi-logo-icon.png">
+<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Bharattoonstudio/NeuroSathi/main/neurosarathi-logo-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&display=swap" rel="stylesheet">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none';">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important} }
+  body{font-family:'Manrope',sans-serif;color:#292524;background:#FFFDFA;line-height:1.5}
+  a{color:inherit}
+  img{max-width:100%;display:block}
+  .wrap{max-width:1160px;margin:0 auto;padding-left:24px;padding-right:24px}
+  .eyebrow{font-size:12px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#0D7D74}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:800;color:#262322}
+  .muted{color:#57534E}
+
+  /* ── Header ── */
+  header.site{position:sticky;top:0;z-index:40;background:transparent;border-bottom:1px solid transparent;transition:background .3s ease,box-shadow .3s ease,border-color .3s ease}
+  header.site.scrolled{background:rgba(255,253,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid rgba(0,0,0,.05);box-shadow:0 4px 20px rgba(0,0,0,.04)}
+  header.site.scrolled .site-nav{padding-top:12px;padding-bottom:12px}
+  .site-nav{transition:padding .3s ease}
+  .site-nav{display:flex;align-items:center;gap:12px;padding:16px 24px;max-width:1160px;margin:0 auto}
+  .logo-mark-img{height:80px;width:auto;object-fit:contain;flex-shrink:0}
+  .logo-text{font-family:'Fraunces',serif;font-weight:800;font-size:18px;color:#0D5C4A}
+  .nav-cta{margin-left:auto;background:linear-gradient(135deg,#134E4A,#0D6660);color:#fff;text-decoration:none;font-weight:800;font-size:13.5px;padding:10px 20px;border-radius:50px;transition:transform .2s ease,box-shadow .2s ease;box-shadow:0 4px 14px rgba(19,78,74,.2)}
+  .nav-cta:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(19,78,74,.28)}
+  .nav-cta:active{transform:translateY(0) scale(.97)}
+
+  /* ── Hero ── */
+  .hero{background:linear-gradient(170deg,#FFF9F0 0%,#FDF3E7 40%,#EAF4F6 100%);padding:64px 24px 56px}
+  .hero-grid{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:center}
+  @media (max-width:900px){ .hero-grid{grid-template-columns:1fr} }
+  .hero h1{font-size:clamp(30px,4.6vw,50px);line-height:1.22;margin:16px 0 18px}
+  .hero-sub{font-size:17px;color:#57534E;margin-bottom:22px;max-width:520px}
+  .hero-points{list-style:none;margin-bottom:30px}
+  .hero-points li{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:#44403C;margin-bottom:10px}
+  .hero-points li::before{content:'✓';color:#0D7D74;font-weight:800;flex-shrink:0}
+  .hero-ctas{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:32px}
+  .btn-primary{background:linear-gradient(135deg,#134E4A,#0D6660);color:#fff;text-decoration:none;font-weight:800;font-size:15.5px;padding:16px 30px;border-radius:50px;box-shadow:0 10px 28px rgba(19,78,74,.25);transition:transform .2s ease,box-shadow .2s ease}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(19,78,74,.32)}
+  .btn-primary:active{transform:translateY(0) scale(.98);box-shadow:0 6px 18px rgba(19,78,74,.28)}
+  .btn-secondary{background:#fff;color:#134E4A;text-decoration:none;font-weight:800;font-size:15.5px;padding:16px 30px;border-radius:50px;border:2px solid #134E4A;transition:transform .2s ease,box-shadow .2s ease,background .2s ease}
+  .btn-secondary:hover{background:#F0FAF8;transform:translateY(-2px);box-shadow:0 8px 20px rgba(19,78,74,.12)}
+  .btn-secondary:active{transform:translateY(0) scale(.98)}
+  .trust-row{display:flex;flex-wrap:wrap;gap:10px}
+  .trust-pill{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:50px;padding:9px 16px;font-size:12.5px;font-weight:700;color:#44403C;box-shadow:0 3px 10px rgba(0,0,0,.04)}
+  .hero-img-wrap{border-radius:28px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.14);aspect-ratio:4/5;background:#F1F5F4}
+  .hero-img-wrap img{width:100%;height:100%;object-fit:cover}
+
+  /* ── Section shell ── */
+  .section{padding:76px 24px}
+  .section-head{max-width:640px;margin:0 auto 44px;text-align:center}
+  .section-head h2{font-size:clamp(24px,3.4vw,34px);line-height:1.3;margin:12px 0 12px}
+  .section-head p{color:#57534E;font-size:15px}
+
+  /* ── Journey cards ── */
+  .journey-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px;max-width:1100px;margin:0 auto}
+  .journey-card{background:#fff;border-radius:20px;padding:28px 24px;box-shadow:0 8px 24px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.04);transition:transform 0.25s ease, box-shadow 0.25s ease}
+  .journey-card:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(0,0,0,0.08)}
+  .journey-q{font-size:14px;font-weight:800;color:#0D7D74;margin-bottom:10px}
+  .journey-arrow{font-size:18px;color:#D6D3D1;margin:10px 0}
+  .journey-a{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:#262322;margin-bottom:8px}
+  .journey-desc{font-size:13.5px;color:#78716C}
+
+  /* ── Story banner ── */
+  .story-banner{position:relative;max-width:1100px;margin:0 auto;border-radius:28px;overflow:hidden;min-height:420px;box-shadow:0 20px 55px rgba(0,0,0,.16)}
+  .story-slide{position:absolute;inset:0;opacity:0;transition:opacity 1s ease;pointer-events:none}
+  .story-slide.active{opacity:1;pointer-events:auto}
+  .story-slide-img{position:absolute;inset:0;background-size:cover;background-position:center}
+  @media (prefers-reduced-motion:no-preference){ .story-slide-img{animation:kenBurnsSlow 16s ease-in-out infinite alternate} }
+  @keyframes kenBurnsSlow{from{transform:scale(1)}to{transform:scale(1.06)}}
+  .story-overlay{position:absolute;inset:0;background:linear-gradient(100deg,rgba(255,249,240,.96) 0%,rgba(255,249,240,.82) 38%,rgba(255,249,240,.15) 68%,transparent 100%)}
+  .story-content{position:relative;height:100%;display:flex;flex-direction:column;justify-content:center;padding:48px;max-width:540px;min-height:420px}
+  .story-tag{display:inline-block;background:#D6F0EC;color:#0D7D74;border-radius:20px;padding:5px 15px;font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;width:fit-content}
+  .story-heading{font-size:clamp(22px,3.4vw,32px);margin-bottom:12px}
+  .story-desc{font-size:14.5px;color:#57534E;margin-bottom:22px;line-height:1.65}
+  .story-dots{position:absolute;bottom:24px;left:48px;display:flex;gap:8px;z-index:3}
+  .story-dot{width:9px;height:9px;padding:0;border:none;border-radius:50%;background:rgba(0,0,0,.15);cursor:pointer}
+  .story-dot:focus{outline:2px solid #0D7D74;outline-offset:2px}
+  .story-dot.active{background:#0D7D74}
+
+  /* ── Ecosystem cards ── */
+  .eco-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;max-width:1160px;margin:0 auto}
+  .eco-card{background:#fff;border-radius:20px;overflow:hidden;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.06);transition:transform .25s ease,box-shadow .25s ease;display:flex;flex-direction:column}
+  .eco-card:hover{transform:translateY(-6px);box-shadow:0 18px 44px rgba(0,0,0,.12)}
+  .eco-img{width:100%;height:200px;object-fit:cover;background:#F1F5F4}
+  .eco-body{padding:24px}
+  .eco-tag{font-size:11.5px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#0D7D74;margin-bottom:8px}
+  .eco-title{font-size:19px;margin-bottom:8px}
+  .eco-desc{font-size:13.5px;color:#57534E;margin-bottom:14px}
+  .eco-link{font-size:13px;font-weight:800;color:#B45309}
+
+  /* ── Timeline ── */
+  .timeline{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;position:relative}
+  @media (max-width:800px){ .timeline{grid-template-columns:1fr} }
+  .tl-step{text-align:center;position:relative}
+  .tl-num{width:48px;height:48px;border-radius:50%;background:#134E4A;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;margin:0 auto 14px}
+  .tl-title{font-family:'Fraunces',serif;font-weight:800;font-size:17px;margin-bottom:6px}
+  .tl-desc{font-size:13px;color:#78716C}
+
+  /* ── Trust cards ── */
+  .trust-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:18px;max-width:1100px;margin:0 auto}
+  .trust-card{background:#fff;border-radius:20px;padding:22px;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.06);transition:transform .25s ease,box-shadow .25s ease}
+  .trust-icon{font-size:26px;margin-bottom:10px}
+  .trust-title{font-weight:800;font-size:14px;margin-bottom:4px}
+  .trust-desc{font-size:12.5px;color:#78716C}
+  .trust-card:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(0,0,0,.09)}
+
+  /* ── Relatable stories (honestly NOT labeled as verified testimonials) ── */
+  .rel-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;max-width:1100px;margin:0 auto}
+  .rel-card{background:#fff;border-radius:20px;padding:26px;box-shadow:0 8px 24px rgba(0,0,0,.06);transition:transform .25s ease,box-shadow .25s ease}
+  .rel-quote{font-size:14.5px;color:#44403C;line-height:1.6;margin-bottom:14px;font-style:italic}
+  .rel-name{font-size:13px;font-weight:800;color:#0D7D74}
+  .rel-card:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(0,0,0,.09)}
+
+  footer.site{background:#1A1A1A;color:rgba(255,255,255,.6);text-align:center;padding:36px 20px;font-size:13px}
+  footer.site a{color:rgba(255,255,255,.85);text-decoration:underline}
+
+  /* ── Mobile sticky CTA ── */
+  .sticky-cta{display:none;position:fixed;bottom:0;left:0;right:0;z-index:50;background:#fff;padding:12px 16px;box-shadow:0 -6px 20px rgba(0,0,0,.1)}
+  @media (max-width:640px){ .sticky-cta{display:block} body{padding-bottom:72px} }
+  .sticky-cta a{display:block;text-align:center;background:linear-gradient(135deg,#134E4A,#0D6660);color:#fff;text-decoration:none;font-weight:800;padding:14px;border-radius:50px;font-size:15px;transition:transform .2s ease}
+  .sticky-cta a:active{transform:scale(.97)}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <nav class="site-nav" aria-label="Primary">
+    <img src="https://raw.githubusercontent.com/Bharattoonstudio/NeuroSathi/main/neurosarathi-logo-horizontal.png" alt="NeuroSarathi logo" style="height:64px;width:auto;" class="logo-mark-img">
+    <a class="nav-cta" href="/parents.html#tests">Take a Free Educational Screening</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ══════ HERO ══════ -->
+  <section class="hero">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow" style="display:flex;flex-direction:column;gap:4px;">
+          <span><span style="font-family:'Fraunces',serif;font-weight:800;font-size:28px;text-transform:none;letter-spacing:-0.5px;color:#0A1D45;">Neuro</span><span style="font-family:'Fraunces',serif;font-weight:800;font-size:28px;text-transform:none;letter-spacing:-0.5px;color:#008AAE;">Sarathi</span></span>
+          <span>Every Child Can Shine ✨</span>
+        </div>
+        <h1>If you're worried about your child's development, you don't have to figure it out alone.</h1>
+        <p class="hero-sub">The beginning of a global neuro support portal — bringing educational screening tools, guidance, and a professional directory into one place.</p>
+        <ul class="hero-points">
+          <li>Start with a free educational screening</li>
+          <li>Understand what your child needs</li>
+          <li>Connect with trusted professionals</li>
+          <li>Support your child with confidence</li>
+        </ul>
+        <div class="hero-ctas">
+          <a class="btn-primary" href="/parents.html#tests">Take a Free Educational Screening</a>
+          <a class="btn-secondary" href="#ecosystem">Explore NeuroSarathi</a>
+        </div>
+        <div class="trust-row">
+          <span class="trust-pill">✅ Verified Professionals</span>
+          <span class="trust-pill">📊 Evidence Based</span>
+          <span class="trust-pill">🔒 Private &amp; Secure</span>
+          <span class="trust-pill">🧩 20+ Conditions Supported</span>
+          <span class="trust-pill">🌍 Available Worldwide</span>
+        </div>
+        <p style="font-size:12.5px;color:#78716C;margin-top:18px;max-width:520px;line-height:1.6">
+          ⚠️ NeuroSarathi is an educational platform, not a healthcare provider. Screening tools are for educational awareness only and are not a medical diagnosis. Always consult a qualified professional for assessment or treatment.
+          <a href="/medical-disclaimer.html" style="color:#0D7D74;font-weight:700">Medical Disclaimer</a> ·
+          <a href="/educational-disclaimer.html" style="color:#0D7D74;font-weight:700">Educational Disclaimer</a>
+        </p>
+      </div>
+      <div class="hero-img-wrap">
+        <img src="/story-child-happy.jpg" loading="eager" decoding="async" alt="A parent and child sharing a warm, joyful moment together" onerror="this.parentElement.style.background='linear-gradient(135deg,#FDE68A,#F2A65A)';this.remove()">
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ HOW WE HELP (journey cards) ══════ -->
+  <section class="section" aria-labelledby="help-heading">
+    <div class="section-head">
+      <div class="eyebrow">How We Help</div>
+      <h2 id="help-heading">A clear next step, whatever stage you're at</h2>
+    </div>
+    <div class="journey-grid">
+      <div class="journey-card">
+        <div class="journey-q">Is my child developing normally?</div>
+        <div class="journey-arrow">↓</div>
+        <div class="journey-a">Take a screening</div>
+        <div class="journey-desc">Free, evidence-based educational screening tools for autism, ADHD, and more — results in minutes. Not a medical diagnosis.</div>
+      </div>
+      <div class="journey-card">
+        <div class="journey-q">What should I do next?</div>
+        <div class="journey-arrow">↓</div>
+        <div class="journey-a">Get expert guidance</div>
+        <div class="journey-desc">Step-by-step guidance for real situations — meltdowns, speech delays, school concerns.</div>
+      </div>
+      <div class="journey-card">
+        <div class="journey-q">Who can help?</div>
+        <div class="journey-arrow">↓</div>
+        <div class="journey-a">Find verified professionals</div>
+        <div class="journey-desc">Doctors, therapists, and special educators — searchable by your city and specific need.</div>
+      </div>
+      <div class="journey-card">
+        <div class="journey-q">How do I support my child every day?</div>
+        <div class="journey-arrow">↓</div>
+        <div class="journey-a">Daily resources</div>
+        <div class="journey-desc">Practical routines, government scheme guidance, and a library of learning resources.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ STORY BANNER ══════ -->
+  <section class="section" style="padding-top:0" aria-label="Stories from the NeuroSarathi journey">
+    <div class="story-banner" id="storyBanner" role="region" aria-roledescription="carousel" aria-label="NeuroSarathi journey stories" tabindex="0"
+         onmouseenter="pauseStory()" onmouseleave="resumeStory()" onkeydown="storyKey(event)">
+
+      <div class="story-slide active" data-slide="0">
+        <div class="story-slide-img" style="background-image:url('/story-child-therapy.jpg')"></div>
+        <div class="story-overlay"></div>
+        <div class="story-content">
+          <span class="story-tag">Early Screening</span>
+          <h3 class="story-heading">Catching it early changes everything</h3>
+          <p class="story-desc">A five-minute educational screening today can help you recognise patterns early — not a diagnosis, but often the first real step.</p>
+          <a class="btn-primary" style="width:fit-content" href="/parents.html#tests">Start a Screening →</a>
+        </div>
+      </div>
+
+      <div class="story-slide" data-slide="1">
+        <div class="story-slide-img" style="background-image:url('/story-child-guidance.jpg')"></div>
+        <div class="story-overlay"></div>
+        <div class="story-content">
+          <span class="story-tag" style="background:#DDEAFB;color:#1E40AF">Expert Support</span>
+          <h3 class="story-heading">Real guidance, from people who understand</h3>
+          <p class="story-desc">Verified doctors, therapists, and educators — searchable by city, specialty, and the exact support your family needs.</p>
+          <a class="btn-primary" style="width:fit-content" href="/parents.html#map">Find Professionals →</a>
+        </div>
+      </div>
+
+      <div class="story-slide" data-slide="2">
+        <div class="story-slide-img" style="background-image:url('/story-autism-awareness.jpg')"></div>
+        <div class="story-overlay"></div>
+        <div class="story-content">
+          <span class="story-tag" style="background:#FDE9D6;color:#9A3412">Daily Activities</span>
+          <h3 class="story-heading">Support that fits into everyday life</h3>
+          <p class="story-desc">Practical routines, sensory-friendly activities, and government scheme guidance — built for real Indian households.</p>
+          <a class="btn-primary" style="width:fit-content" href="/parents.html#resources">Browse Resources →</a>
+        </div>
+      </div>
+
+      <div class="story-slide" data-slide="3">
+        <div class="story-slide-img" style="background-image:url('/story-adhd-child.jpg')"></div>
+        <div class="story-overlay"></div>
+        <div class="story-content">
+          <span class="story-tag" style="background:#F3E8FF;color:#6D28D9">Care Circle</span>
+          <h3 class="story-heading">No one should navigate this alone</h3>
+          <p class="story-desc">Parents, doctors, therapists, educators, and trusted caregivers — everyone around a child, in one supportive place.</p>
+          <a class="btn-primary" style="width:fit-content" href="#ecosystem">See the Ecosystem →</a>
+        </div>
+      </div>
+
+      <div class="story-dots" role="tablist" aria-label="Story navigation">
+        <button class="story-dot active" data-dot="0" onclick="goToStory(0)" aria-label="Story 1 of 4" role="tab"></button>
+        <button class="story-dot" data-dot="1" onclick="goToStory(1)" aria-label="Story 2 of 4" role="tab"></button>
+        <button class="story-dot" data-dot="2" onclick="goToStory(2)" aria-label="Story 3 of 4" role="tab"></button>
+        <button class="story-dot" data-dot="3" onclick="goToStory(3)" aria-label="Story 4 of 4" role="tab"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ FIVE USER ECOSYSTEM ══════ -->
+  <section class="section" id="ecosystem" aria-labelledby="eco-heading">
+    <div class="section-head">
+      <div class="eyebrow">The NeuroSarathi Ecosystem</div>
+      <h2 id="eco-heading">One place for everyone around a child</h2>
+      <p>Parents typically spend significant money and weeks piecing this together alone. NeuroSarathi brings it into one place — most of it free to start.</p>
+    </div>
+    <div class="eco-grid">
+
+      <a class="eco-card" href="/parents.html" aria-label="For Parents">
+        <img class="eco-img" src="/story-child-happy.jpg" loading="lazy" decoding="async" alt="Parent and child in a joyful moment" onerror="this.style.background='linear-gradient(135deg,#FDE68A,#F2A65A)';this.removeAttribute('src')">
+        <div class="eco-body">
+          <div class="eco-tag">For Parents</div>
+          <div class="eco-title">Take a breath</div>
+          <div class="eco-desc">Free educational screening, step-by-step guidance, and a community that truly understands what you're going through.</div>
+          <div class="eco-link">Explore for parents →</div>
+        </div>
+      </a>
+
+      <a class="eco-card" href="/professionals.html" aria-label="For Doctors and Therapists">
+        <img class="eco-img" src="/story-child-therapy.jpg" loading="lazy" decoding="async" alt="A therapist working encouragingly with a child" onerror="this.style.background='linear-gradient(135deg,#BFDBFE,#60A5FA)';this.removeAttribute('src')">
+        <div class="eco-body">
+          <div class="eco-tag">For Doctors &amp; Therapists</div>
+          <div class="eco-title">Connect with families who need you</div>
+          <div class="eco-desc">Be found by families actively searching for your specialty, in your city.</div>
+          <div class="eco-link">Explore for professionals →</div>
+        </div>
+      </a>
+
+      <a class="eco-card" href="/educators.html" aria-label="For Special Educators">
+        <img class="eco-img" src="/story-child-guidance.jpg" loading="lazy" decoding="async" alt="A special educator guiding a child with warmth and patience" onerror="this.style.background='linear-gradient(135deg,#DDD6FE,#A78BFA)';this.removeAttribute('src')">
+        <div class="eco-body">
+          <div class="eco-tag">For Special Educators</div>
+          <div class="eco-title">Make a lasting impact</div>
+          <div class="eco-desc">Bring your specialized teaching skills directly to families looking for exactly what you offer.</div>
+          <div class="eco-link">Explore for educators →</div>
+        </div>
+      </a>
+
+      <a class="eco-card" href="/caregivers.html" aria-label="Babysitters and Home Tutors">
+        <img class="eco-img" src="/story-autism-awareness.jpg" loading="lazy" decoding="async" alt="A caring moment between a caregiver and a child" onerror="this.style.background='linear-gradient(135deg,#FECACA,#F87171)';this.removeAttribute('src')">
+        <div class="eco-body">
+          <div class="eco-tag">Babysitters &amp; Home Tutors</div>
+          <div class="eco-title">Find each other, safely</div>
+          <div class="eco-desc">A space to connect — with clear guidance that parents independently verify anyone before deciding.</div>
+          <div class="eco-link">Explore this space →</div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ══════ HOW IT WORKS ══════ -->
+  <section class="section" style="background:#FAF7F2" aria-labelledby="how-heading">
+    <div class="section-head">
+      <div class="eyebrow">How It Works</div>
+      <h2 id="how-heading">Four simple steps</h2>
+    </div>
+    <div class="timeline">
+      <div class="tl-step"><div class="tl-num">1</div><div class="tl-title">Screen</div><div class="tl-desc">Take a free, evidence-based educational screening in minutes.</div></div>
+      <div class="tl-step"><div class="tl-num">2</div><div class="tl-title">Understand</div><div class="tl-desc">Get a clear, plain-language explanation of what it means.</div></div>
+      <div class="tl-step"><div class="tl-num">3</div><div class="tl-title">Connect</div><div class="tl-desc">Find verified professionals matched to your child's needs.</div></div>
+      <div class="tl-step"><div class="tl-num">4</div><div class="tl-title">Support</div><div class="tl-desc">Access daily resources built for real, everyday life.</div></div>
+    </div>
+  </section>
+
+  <!-- ══════ WHY PARENTS TRUST US ══════ -->
+  <section class="section" aria-labelledby="trust-heading">
+    <div class="section-head">
+      <div class="eyebrow">Why Parents Trust Us</div>
+      <h2 id="trust-heading">Built with care, not just code</h2>
+    </div>
+    <div class="trust-grid">
+      <div class="trust-card"><div class="trust-icon">✅</div><div class="trust-title">Verified Professionals</div><div class="trust-desc">Every listed doctor and therapist goes through verification.</div></div>
+      <div class="trust-card"><div class="trust-icon">📊</div><div class="trust-title">Evidence Based</div><div class="trust-desc">Screening tools used and trusted by developmental specialists.</div></div>
+      <div class="trust-card"><div class="trust-icon">🏛️</div><div class="trust-title">Government Resources</div><div class="trust-desc">Clear guidance on UDID, Niramaya, and other schemes.</div></div>
+      <div class="trust-card"><div class="trust-icon">🔒</div><div class="trust-title">Private &amp; Secure</div><div class="trust-desc">Your family's information stays confidential, always.</div></div>
+      <div class="trust-card"><div class="trust-icon">🗣️</div><div class="trust-title">Multiple Languages</div><div class="trust-desc">Support available in English and regional Indian languages.</div></div>
+      <div class="trust-card"><div class="trust-icon">🤝</div><div class="trust-title">Community Support</div><div class="trust-desc">You're never navigating this alone.</div></div>
+    </div>
+  </section>
+
+  <!-- ══════ RELATABLE STORIES — honestly NOT labeled as verified testimonials ══════ -->
+  <section class="section" style="background:#FAF7F2" aria-labelledby="stories-heading">
+    <div class="section-head">
+      <div class="eyebrow">You're Not Alone</div>
+      <h2 id="stories-heading">Stories many parents relate to</h2>
+      <p>NeuroSarathi is newly launched — these are common experiences shared by families, not verified customer reviews.</p>
+    </div>
+    <div class="rel-grid">
+      <div class="rel-card">
+        <p class="rel-quote">"Every birthday someone asks why he still doesn't speak. We kept hearing 'give it more time' — every month felt longer than the last."</p>
+        <div class="rel-name">A parent navigating speech delay — Mumbai</div>
+      </div>
+      <div class="rel-card">
+        <p class="rel-quote">"School only calls when something goes wrong. We weren't looking for excuses — we were looking for someone who understood."</p>
+        <div class="rel-name">A parent navigating ADHD — Delhi</div>
+      </div>
+      <div class="rel-card">
+        <p class="rel-quote">"Family said he would grow out of it. Deep down, we knew he needed support — not judgment."</p>
+        <div class="rel-name">A parent navigating autism — Bengaluru</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  <p style="max-width:640px;margin:0 auto 18px;color:rgba(255,255,255,.5);line-height:1.6">
+    NeuroSarathi is an educational information platform. It does not provide medical diagnosis, treatment, or healthcare services, and is not a substitute for professional medical advice.
+  </p>
+  <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> ·
+  <a href="/medical-disclaimer.html">Medical Disclaimer</a> ·
+  <a href="/educational-disclaimer.html">Educational Disclaimer</a> ·
+  <a href="/emergency-disclaimer.html">Emergency Disclaimer</a> ·
+  <a href="/limitation-of-liability.html">Limitation of Liability</a> ·
+  <a href="mailto:info@neurosarathi.com">Contact</a>
+</footer>
+
+<div class="sticky-cta">
+  <a href="/parents.html#tests">Take a Free Educational Screening</a>
+</div>
+
+<script>
+let storyIndex = 0;
+let storyTimer = null;
+let storyPaused = false;
+const STORY_COUNT = 4;
+
+function goToStory(idx){
+  document.querySelectorAll('.story-slide').forEach((s,i)=> s.classList.toggle('active', i===idx));
+  document.querySelectorAll('.story-dot').forEach((d,i)=> d.classList.toggle('active', i===idx));
+  storyIndex = idx;
+}
+function advanceStory(){
+  if(storyPaused) return;
+  goToStory((storyIndex + 1) % STORY_COUNT);
+}
+function pauseStory(){ storyPaused = true; }
+function resumeStory(){ storyPaused = false; }
+function storyKey(e){
+  if(e.key === 'ArrowRight') goToStory((storyIndex + 1) % STORY_COUNT);
+  else if(e.key === 'ArrowLeft') goToStory((storyIndex - 1 + STORY_COUNT) % STORY_COUNT);
+}
+storyTimer = setInterval(advanceStory, 7000);
+
+// ── Nav: glass effect + shrink, only once scrolled ──
+const siteHeader = document.querySelector('header.site');
+function updateHeaderScrollState(){
+  siteHeader.classList.toggle('scrolled', window.scrollY > 8);
+}
+window.addEventListener('scroll', updateHeaderScrollState, { passive: true });
+updateHeaderScrollState();
+
+// ── Fade-up reveal on scroll, respecting reduced-motion ──
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(!prefersReducedMotion && 'IntersectionObserver' in window){
+  const revealTargets = document.querySelectorAll('.journey-card, .eco-card, .trust-card, .rel-card');
+  revealTargets.forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(16px)';
+    el.style.transition = 'opacity .6s ease, transform .6s ease';
+  });
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  revealTargets.forEach(el => revealObserver.observe(el));
+
+  // Hero image: gentle scale-in on load, not scroll-triggered (it's above the fold)
+  const heroImg = document.querySelector('.hero-img-wrap img');
+  if(heroImg){
+    heroImg.style.transform = 'scale(.97)';
+    heroImg.style.opacity = '0';
+    heroImg.style.transition = 'transform .8s ease, opacity .8s ease';
+    requestAnimationFrame(() => {
+      heroImg.style.transform = 'scale(1)';
+      heroImg.style.opacity = '1';
+    });
+  }
+}
+</script>
+
+</body>
+</html>

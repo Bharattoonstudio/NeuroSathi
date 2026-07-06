@@ -4973,6 +4973,10 @@ function showPaySuccess(itemName, amount){
     const email = document.getElementById('reportEmail')?.value?.trim();
     const testName = window._lastResult?.testName || itemName.replace(' Full Report','');
     if(email) sendReportEmail(email, testName);
+    // Send WhatsApp notification for paid reports too
+    const phone = document.getElementById('reportPhone')?.value?.trim();
+    const code = document.getElementById('reportCountryCode')?.value;
+    if(phone) sendWhatsAppNotification(phone, code, testName);
   }
   const isTestMode = RZP_TEST_KEY.startsWith('rzp_test_');
   const modeBlock = isTestMode
@@ -5532,14 +5536,52 @@ async function sendReportEmail(email, testName){
       console.log('Report email sent successfully to:', email);
     }
   }catch(e){
-    // Never let an email failure block the parent from seeing their report
-    // on-screen — this is a best-effort delivery, not a blocking dependency.
     console.error('sendReportEmail error:', e);
+  }
+}
+
+function sendWhatsAppNotification(phone, countryCode, testName){
+  try{
+    if(!phone) return;
+    // Clean phone number - remove spaces, dashes, brackets
+    const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
+    const cleanCode = (countryCode || '+91').replace('+','');
+    const fullNumber = cleanCode + cleanPhone;
+    // WhatsApp message
+    const message = `🌟 *Thank you for taking the first step toward your child's bright future!*
+
+We have received your *${testName}* screening.
+
+📄 *Your detailed report has been sent to your email.* Please check your inbox (and spam folder just in case).
+
+💡 *What's next?*
+• Review your report carefully
+• Explore our free resources at neurosarathi.com
+• Connect with verified professionals if needed
+
+Every child can shine — and you are already helping yours! 🌈
+
+— *Team NeuroSarathi*
+🌐 neurosarathi.com`;
+
+    // Open WhatsApp with pre-filled message
+    const waUrl = \`https://wa.me/\${fullNumber}?text=\${encodeURIComponent(message)}\`;
+    // Use setTimeout to not block the UI
+    setTimeout(() => {
+      window.open(waUrl, '_blank');
+    }, 2000);
+    console.log('WhatsApp notification triggered for:', fullNumber);
+  }catch(e){
+    console.error('WhatsApp notification error:', e);
   }
 }
 
 function unlockReportForFree(testName, alreadyClaimed, email){
   if(email) sendReportEmail(email, testName);
+  // Send WhatsApp notification
+  const phone = document.getElementById('reportPhone')?.value?.trim();
+  const code = document.getElementById('reportCountryCode')?.value;
+  if(phone) sendWhatsAppNotification(phone, code, testName);
   const el = document.createElement('div');
   el.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(20,20,20,.97);display:flex;align-items:center;justify-content:center;padding:20px';
   const message = alreadyClaimed

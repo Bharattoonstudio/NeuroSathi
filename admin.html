@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login — NeuroSarathi</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  body{
+    margin:0;background:#1A1A1A;font-family:'Manrope',sans-serif;color:#fff;
+    display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;
+  }
+  .wrap{padding:24px}
+  .spinner{
+    width:32px;height:32px;border:3px solid rgba(255,255,255,.2);border-top-color:#FF6B1A;
+    border-radius:50%;margin:0 auto 18px;animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  p{font-size:14px;color:rgba(255,255,255,.6)}
+  a{color:#FF6B1A;font-weight:700;text-decoration:none}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="spinner"></div>
+    <p>Opening Admin Login…</p>
+    <p><a href="/parents.html#admin">Click here if you're not redirected automatically</a></p>
+  </div>
+  <script>
+    // This page exists so admin access has a real, professional entry point
+    // instead of a hidden gesture. The actual login form and all its security
+    // checks (email allowlist, Supabase auth, server-side verification) already
+    // live on parents.html — this page just opens that same, already-working flow.
+    window.location.replace('/parents.html#admin');
+  </script>
+</body>
+</html>

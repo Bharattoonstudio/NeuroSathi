@@ -3,22 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>For Doctors & Therapists — NeuroSarathi</title>
-<meta name="description" content="List your practice on NeuroSarathi. Get discovered by families searching for developmental pediatricians, therapists, and specialists in your city.">
+<title>For Caregivers & Home Tutors — NeuroSarathi</title>
+<meta name="description" content="List your services on NeuroSarathi. Connect with families looking for trusted caregivers, babysitters, and home tutors experienced with neurodivergent children.">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#262B45">
-<link rel="canonical" href="https://www.neurosarathi.com/professionals.html">
+<link rel="canonical" href="https://www.neurosarathi.com/caregivers.html">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://neurosarathi.com/professionals.html">
-<meta property="og:title" content="For Doctors & Therapists — NeuroSarathi">
-<meta property="og:description" content="List your practice on NeuroSarathi. Get discovered by families searching for developmental pediatricians, therapists, and specialists in your city.">
+<meta property="og:url" content="https://neurosarathi.com/caregivers.html">
+<meta property="og:title" content="For Caregivers & Home Tutors — NeuroSarathi">
+<meta property="og:description" content="List your services on NeuroSarathi. Connect with families looking for trusted caregivers, babysitters, and home tutors experienced with neurodivergent children.">
 <meta property="og:image" content="https://raw.githubusercontent.com/Bharattoonstudio/NeuroSathi/main/neurosarathi-logo-horizontal.png">
 <meta property="og:site_name" content="NeuroSarathi">
 <meta property="og:locale" content="en_IN">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:url" content="https://neurosarathi.com/professionals.html">
-<meta name="twitter:title" content="For Doctors & Therapists — NeuroSarathi">
-<meta name="twitter:description" content="List your practice on NeuroSarathi. Get discovered by families searching for developmental pediatricians, therapists, and specialists in your city.">
+<meta name="twitter:url" content="https://neurosarathi.com/caregivers.html">
+<meta name="twitter:title" content="For Caregivers & Home Tutors — NeuroSarathi">
+<meta name="twitter:description" content="List your services on NeuroSarathi. Connect with families looking for trusted caregivers, babysitters, and home tutors experienced with neurodivergent children.">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/Bharattoonstudio/NeuroSathi/main/neurosarathi-logo-horizontal.png">
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" type="image/png" href="/images/favicon.png">
@@ -79,22 +79,23 @@
   <a href="/index.html" style="display:flex;align-items:center;background:#fff;border-radius:10px;padding:4px 10px;"><img src="assets/neurosarathi-logo.png" alt="NeuroSarathi — Every Child Can Shine" style="height:28px;width:auto;display:block;"></a>
   <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
     <a href="/parents.html">For Parents</a>
+    <a href="/professionals.html">For Professionals</a>
     <a href="/educators.html">For Educators</a>
-    <a href="/caregivers.html">For Caregivers</a>
   </div>
 </nav>
 
 <div class="prof-hero">
-  <div style="font-size:12px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#C1694F;margin-bottom:12px">FOR DOCTORS & THERAPISTS</div>
+  <div style="font-size:12px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#C1694F;margin-bottom:12px">FOR CAREGIVERS & HOME TUTORS</div>
   <h1 style="font-family:'Fraunces',serif;font-size:clamp(24px,4vw,38px);font-weight:800;color:#fff;max-width:700px;margin:0 auto 14px">
-    Get discovered by families who need exactly what you offer
+    Trusted support, right in the family's home
   </h1>
   <p style="font-size:15px;color:rgba(255,255,255,.6);max-width:520px;margin:0 auto">
-    List your practice once. Parents searching in your city and specialty find you directly — no unrelated content, no noise.
+    List your caregiving or tutoring services once. Parents looking for experienced, trusted help in their city find you directly.
   </p>
 </div>
 
 <div class="prof-form-wrap">
+
   <div class="prof-form">
 
     <div id="profFormStep1">
@@ -111,21 +112,17 @@
       <div style="text-align:center;margin-top:14px;font-size:13px;color:#78716C">Already have an account? Just enter your email &amp; password and continue.</div>
     </div>
 
-    <form id="profFormStep2" style="display:none" onsubmit="submitProfessionalRegistration(event)">
-      <h2 style="font-family:'Fraunces',serif;font-size:20px;font-weight:800;color:#262B45;margin-bottom:20px">Your professional profile</h2>
+    <form id="profFormStep2" style="display:none" onsubmit="submitCaregiverRegistration(event)">
+      <h2 style="font-family:'Fraunces',serif;font-size:20px;font-weight:800;color:#262B45;margin-bottom:20px">Your caregiver profile</h2>
 
       <div class="prof-field">
-        <label>I am a *</label>
+        <label>I offer *</label>
         <select id="profType" required>
-          <option value="">Select your profession</option>
-          <option value="developmental_pediatrician">Developmental Pediatrician</option>
-          <option value="child_psychiatrist">Child Psychiatrist</option>
-          <option value="occupational_therapist">Occupational Therapist</option>
-          <option value="speech_language_pathologist">Speech-Language Pathologist</option>
-          <option value="applied_behavior_analyst">Applied Behavior Analyst (ABA)</option>
-          <option value="clinical_psychologist">Clinical Psychologist</option>
-          <option value="physiotherapist">Physiotherapist</option>
-          <option value="dietitian">Dietitian</option>
+          <option value="">Select service type</option>
+          <option value="babysitter">Babysitting / Childcare</option>
+          <option value="home_tutor">Home Tutor</option>
+          <option value="special_needs_caregiver">Special Needs Caregiver (non-clinical)</option>
+          <option value="respite_care">Respite Care (short-term relief for parents)</option>
         </select>
       </div>
 
@@ -143,17 +140,17 @@
 
       <div class="prof-field">
         <label>Display name (shown to parents) *</label>
-        <input type="text" id="profDisplayName" required placeholder="e.g. Dr. Priya Sharma">
+        <input type="text" id="profDisplayName" required placeholder="e.g. Sunita Patil">
       </div>
 
       <div class="prof-field">
-        <label>Registration number (for our team to verify — not shown publicly)</label>
-        <input type="text" id="profRegNumber" placeholder="e.g. MCI/NMC registration number">
+        <label>Years of experience with neurodivergent children</label>
+        <input type="number" id="profExperience" min="0" placeholder="e.g. 3">
       </div>
 
       <div class="prof-field">
-        <label>Registration body</label>
-        <input type="text" id="profRegBody" placeholder="e.g. National Medical Commission">
+        <label>Relevant training or certification (optional)</label>
+        <input type="text" id="profTraining" placeholder="e.g. First aid, special education diploma, if any">
       </div>
 
       <div class="prof-field">
@@ -201,28 +198,33 @@
       </div>
 
       <div class="prof-field">
-        <label>Conditions you specialise in (comma separated)</label>
-        <input type="text" id="profConditions" placeholder="e.g. Autism, ADHD, Speech Delay">
+        <label>Comfortable supporting (comma separated)</label>
+        <input type="text" id="profConditions" placeholder="e.g. Autism, ADHD, Sensory needs">
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div class="prof-field">
-          <label>Consultation fee — from (₹)</label>
-          <input type="number" id="profFeeMin" placeholder="e.g. 500">
+          <label>Hourly rate — from (₹)</label>
+          <input type="number" id="profFeeMin" placeholder="e.g. 150">
         </div>
         <div class="prof-field">
-          <label>Consultation fee — up to (₹)</label>
-          <input type="number" id="profFeeMax" placeholder="e.g. 1500">
+          <label>Hourly rate — up to (₹)</label>
+          <input type="number" id="profFeeMax" placeholder="e.g. 400">
         </div>
       </div>
 
       <div class="prof-field">
         <label>Short bio</label>
-        <textarea id="profBio" rows="3" placeholder="A few lines about your experience and approach"></textarea>
+        <textarea id="profBio" rows="3" placeholder="A few lines about your experience and approach with children"></textarea>
       </div>
 
-      <button type="submit" id="profSubmitBtn" style="width:100%;background:linear-gradient(135deg,#C1694F,#D48A6C);color:#fff;border:none;border-radius:50px;padding:14px;font-family:inherit;font-size:15px;font-weight:900;cursor:pointer">Submit for Verification →</button>
-      <div style="text-align:center;margin-top:12px;font-size:12.5px;color:#78716C">Your profile stays hidden from parent searches until our team verifies your registration details.</div>
+      <div class="prof-field" style="display:flex;align-items:flex-start;gap:10px;background:#FBF7EE;border-radius:10px;padding:12px 14px">
+        <input type="checkbox" id="profDisclaimerAck" required style="width:auto;margin-top:3px">
+        <label for="profDisclaimerAck" style="font-size:12.5px;font-weight:600;color:#57534E;margin:0">I understand that meeting a family in person or at their home (or having them visit mine) is entirely my own choice and responsibility. *</label>
+      </div>
+
+      <button type="submit" id="profSubmitBtn" style="width:100%;background:linear-gradient(135deg,#C1694F,#D48A6C);color:#fff;border:none;border-radius:50px;padding:14px;font-family:inherit;font-size:15px;font-weight:900;cursor:pointer">Submit Profile →</button>
+      <div style="text-align:center;margin-top:12px;font-size:12.5px;color:#78716C">Your profile becomes visible to parents searching in your city once submitted.</div>
     </form>
 
     <div id="profSuccess" style="display:none">
@@ -243,7 +245,7 @@
 <div id="termsModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(20,20,20,.75);align-items:center;justify-content:center;padding:20px">
   <div style="max-width:560px;width:100%;background:#fff;border-radius:24px;overflow:hidden;max-height:88vh;display:flex;flex-direction:column">
     <div style="padding:28px 28px 0">
-      <h2 style="font-family:'Fraunces',serif;font-size:20px;font-weight:800;color:#262B45;margin-bottom:6px">Terms & Conditions — Doctors & Therapists</h2>
+      <h2 style="font-family:'Fraunces',serif;font-size:20px;font-weight:800;color:#262B45;margin-bottom:6px">Terms & Conditions — Caregivers</h2>
       <p style="font-size:13px;color:#78716C;margin-bottom:16px">Please read and confirm each item below before connecting with families.</p>
     </div>
     <div style="padding:0 28px;overflow-y:auto;flex:1;font-size:13px;color:#44403C;line-height:1.7">
@@ -255,15 +257,15 @@
         <li style="margin-bottom:0">NeuroSarathi may suspend or remove any account that violates these terms, provides false information, or receives credible complaints.</li>
       </ul>
 
-      <div style="font-size:12px;font-weight:800;color:#262B45;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Doctor / Therapist Terms</div>
+      <div style="font-size:12px;font-weight:800;color:#262B45;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Caregiver Terms</div>
       <ul style="padding-left:18px;margin:0 0 18px">
-        <li style="margin-bottom:8px">You declare that your qualifications, registration, and licensing information are genuine and accurate.</li>
-        <li style="margin-bottom:8px">You will comply with all applicable professional and legal obligations, and maintain professional ethics and confidentiality.</li>
-        <li style="margin-bottom:0">You remain solely responsible for the professional services and advice you provide — NeuroSarathi only provides a platform for visibility and communication, and does not supervise or control your professional activities.</li>
+        <li style="margin-bottom:8px">You confirm that information provided about your experience is accurate.</li>
+        <li style="margin-bottom:8px">You will treat children with dignity and respect, and maintain confidentiality.</li>
+        <li style="margin-bottom:0">You understand that NeuroSarathi is not your employer, and you are independently responsible for the services you provide.</li>
       </ul>
 
       <div style="font-size:12px;font-weight:800;color:#262B45;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Professional Directory Disclaimer</div>
-      <p style="margin-bottom:18px">NeuroSarathi does not employ, supervise, endorse, or certify professionals listed on the platform, and does not guarantee their qualifications or the outcomes of any services provided. Families are responsible for verifying suitability before engaging any professional.</p>
+      <p style="margin-bottom:18px">NeuroSarathi does not employ, supervise, endorse, or certify caregivers listed on the platform, and does not guarantee their suitability or the outcomes of any arrangement. Families are responsible for verifying suitability before engaging any caregiver.</p>
 
       <div style="font-size:12px;font-weight:800;color:#262B45;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Limitation of Liability</div>
       <p style="margin-bottom:0">To the maximum extent permitted by law, NeuroSarathi and its founders, employees, and affiliates are not liable for any direct, indirect, or consequential damages arising from use of the platform, reliance on its content, or interactions with families or other users.</p>
@@ -277,7 +279,7 @@
       </label>
       <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:12px">
         <input type="checkbox" class="termsCheck" onchange="validateTermsGate()" style="margin-top:2px;flex-shrink:0;width:18px;height:18px">
-        <span style="font-size:12.5px;color:#262B45;line-height:1.6">I declare that my qualifications, registration, and licensing information are genuine, and I am solely responsible for the professional services I provide.</span>
+        <span style="font-size:12.5px;color:#262B45;line-height:1.6">I confirm the information about my experience is accurate, and I understand NeuroSarathi is not my employer — I am independently responsible for the services I provide.</span>
       </label>
       <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:12px">
         <input type="checkbox" class="termsCheck" onchange="validateTermsGate()" style="margin-top:2px;flex-shrink:0;width:18px;height:18px">
@@ -339,7 +341,7 @@ async function acceptTerms(){
   btn.textContent = 'Saving...'; btn.disabled = true;
   try{
     const sb = await getSupabase();
-    const { error } = await sb.auth.updateUser({ data: { terms_accepted: true, terms_accepted_at: new Date().toISOString(), terms_role: 'professional' } });
+    const { error } = await sb.auth.updateUser({ data: { terms_accepted: true, terms_accepted_at: new Date().toISOString(), terms_role: 'caregiver' } });
     if(error){ alert('Could not save your acceptance: ' + error.message); btn.textContent = origText; btn.disabled = false; return; }
     document.getElementById('termsModal').style.display = 'none';
     document.getElementById('profFormStep2').style.display = 'block';
@@ -383,15 +385,11 @@ async function profSignupOrLogin(){
   }
 }
 
-const PROF_TYPE_LABELS = {
-  developmental_pediatrician: 'Developmental Pediatrician',
-  child_psychiatrist: 'Child Psychiatrist',
-  occupational_therapist: 'Occupational Therapist',
-  speech_language_pathologist: 'Speech-Language Pathologist',
-  applied_behavior_analyst: 'Applied Behavior Analyst (ABA)',
-  clinical_psychologist: 'Clinical Psychologist',
-  physiotherapist: 'Physiotherapist',
-  dietitian: 'Dietitian',
+const CAREGIVER_TYPE_LABELS = {
+  babysitter: 'Babysitting / Childcare',
+  home_tutor: 'Home Tutor',
+  special_needs_caregiver: 'Special Needs Caregiver',
+  respite_care: 'Respite Care',
 };
 
 function calcProfileCompletion(p, fields){
@@ -403,28 +401,22 @@ function calcProfileCompletion(p, fields){
   return Math.round((filled / fields.length) * 100);
 }
 
-const VERIFICATION_BADGES = {
-  submitted:    { cls: 'pending', label: '🕐 Submitted — Awaiting Review' },
-  under_review: { cls: 'pending', label: '🔍 Under Review' },
-  verified:     { cls: 'live',    label: '✅ Verified' },
-};
-
 function renderProfileCard(p){
   const initial = (p.display_name || '?').trim().charAt(0).toUpperCase();
-  const typeLabel = PROF_TYPE_LABELS[p.professional_type] || p.professional_type;
+  const typeLabel = CAREGIVER_TYPE_LABELS[p.caregiver_type] || p.caregiver_type;
   const locParts = [p.area, p.city, p.state].filter(Boolean).join(', ');
   const location = locParts + (p.pincode ? (locParts ? ' - ' : '') + p.pincode : '');
-  const feeText = (p.consultation_fee_min || p.consultation_fee_max)
-    ? `₹${p.consultation_fee_min ?? '—'}–₹${p.consultation_fee_max ?? '—'}`
+  const rateText = (p.hourly_rate_min || p.hourly_rate_max)
+    ? `₹${p.hourly_rate_min ?? '—'}–₹${p.hourly_rate_max ?? '—'} /hr`
     : 'Not specified';
-  const conditionsChips = (p.conditions_specialised || []).map(c => `<span class="fb-chip">${escapeHtml(c)}</span>`).join('') || '<span style="font-size:12.5px;color:#A8A29E">Not specified yet</span>';
+  const experienceText = (p.years_experience || p.years_experience === 0) ? `${p.years_experience} yrs` : 'Not specified';
+  const conditionsChips = (p.conditions_supported || []).map(c => `<span class="fb-chip">${escapeHtml(c)}</span>`).join('') || '<span style="font-size:12.5px;color:#A8A29E">Not specified yet</span>';
   const languagesText = (p.languages_spoken || []).join(', ') || 'Not specified';
-  const badge = VERIFICATION_BADGES[p.verification_status] || VERIFICATION_BADGES.submitted;
   const avatarHtml = p.photo_url
     ? `<img src="${escapeHtml(p.photo_url)}" alt="${escapeHtml(p.display_name || '')}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
     : escapeHtml(initial);
 
-  const completionFields = ['display_name','city','state','pincode','languages_spoken','conditions_specialised','consultation_fee_min','bio','registration_body','photo_url'];
+  const completionFields = ['display_name','city','state','pincode','languages_spoken','conditions_supported','hourly_rate_min','bio','years_experience','training','photo_url'];
   const completion = calcProfileCompletion(p, completionFields);
 
   return `
@@ -435,7 +427,7 @@ function renderProfileCard(p){
       <div class="fb-card-body">
         <div class="fb-name">${escapeHtml(p.display_name || '')}</div>
         <div class="fb-subtitle">${escapeHtml(typeLabel)}${location ? ' · ' + escapeHtml(location) : ''}</div>
-        <div class="fb-badge ${badge.cls}">${badge.label}</div>
+        <div class="fb-badge live">✅ Live — Visible to Parents</div>
 
         <div class="fb-completion">
           <div class="fb-completion-head"><span>Profile Completion</span><span>${completion}%</span></div>
@@ -444,7 +436,8 @@ function renderProfileCard(p){
         </div>
 
         <div class="fb-stats">
-          <div class="fb-stat"><div class="fb-stat-label">Consultation Fee</div><div class="fb-stat-value">${feeText}</div></div>
+          <div class="fb-stat"><div class="fb-stat-label">Hourly Rate</div><div class="fb-stat-value">${rateText}</div></div>
+          <div class="fb-stat"><div class="fb-stat-label">Experience</div><div class="fb-stat-value">${experienceText}</div></div>
           <div class="fb-stat"><div class="fb-stat-label">Languages</div><div class="fb-stat-value">${escapeHtml(languagesText)}</div></div>
         </div>
         <div class="fb-chips">${conditionsChips}</div>
@@ -458,7 +451,7 @@ function renderProfileCard(p){
         <div class="fb-actions">
           <button class="fb-btn-edit" onclick="editProfile()">✏️ Edit Profile</button>
         </div>
-        <div style="text-align:center;margin-top:16px;font-size:12.5px;color:#78716C">Your profile stays hidden from parent searches until our team verifies your registration details.</div>
+        <div style="text-align:center;margin-top:16px;font-size:12.5px;color:#78716C">You'll be notified by email when a family sends you a connection request.</div>
       </div>
     </div>`;
 }
@@ -491,7 +484,7 @@ async function loadExistingProfile(){
     const { data: userData } = await sb.auth.getUser();
     const userId = userData?.user?.id;
     if(!userId) return;
-    const { data, error } = await sb.from('professionals').select('*').eq('user_id', userId).maybeSingle();
+    const { data, error } = await sb.from('caregivers').select('*').eq('user_id', userId).maybeSingle();
     if(error || !data) return;
     showProfileCard(data);
   }catch(e){
@@ -538,10 +531,16 @@ async function uploadProfilePhotoIfSelected(sb, userId){
   return data?.publicUrl || null;
 }
 
-async function submitProfessionalRegistration(event){
+async function submitCaregiverRegistration(event){
   event.preventDefault();
   const btn = document.getElementById('profSubmitBtn');
   const origText = btn.textContent;
+
+  if(!document.getElementById('profDisclaimerAck').checked){
+    alert('Please confirm you understand the disclaimer above before submitting.');
+    return;
+  }
+
   btn.textContent = 'Submitting...';
   btn.disabled = true;
 
@@ -564,35 +563,32 @@ async function submitProfessionalRegistration(event){
 
     const payload = {
       user_id: userId,
-      professional_type: document.getElementById('profType').value,
+      caregiver_type: document.getElementById('profType').value,
       display_name: document.getElementById('profDisplayName').value.trim(),
-      registration_body: document.getElementById('profRegBody').value.trim() || null,
+      years_experience: document.getElementById('profExperience').value ? parseInt(document.getElementById('profExperience').value) : null,
+      training: document.getElementById('profTraining').value.trim() || null,
       city: document.getElementById('profCity').value.trim(),
       state: document.getElementById('profState').value.trim() || null,
       area: document.getElementById('profArea').value.trim() || null,
       pincode: pincode || null,
       languages_spoken: toArray(document.getElementById('profLanguages').value),
-      conditions_specialised: toArray(document.getElementById('profConditions').value),
-      consultation_fee_min: document.getElementById('profFeeMin').value ? parseInt(document.getElementById('profFeeMin').value) : null,
-      consultation_fee_max: document.getElementById('profFeeMax').value ? parseInt(document.getElementById('profFeeMax').value) : null,
+      conditions_supported: toArray(document.getElementById('profConditions').value),
+      hourly_rate_min: document.getElementById('profFeeMin').value ? parseInt(document.getElementById('profFeeMin').value) : null,
+      hourly_rate_max: document.getElementById('profFeeMax').value ? parseInt(document.getElementById('profFeeMax').value) : null,
       bio: document.getElementById('profBio').value.trim() || null,
+      disclaimer_accepted: true,
     };
     if(photoUrl) payload.photo_url = photoUrl;
-    // Note: registration_number_encrypted is intentionally NOT written here —
-    // it requires server-side encryption, not a plaintext client-side write.
-    // The registration number entered above is for our team's manual
-    // verification process, communicated separately (e.g. via email/support),
-    // not stored in this table from the browser.
 
-    if(!payload.professional_type || !payload.display_name || !payload.city){
+    if(!payload.caregiver_type || !payload.display_name || !payload.city){
       alert('Please fill in all required fields (marked *).');
       btn.textContent = origText; btn.disabled = false;
       return;
     }
 
-    const { error } = await sb.from('professionals').upsert(payload, { onConflict: 'user_id' });
+    const { error } = await sb.from('caregivers').upsert(payload, { onConflict: 'user_id' });
     if(error){
-      alert('Could not submit your registration: ' + error.message);
+      alert('Could not submit your profile: ' + error.message);
       btn.textContent = origText; btn.disabled = false;
       return;
     }

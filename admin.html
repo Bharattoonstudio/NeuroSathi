@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — NeuroSarathi</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Manrope',sans-serif;background:#f4f2ee;color:#1a1a1a;min-height:100vh}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600}
+
+  /* ---- Login screen ---- */
+  #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .login-card{background:#fff;border-radius:24px;padding:36px 32px;max-width:400px;width:100%;box-shadow:0 20px 50px -20px rgba(0,0,0,0.15)}
+  .login-card h1{font-size:1.6rem;margin-bottom:4px}
+  .login-card p.sub{color:#888;font-size:.9rem;margin-bottom:24px}
+  input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #ddd;margin-bottom:12px;font-family:inherit;font-size:.92rem}
+  input:focus{outline:none;border-color:#FF6B1A}
+  .btn{width:100%;padding:13px;background:#FF6B1A;color:#fff;border:none;border-radius:50px;font-weight:700;font-size:.95rem;cursor:pointer}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .btn-outline{background:none;border:1px solid #ddd;color:#555}
+  .error-msg{color:#c0392b;font-size:.82rem;margin-top:10px;min-height:1em}
+
+  /* ---- Dashboard shell ---- */
+  #dashboard{display:none}
+  .topbar{background:#1a1a1a;color:#fff;padding:14px 24px;display:flex;justify-content:space-between;align-items:center}
+  .topbar .brand{font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem}
+  .topbar button{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:7px 16px;border-radius:50px;font-size:.8rem;cursor:pointer}
+  .tabs{display:flex;gap:8px;padding:16px 24px 0;background:#fff;border-bottom:1px solid #eee}
+  .tab{padding:10px 18px;border-radius:12px 12px 0 0;font-size:.88rem;font-weight:600;cursor:pointer;color:#888}
+  .tab.active{color:#FF6B1A;border-bottom:3px solid #FF6B1A}
+  .content{padding:24px;max-width:900px;margin:0 auto}
+  .panel{display:none}
+  .panel.active{display:block}
+  .panel h2{font-size:1.3rem;margin-bottom:4px}
+  .panel .sub{color:#888;font-size:.88rem;margin-bottom:20px}
+
+  .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+  .stat-card{background:#fff;border-radius:16px;padding:16px;border:1px solid #eee}
+  .stat-card .num{font-size:1.6rem;font-weight:700;font-family:'Fraunces',serif;color:#1a1a1a}
+  .stat-card .label{font-size:.75rem;color:#888;text-transform:uppercase;letter-spacing:.3px}
+
+  .item-card{background:#fff;border:1px solid #eee;border-radius:16px;padding:16px;margin-bottom:10px}
+  .item-card .name{font-weight:700;font-size:1rem}
+  .item-card .meta{font-size:.8rem;color:#888;margin:4px 0 10px}
+  .status-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700}
+  .status-submitted{background:#fff3e0;color:#e8a33d}
+  .status-under_review{background:#e3f2fd;color:#1976d2}
+  .status-verified{background:#e8f5e9;color:#2a7b47}
+  .status-rejected{background:#ffebee;color:#c0392b}
+  .action-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .action-row button{flex:1;min-width:100px;padding:9px;border:none;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;color:#fff}
+  .btn-verify{background:#2a7b47}
+  .btn-review{background:#e8a33d}
+  .btn-reject{background:#c0392b}
+  .empty-note{color:#888;font-size:.88rem;padding:20px;text-align:center}
+  .search-box{width:100%;padding:11px 14px;border-radius:12px;border:1px solid #ddd;margin-bottom:16px;font-family:inherit}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="loginScreen">
+  <div class="login-card">
+    <h1>Admin Access</h1>
+    <p class="sub">NeuroSarathi staff only.</p>
+    <input type="email" id="loginEmail" placeholder="Email">
+    <input type="password" id="loginPassword" placeholder="Password">
+    <button class="btn" id="loginBtn" onclick="doAdminLogin()">Log In</button>
+    <div class="error-msg" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="dashboard">
+  <div class="topbar">
+    <div class="brand">NeuroSarathi Admin</div>
+    <button onclick="doAdminLogout()">Log out</button>
+  </div>
+  <div class="tabs">
+    <div class="tab active" data-panel="panelOverview" onclick="switchTab('panelOverview')">Overview</div>
+    <div class="tab" data-panel="panelProfessionals" onclick="switchTab('panelProfessionals')">Professionals</div>
+    <div class="tab" data-panel="panelUsers" onclick="switchTab('panelUsers')">Users</div>
+  </div>
+  <div class="content">
+
+    <div class="panel active" id="panelOverview">
+      <h2>Overview</h2>
+      <p class="sub">Snapshot of platform activity.</p>
+      <div class="stat-row" id="overviewStats">
+        <div class="stat-card"><div class="num">—</div><div class="label">Professionals</div></div>
+        <div class="stat-card"><div class="num">—</div><div class="label">Pending Review</div></div>
+        <div class="stat-card"><div class="num">—</div><div class="label">Verified</div></div>
+        <div class="stat-card"><div class="num">—</div><div class="label">Children Registered</div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="panelProfessionals">
+      <h2>Professional Verification</h2>
+      <p class="sub">Review and approve professional registrations.</p>
+      <input class="search-box" id="profSearch" placeholder="Search by name or city…" oninput="renderProfessionals()">
+      <div id="profList"><div class="empty-note">Loading…</div></div>
+    </div>
+
+    <div class="panel" id="panelUsers">
+      <h2>Users</h2>
+      <p class="sub">Registered families, based on child profiles on file. Full account management (email, password resets) requires Supabase Dashboard access directly, since that needs service-role permissions this page intentionally doesn't hold.</p>
+      <input class="search-box" id="userSearch" placeholder="Search by child name or condition…" oninput="renderUsers()">
+      <div id="userList"><div class="empty-note">Loading…</div></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://qvuenvngwgcknawfsnxl.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2dWVudm5nd2dja25hd2ZzbnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MzI1OTksImV4cCI6MjA5ODMwODU5OX0.MZgac469tvi9Xq9gyaRbHDc9t88Ww9dN8ldZ8JvKGVI";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* Edit this list to add/remove admins. This is a UX gate only — real
+   protection must come from a Row Level Security policy on every table
+   this page writes to (professionals.verification_status, etc.),
+   restricting writes to these specific accounts server-side. */
+const ADMIN_EMAILS = ['bharattoonstudio@gmail.com'];
+
+let professionalsCache = [];
+let usersCache = [];
+
+/* ---------- Boot ---------- */
+async function init(){
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session && session.user && ADMIN_EMAILS.includes(session.user.email)){
+    showDashboard();
+  } else {
+    if (session) await supabase.auth.signOut(); // logged in but not an admin — clear it
+  }
+}
+init();
+
+/* ---------- Login ---------- */
+async function doAdminLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
+  errEl.textContent = '';
+
+  if (!email || !password){
+    errEl.textContent = 'Enter both email and password.';
+    return;
+  }
+  if (!ADMIN_EMAILS.includes(email)){
+    errEl.textContent = 'This email is not authorized for admin access.';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Logging in…';
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  btn.disabled = false; btn.textContent = 'Log In';
+
+  if (error){
+    errEl.textContent = error.message;
+    return;
+  }
+  showDashboard();
+}
+
+async function doAdminLogout(){
+  await supabase.auth.signOut();
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPassword').value = '';
+}
+
+function showDashboard(){
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  loadOverview();
+  loadProfessionals();
+  loadUsers();
+}
+
+/* ---------- Tabs ---------- */
+function switchTab(panelId){
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.panel === panelId));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === panelId));
+}
+
+/* ---------- Overview ---------- */
+async function loadOverview(){
+  const statEls = document.querySelectorAll('#overviewStats .num');
+  try {
+    const [{ count: totalProf }, { count: pending }, { count: verified }, { count: children }] = await Promise.all([
+      supabase.from('professionals').select('*', { count: 'exact', head: true }),
+      supabase.from('professionals').select('*', { count: 'exact', head: true }).in('verification_status', ['submitted','under_review']),
+      supabase.from('professionals').select('*', { count: 'exact', head: true }).eq('verification_status', 'verified'),
+      supabase.from('children').select('*', { count: 'exact', head: true }),
+    ]);
+    statEls[0].textContent = totalProf ?? '—';
+    statEls[1].textContent = pending ?? '—';
+    statEls[2].textContent = verified ?? '—';
+    statEls[3].textContent = children ?? '—';
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+/* ---------- Professionals ---------- */
+async function loadProfessionals(){
+  const el = document.getElementById('profList');
+  const { data, error } = await supabase
+    .from('professionals')
+    .select('id, display_name, professional_type, city, state, verification_status, created_at')
+    .order('created_at', { ascending: false });
+
+  if (error){
+    el.innerHTML = `<div class="empty-note">Couldn't load: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  professionalsCache = data || [];
+  renderProfessionals();
+}
+
+function renderProfessionals(){
+  const el = document.getElementById('profList');
+  const q = (document.getElementById('profSearch').value || '').toLowerCase();
+  const filtered = professionalsCache.filter(p =>
+    (p.display_name || '').toLowerCase().includes(q) || (p.city || '').toLowerCase().includes(q)
+  );
+
+  if (!filtered.length){
+    el.innerHTML = `<div class="empty-note">${professionalsCache.length ? 'No matches.' : 'No professionals registered yet.'}</div>`;
+    return;
+  }
+
+  el.innerHTML = filtered.map(p => `
+    <div class="item-card">
+      <div class="name">${escapeHtml(p.display_name)}</div>
+      <div class="meta">${escapeHtml(p.professional_type || '')} · ${escapeHtml(p.city || '')}${p.state ? ', ' + escapeHtml(p.state) : ''}
+        &nbsp;<span class="status-badge status-${escapeHtml(p.verification_status || 'submitted')}">${escapeHtml((p.verification_status || 'submitted').replace('_',' '))}</span>
+      </div>
+      <div class="action-row">
+        <button class="btn-verify" onclick="setVerification('${p.id}','verified')">✓ Verify</button>
+        <button class="btn-review" onclick="setVerification('${p.id}','under_review')">Under Review</button>
+        <button class="btn-reject" onclick="setVerification('${p.id}','rejected')">✕ Reject</button>
+      </div>
+    </div>`).join('');
+}
+
+async function setVerification(id, status){
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session || !session.user || !ADMIN_EMAILS.includes(session.user.email)){
+    alert('Your admin session has expired. Please log in again.');
+    doAdminLogout();
+    return;
+  }
+  const { error } = await supabase
+    .from('professionals')
+    .update({ verification_status: status, verification_date: new Date().toISOString() })
+    .eq('id', id);
+  if (error){
+    alert('Update failed: ' + error.message);
+    return;
+  }
+  await loadProfessionals();
+  await loadOverview();
+}
+
+/* ---------- Users (via children table — see note in panel) ---------- */
+async function loadUsers(){
+  const el = document.getElementById('userList');
+  const { data, error } = await supabase
+    .from('children')
+    .select('id, name, age, conditions, user_id, created_at')
+    .order('created_at', { ascending: false })
+    .limit(200);
+
+  if (error){
+    el.innerHTML = `<div class="empty-note">Couldn't load: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  usersCache = data || [];
+  renderUsers();
+}
+
+function renderUsers(){
+  const el = document.getElementById('userList');
+  const q = (document.getElementById('userSearch').value || '').toLowerCase();
+  const filtered = usersCache.filter(c =>
+    (c.name || '').toLowerCase().includes(q) || (c.conditions || '').toLowerCase().includes(q)
+  );
+
+  if (!filtered.length){
+    el.innerHTML = `<div class="empty-note">${usersCache.length ? 'No matches.' : 'No child profiles logged yet.'}</div>`;
+    return;
+  }
+
+  el.innerHTML = filtered.map(c => `
+    <div class="item-card">
+      <div class="name">${escapeHtml(c.name || 'Unnamed child')}</div>
+      <div class="meta">${c.age ? c.age + ' yrs · ' : ''}${escapeHtml(c.conditions || 'No concerns noted')}</div>
+    </div>`).join('');
+}
+
+function escapeHtml(s){
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+</script>
+</body>
+</html>

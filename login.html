@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login · NeuroSarathi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --background: oklch(0.983 0.012 85);
+  --ink: oklch(0.22 0.035 265);
+  --ink-soft: oklch(0.38 0.028 260);
+  --card: oklch(0.985 0.008 80);
+  --primary: oklch(0.5 0.1 165);
+  --primary-foreground: oklch(0.983 0.012 85);
+  --sage-soft: oklch(0.92 0.03 145);
+  --terracotta: oklch(0.62 0.13 45);
+  --muted-foreground: oklch(0.48 0.025 260);
+  --border: oklch(0.88 0.02 70);
+  --shadow-lift: 0 2px 4px oklch(0.22 0.035 265 / 0.05), 0 24px 60px -20px oklch(0.28 0.08 265 / 0.18);
+}
+body{font-family:'Manrope',system-ui,sans-serif;background:var(--background);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;
+  background-image: radial-gradient(1000px 500px at 15% 0%, oklch(0.92 0.05 55 / .45), transparent 60%), radial-gradient(800px 500px at 100% 100%, oklch(0.9 0.04 145 / .3), transparent 60%);
+}
+.logo{height:64px;width:auto;margin-bottom:28px;display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:28px;padding:36px 32px;max-width:420px;width:100%;box-shadow:var(--shadow-lift)}
+h1{font-family:'Fraunces',serif;font-weight:500;font-size:1.8rem;margin-bottom:8px;color:var(--ink)}
+p.sub{color:var(--ink-soft);margin-bottom:24px;font-size:.95rem}
+input{width:100%;padding:13px 16px;border-radius:14px;border:1px solid var(--border);margin-bottom:14px;font-family:inherit;font-size:.95rem;background:var(--background);color:var(--ink)}
+input:focus{outline:none;border-color:var(--terracotta)}
+.btn-primary{width:100%;background:var(--primary);color:var(--primary-foreground);border:none;padding:14px;border-radius:999px;font-weight:600;font-size:1rem;cursor:pointer;transition:transform .2s;box-shadow:var(--shadow-lift)}
+.btn-primary:hover{transform:scale(1.01)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.msg{font-size:.85rem;margin-top:14px;padding:10px 14px;border-radius:10px;display:none}
+.msg.error{display:block;background:oklch(0.93 0.05 25);color:oklch(0.4 0.15 25)}
+.msg.success{display:block;background:var(--sage-soft);color:oklch(0.35 0.08 150)}
+.switch{margin-top:22px;text-align:center;font-size:.9rem;color:var(--ink-soft)}
+.switch a{color:var(--terracotta);font-weight:600;text-decoration:none}
+.back{margin-top:18px;text-align:center}
+.back a{color:var(--muted-foreground);font-size:.85rem;text-decoration:none}
+</style>
+</head>
+<body>
+  <a href="/index.html"><img class="logo" src="/neurosarathi-logo-horizontal.png" alt="NeuroSarathi — Every Child Can Shine"></a>
+  <div class="card">
+    <h1>Welcome back</h1>
+    <p class="sub">Log in to continue your child's journey.</p>
+    <input type="email" id="email" placeholder="Email address">
+    <input type="password" id="password" placeholder="Password">
+    <button class="btn-primary" id="submitBtn" onclick="doLogin()">Log In</button>
+    <div class="msg" id="msg"></div>
+    <div class="switch">New here? <a href="/signup.html">Create a free account</a></div>
+    <div class="back"><a href="/parents.html">← Back to NeuroSarathi</a></div>
+  </div>
+
+<script>
+const SUPABASE_URL = "https://qvuenvngwgcknawfsnxl.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2dWVudm5nd2dja25hd2ZzbnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MzI1OTksImV4cCI6MjA5ODMwODU5OX0.MZgac469tvi9Xq9gyaRbHDc9t88Ww9dN8ldZ8JvKGVI";
+let supabase = null;
+try {
+  if (SUPABASE_ANON_KEY.indexOf('PASTE_YOUR') === -1) {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+} catch (e) { console.warn(e); }
+
+async function doLogin() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const msg = document.getElementById('msg');
+  const btn = document.getElementById('submitBtn');
+
+  if (!supabase) {
+    msg.className = 'msg error';
+    msg.textContent = 'Backend not connected yet — add the Supabase anon key in this page\'s code first.';
+    return;
+  }
+  if (!email || !password) {
+    msg.className = 'msg error';
+    msg.textContent = 'Please enter your email and password.';
+    return;
+  }
+  btn.disabled = true; btn.textContent = 'Logging in…';
+  try {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    msg.className = 'msg success';
+    msg.textContent = 'Logged in! Redirecting…';
+    setTimeout(() => { window.location.href = '/dashboard.html'; }, 900);
+  } catch (err) {
+    msg.className = 'msg error';
+    msg.textContent = err.message || 'Something went wrong. Please try again.';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Log In';
+  }
+}
+</script>
+</body>
+</html>

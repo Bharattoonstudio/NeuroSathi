@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>NeuroSarathi — Parent Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f5f9ff; color: #1e293b; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 20px; }
+        ::-webkit-scrollbar-thumb { background: #b9d0f0; border-radius: 20px; }
+        .card-premium { background: linear-gradient(145deg, #ffffff, #f5f9ff); border-radius: 32px; box-shadow: 0 12px 40px rgba(120, 160, 220, 0.12), 0 4px 16px rgba(120, 160, 220, 0.06); transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1); border: 1px solid rgba(255, 255, 255, 0.6); }
+        .card-premium:hover { transform: translateY(-4px); box-shadow: 0 20px 48px rgba(120, 160, 220, 0.18); }
+        .card-soft { background: white; border-radius: 24px; box-shadow: 0 6px 24px rgba(120, 160, 220, 0.08); transition: all 0.3s ease; border: 1px solid rgba(230, 242, 255, 0.6); }
+        .card-soft:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(120, 160, 220, 0.12); }
+        .sidebar { position: fixed; top: 0; left: 0; width: 280px; height: 100vh; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-right: 1px solid rgba(200, 215, 240, 0.4); z-index: 1000; transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); overflow-y: auto; padding: 0 0 24px 0; }
+        .sidebar.open { transform: translateX(0); }
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.2); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .sidebar-overlay.active { opacity: 1; pointer-events: all; }
+        .ai-avatar-float { position: fixed; bottom: 28px; right: 28px; z-index: 999; width: 76px; height: 76px; border-radius: 50%; background: linear-gradient(135deg, #b8d4ff, #7ba3e6); box-shadow: 0 8px 32px rgba(100, 150, 255, 0.35); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; border: 3px solid rgba(255, 255, 255, 0.7); animation: float-bounce 3.5s ease-in-out infinite, glow-pulse 2.8s ease-in-out infinite; }
+        .ai-avatar-float:hover { transform: scale(1.06) translateY(-2px); box-shadow: 0 12px 40px rgba(100, 150, 255, 0.45); }
+        .ai-avatar-float img { width: 62px; height: 62px; border-radius: 50%; object-fit: contain; background: white; padding: 3px; }
+        @keyframes float-bounce { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+        @keyframes glow-pulse { 0%, 100% { box-shadow: 0 8px 32px rgba(100, 150, 255, 0.35); } 50% { box-shadow: 0 8px 48px rgba(100, 150, 255, 0.55), 0 0 60px rgba(100, 150, 255, 0.15); } }
+        .ai-glow-ring { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #b8d4ff, #7ba3e6); display: flex; align-items: center; justify-content: center; animation: glow-pulse 3s ease-in-out infinite; box-shadow: 0 0 40px rgba(100, 150, 255, 0.2); }
+        .ai-glow-ring img { width: 100px; height: 100px; border-radius: 50%; object-fit: contain; background: white; padding: 8px; border: 2px solid rgba(255, 255, 255, 0.5); }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid rgba(200, 215, 240, 0.3); display: flex; justify-content: space-around; padding: 8px 0 12px 0; z-index: 100; display: none; }
+        .bottom-nav .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; color: #94a3b8; cursor: pointer; padding: 4px 12px; border-radius: 12px; transition: all 0.2s; }
+        .bottom-nav .nav-item i { font-size: 20px; }
+        .bottom-nav .nav-item.active { color: #5b8dd9; background: rgba(91, 141, 217, 0.08); }
+        .hamburger-btn { background: none; border: none; font-size: 24px; color: #334155; cursor: pointer; padding: 8px; border-radius: 12px; transition: background 0.2s; }
+        .hamburger-btn:hover { background: rgba(91, 141, 217, 0.08); }
+        .progress-bar { width: 100%; height: 8px; background: #e8edf5; border-radius: 20px; overflow: hidden; }
+        .progress-bar .fill { height: 100%; border-radius: 20px; background: linear-gradient(90deg, #7ba3e6, #b8d4ff); transition: width 1s ease; }
+        .timeline-item { display: flex; align-items: flex-start; gap: 16px; padding: 8px 0; }
+        .timeline-dot { width: 14px; height: 14px; border-radius: 50%; background: #dce3ef; flex-shrink: 0; margin-top: 4px; border: 2px solid white; box-shadow: 0 0 0 2px #dce3ef; }
+        .timeline-dot.checked { background: #6fcf97; box-shadow: 0 0 0 2px #6fcf97; }
+        .counter { font-size: 28px; font-weight: 700; color: #1e293b; }
+        .chat-window { position: fixed; bottom: 110px; right: 28px; width: 380px; max-width: calc(100vw - 56px); max-height: 520px; background: white; border-radius: 24px; box-shadow: 0 24px 80px rgba(0, 0, 0, 0.15); z-index: 1000; display: none; flex-direction: column; overflow: hidden; border: 1px solid rgba(200, 215, 240, 0.3); }
+        .chat-window.open { display: flex; }
+        .chat-header { padding: 16px 20px; background: linear-gradient(135deg, #f0f6ff, #e3edff); border-bottom: 1px solid rgba(200, 215, 240, 0.3); display: flex; align-items: center; gap: 12px; }
+        .chat-header img { width: 36px; height: 36px; border-radius: 50%; object-fit: contain; background: white; padding: 2px; }
+        .chat-messages { flex: 1; padding: 16px 20px; overflow-y: auto; background: #fafcff; display: flex; flex-direction: column; }
+        .chat-message { padding: 10px 16px; border-radius: 16px; max-width: 85%; margin-bottom: 8px; font-size: 14px; line-height: 1.5; white-space: pre-wrap; }
+        .chat-message.ai { background: #f0f6ff; color: #1e293b; align-self: flex-start; border-bottom-left-radius: 4px; }
+        .chat-message.user { background: #5b8dd9; color: white; align-self: flex-end; border-bottom-right-radius: 4px; margin-left: auto; }
+        .chat-message.system-note { background: transparent; color: #94a3b8; font-size: 11px; text-align: center; align-self: center; max-width: 100%; }
+        .chat-input-area { padding: 12px 16px; border-top: 1px solid rgba(200, 215, 240, 0.3); display: flex; gap: 8px; background: white; }
+        .chat-input-area input { flex: 1; border: none; outline: none; padding: 10px 14px; border-radius: 20px; background: #f1f5f9; font-size: 14px; }
+        .chat-input-area button { background: #5b8dd9; border: none; color: white; padding: 10px 18px; border-radius: 20px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+        .chat-input-area button:hover { background: #4a7ac4; }
+        .chat-input-area button:disabled { opacity: .5; cursor: not-allowed; }
+        .chat-suggestions { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 16px 12px 16px; background: #fafcff; border-top: 1px solid rgba(200, 215, 240, 0.15); }
+        .chat-suggestions button { background: white; border: 1px solid #dce3ef; padding: 6px 14px; border-radius: 20px; font-size: 12px; color: #334155; cursor: pointer; transition: all 0.2s; }
+        .chat-suggestions button:hover { background: #f0f6ff; border-color: #7ba3e6; }
+        .empty-note { color: #94a3b8; font-size: 13px; padding: 16px; text-align: center; background: #fafcff; border-radius: 16px; border: 1px dashed #dce3ef; }
+        @media (max-width: 768px) {
+            .sidebar { width: 280px; }
+            .bottom-nav { display: flex; }
+            .ai-avatar-float { bottom: 80px; right: 16px; width: 64px; height: 64px; }
+            .ai-avatar-float img { width: 52px; height: 52px; }
+            .chat-window { bottom: 150px; right: 16px; max-height: 460px; width: calc(100vw - 32px); }
+            .desktop-sidebar { display: none !important; }
+            .main-content { padding-bottom: 80px !important; }
+            .ai-glow-ring { width: 90px; height: 90px; }
+            .ai-glow-ring img { width: 74px; height: 74px; }
+        }
+        @media (min-width: 769px) {
+            .sidebar { transform: translateX(0) !important; width: 260px; position: fixed; }
+            .sidebar-overlay { display: none !important; }
+            .mobile-hamburger { display: none !important; }
+            .main-content { margin-left: 260px; padding: 24px 32px 32px 32px; }
+            .bottom-nav { display: none !important; }
+            .ai-avatar-float { bottom: 32px; right: 32px; }
+        }
+        .menu-item.active { background: rgba(91, 141, 217, 0.08); color: #5b8dd9; font-weight: 600; }
+        .menu-item.active i { color: #5b8dd9; }
+        .child-selector { background: white; border: 1px solid #e8edf5; border-radius: 16px; padding: 6px 14px 6px 16px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s; font-size: 14px; font-weight: 500; }
+        .child-selector:hover { border-color: #7ba3e6; box-shadow: 0 4px 12px rgba(123, 163, 230, 0.12); }
+        .notif-bell { position: relative; cursor: pointer; padding: 8px; border-radius: 12px; transition: background 0.2s; }
+        .notif-bell:hover { background: rgba(91, 141, 217, 0.08); }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="p-6 pb-4">
+            <div class="flex items-center gap-3 mb-1">
+                <img src="/neurosarathi-logo-icon.png" alt="NeuroSarathi" class="w-10 h-10 rounded-xl shadow-md object-contain bg-white" onerror="this.style.display='none'">
+                <div>
+                    <div class="font-bold text-xl text-slate-800 tracking-tight">NeuroSarathi</div>
+                    <div class="text-xs text-slate-400 font-medium tracking-wide">Every Child Can Shine ✨</div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="px-3 pb-4">
+            <div class="space-y-0.5">
+                <a href="#top" class="menu-item active flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-700 transition-all hover:bg-slate-50">
+                    <i class="fas fa-home w-5 text-center text-slate-400"></i> Home
+                </a>
+                <a href="#routine" class="menu-item flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-700 transition-all hover:bg-slate-50">
+                    <i class="fas fa-calendar-day w-5 text-center text-slate-400"></i> Daily Routine
+                </a>
+                <a href="#growth" class="menu-item flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-700 transition-all hover:bg-slate-50">
+                    <i class="fas fa-chart-line w-5 text-center text-slate-400"></i> Growth Journey
+                </a>
+                <a href="javascript:void(0)" onclick="toggleChat()" class="menu-item flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-700 transition-all hover:bg-slate-50">
+                    <i class="fas fa-robot w-5 text-center text-slate-400"></i> AI Sarathi
+                </a>
+                <a href="/professionals.html" class="menu-item flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-700 transition-all hover:bg-slate-50">
+                    <i class="fas fa-globe-asia w-5 text-center text-slate-400"></i> Find Professionals
+                </a>
+                <a href="javascript:void(0)" onclick="comingSoon('Learning Centre')" class="menu-item flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-700 transition-all hover:bg-slate-50">
+                    <i class="fas fa-book-open w-5 text-center text-slate-400"></i> Learning Centre
+                </a>
+                <a href="javascript:void(0)" onclick="comingSoon('School Support')" class="menu-item flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-700 transition-all hover:bg-slate-50">
+                    <i class="fas fa-school w-5 text-center text-slate-400"></i> School Support
+                </a>
+                <a href="javascript:void(0)" onclick="comingSoon('Government Schemes')" class="menu-item flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-700 transition-all hover:bg-slate-50">
+                    <i class="fas fa-building-columns w-5 text-center text-slate-400"></i> Government Schemes
+                </a>
+                <a href="javascript:void(0)" onclick="comingSoon('Documents')" class="menu-item flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-700 transition-all hover:bg-slate-50">
+                    <i class="fas fa-file-alt w-5 text-center text-slate-400"></i> Documents
+                </a>
+                <a href="javascript:void(0)" onclick="comingSoon('Settings')" class="menu-item flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-700 transition-all hover:bg-slate-50">
+                    <i class="fas fa-cog w-5 text-center text-slate-400"></i> Settings
+                </a>
+            </div>
+
+            <div class="border-t border-slate-200/60 mt-4 pt-4 px-4">
+                <a href="javascript:void(0)" onclick="doLogout()" class="flex items-center gap-3 text-sm font-medium text-red-400 hover:text-red-500 transition-colors">
+                    <i class="fas fa-right-from-bracket w-5 text-center"></i> Logout
+                </a>
+            </div>
+        </nav>
+    </aside>
+
+    <div class="main-content" id="top" style="padding: 20px 20px 100px 20px;">
+
+        <header class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <button class="hamburger-btn mobile-hamburger" id="hamburgerBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="child-selector" id="childSelector">
+                    <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-300 to-purple-300 flex items-center justify-center text-white font-bold text-xs" id="childInitial">–</div>
+                    <span id="childNameLabel">No child added yet</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div class="notif-bell" id="notifBell">
+                    <i class="fas fa-bell text-xl text-slate-500"></i>
+                </div>
+                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center text-white font-semibold text-sm shadow-md cursor-pointer" id="userAvatarInitial">
+                    P
+                </div>
+            </div>
+        </header>
+
+        <section class="card-premium p-6 md:p-8 mb-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-blue-100/40 to-purple-100/30 rounded-full -translate-y-12 translate-x-12"></div>
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-slate-800 mb-2" id="greetingText">Welcome back 👋</h1>
+                    <p class="text-slate-500 text-sm md:text-base max-w-md" id="greetingSub">Loading your family's journey…</p>
+                    <div class="flex flex-wrap gap-3 mt-4" id="childChips"></div>
+                    <button class="mt-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2.5 rounded-2xl text-sm font-semibold shadow-lg shadow-blue-200/50 hover:shadow-blue-300/50 transition-all hover:scale-[1.02]" id="addChildBtn">
+                        + Add Child
+                    </button>
+                </div>
+                <div class="flex-shrink-0">
+                    <div class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-yellow-200/40 to-orange-200/30 flex items-center justify-center">
+                        <span class="text-7xl md:text-8xl">🌟</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card-premium p-6 md:p-8 mb-8 text-center">
+            <div class="flex flex-col md:flex-row items-center gap-6 md:gap-8">
+                <div class="flex-shrink-0">
+                    <div class="ai-glow-ring mx-auto">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23e8f0fe' rx='100'/%3E%3Ccircle cx='100' cy='80' r='40' fill='%237ba3e6'/%3E%3Ccircle cx='80' cy='72' r='6' fill='white'/%3E%3Ccircle cx='120' cy='72' r='6' fill='white'/%3E%3Crect x='85' y='120' width='30' height='8' rx='4' fill='%235b8dd9'/%3E%3Crect x='75' y='135' width='50' height='8' rx='4' fill='%235b8dd9'/%3E%3Crect x='65' y='150' width='70' height='8' rx='4' fill='%235b8dd9'/%3E%3C/svg%3E" alt="Sarathi" class="w-full h-full object-contain rounded-full bg-white p-1" />
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-xl md:text-2xl font-bold text-slate-800 mb-1">Hi! I'm Sarathi 👋</h2>
+                    <p class="text-slate-500 text-sm md:text-base">Ask me anything about your child's routine, milestones, or general guidance. I'll only tell you things I can actually back up with your real data or established guidance.</p>
+                    <div class="flex flex-wrap justify-center gap-3 mt-4">
+                        <button class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2.5 rounded-2xl text-sm font-semibold shadow-lg shadow-blue-200/50 hover:shadow-blue-300/50 transition-all hover:scale-[1.02]" onclick="toggleChat()">
+                            Ask Sarathi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="card-soft p-4 text-center">
+                <div class="text-2xl font-bold text-blue-500 counter" id="statPlanned">0</div>
+                <div class="text-xs text-slate-500 mt-1">Activities Today</div>
+            </div>
+            <div class="card-soft p-4 text-center">
+                <div class="text-2xl font-bold text-green-500 counter" id="statCompleted">0</div>
+                <div class="text-xs text-slate-500 mt-1">Completed Today</div>
+            </div>
+            <div class="card-soft p-4 text-center">
+                <div class="text-2xl font-bold text-orange-500 counter" id="statRemaining">0</div>
+                <div class="text-xs text-slate-500 mt-1">Remaining Today</div>
+            </div>
+            <div class="card-soft p-4 text-center">
+                <div class="text-2xl font-bold text-purple-500 counter" id="statStreak">0</div>
+                <div class="text-xs text-slate-500 mt-1">Day Streak 🔥</div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+
+            <div class="card-premium p-6" id="routine">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-lg text-slate-800">Today's Routine</h3>
+                    <span class="text-xs text-slate-400 bg-slate-100 px-3 py-1 rounded-full" id="routineFraction">0/0 completed</span>
+                </div>
+                <div class="space-y-1" id="routineList">
+                    <div class="empty-note">Loading routine…</div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center justify-between text-sm text-slate-600 mb-1">
+                        <span>Progress</span>
+                        <span id="routinePercentLabel">0%</span>
+                    </div>
+                    <div class="progress-bar"><div class="fill" id="routineProgressFill" style="width:0%"></div></div>
+                </div>
+            </div>
+
+            <div class="card-premium p-6" id="growth">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-lg text-slate-800">Growth Journey</h3>
+                </div>
+                <div id="growthContent">
+                    <div class="empty-note">Loading…</div>
+                </div>
+            </div>
+        </div>
+
+        <section class="card-premium p-6 mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-lg text-slate-800">Recent Milestones</h3>
+            </div>
+            <div id="milestonesList">
+                <div class="empty-note">Loading…</div>
+            </div>
+        </section>
+
+        <section class="mb-8">
+            <h3 class="font-bold text-lg text-slate-800 mb-4">Quick Actions</h3>
+            <div class="grid grid-cols-4 md:grid-cols-6 gap-3">
+                <button class="card-soft p-3 text-center hover:bg-blue-50/50 transition-all" onclick="comingSoon('Add Observation')">
+                    <i class="fas fa-pen text-xl text-blue-400"></i>
+                    <span class="text-xs block mt-1 text-slate-600">Add Observation</span>
+                </button>
+                <button class="card-soft p-3 text-center hover:bg-blue-50/50 transition-all" onclick="comingSoon('Upload Document')">
+                    <i class="fas fa-upload text-xl text-green-400"></i>
+                    <span class="text-xs block mt-1 text-slate-600">Upload Document</span>
+                </button>
+                <button class="card-soft p-3 text-center hover:bg-blue-50/50 transition-all" onclick="toggleChat()">
+                    <i class="fas fa-robot text-xl text-indigo-400"></i>
+                    <span class="text-xs block mt-1 text-slate-600">Ask Sarathi</span>
+                </button>
+                <a href="/professionals.html" class="card-soft p-3 text-center hover:bg-blue-50/50 transition-all block">
+                    <i class="fas fa-users text-xl text-pink-400"></i>
+                    <span class="text-xs block mt-1 text-slate-600">Find Professionals</span>
+                </a>
+                <button class="card-soft p-3 text-center hover:bg-blue-50/50 transition-all" onclick="comingSoon('Government Schemes')">
+                    <i class="fas fa-building-columns text-xl text-teal-400"></i>
+                    <span class="text-xs block mt-1 text-slate-600">Govt Schemes</span>
+                </button>
+                <button class="card-soft p-3 text-center hover:bg-blue-50/50 transition-all" onclick="comingSoon('Learning Centre')">
+                    <i class="fas fa-book text-xl text-purple-400"></i>
+                    <span class="text-xs block mt-1 text-slate-600">Learning Centre</span>
+                </button>
+            </div>
+        </section>
+
+        <footer class="text-center py-6 border-t border-slate-200/40">
+            <p class="text-sm text-slate-400 font-medium">✨ "Every small step is a victory." ✨</p>
+            <p class="text-xs text-slate-300 mt-1">NeuroSarathi — Every Child Can Shine</p>
+        </footer>
+    </div>
+
+    <div class="ai-avatar-float" id="aiAvatarFloat" title="Click to chat with Sarathi">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23e8f0fe' rx='100'/%3E%3Ccircle cx='100' cy='80' r='40' fill='%237ba3e6'/%3E%3Ccircle cx='80' cy='72' r='6' fill='white'/%3E%3Ccircle cx='120' cy='72' r='6' fill='white'/%3E%3Crect x='85' y='120' width='30' height='8' rx='4' fill='%235b8dd9'/%3E%3Crect x='75' y='135' width='50' height='8' rx='4' fill='%235b8dd9'/%3E%3Crect x='65' y='150' width='70' height='8' rx='4' fill='%235b8dd9'/%3E%3C/svg%3E" alt="Sarathi" />
+    </div>
+
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23e8f0fe' rx='100'/%3E%3Ccircle cx='100' cy='80' r='40' fill='%237ba3e6'/%3E%3Ccircle cx='80' cy='72' r='6' fill='white'/%3E%3Ccircle cx='120' cy='72' r='6' fill='white'/%3E%3Crect x='85' y='120' width='30' height='8' rx='4' fill='%235b8dd9'/%3E%3Crect x='75' y='135' width='50' height='8' rx='4' fill='%235b8dd9'/%3E%3Crect x='65' y='150' width='70' height='8' rx='4' fill='%235b8dd9'/%3E%3C/svg%3E" alt="Sarathi" />
+            <div class="flex-1">
+                <div class="font-bold text-sm text-slate-800">Sarathi</div>
+                <div class="text-xs text-slate-400" id="chatStatusLabel">Connecting…</div>
+            </div>
+            <button class="text-slate-400 hover:text-slate-600" onclick="toggleChat()"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-message ai">👋 Hi! Ask me anything about your child's routine, milestones, or general guidance.</div>
+            <div class="chat-message system-note">Educational guidance only — not a medical diagnosis.</div>
+        </div>
+
+        <div class="chat-suggestions">
+            <button onclick="sendSuggestion('How is my child doing this week?')">📊 This week's summary</button>
+            <button onclick="sendSuggestion('Suggest an activity for today')">💡 Activity idea</button>
+            <button onclick="sendSuggestion('Explain what autism is')">🧩 About autism</button>
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" placeholder="Ask Sarathi…" id="chatInput" />
+            <button id="chatSendBtn" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="#top" class="nav-item active"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="javascript:void(0)" onclick="toggleChat()" class="nav-item"><i class="fas fa-robot"></i><span>Sarathi</span></a>
+        <a href="#routine" class="nav-item"><i class="fas fa-calendar-day"></i><span>Routine</span></a>
+        <a href="#growth" class="nav-item"><i class="fas fa-chart-line"></i><span>Growth</span></a>
+        <a href="javascript:void(0)" onclick="doLogout()" class="nav-item"><i class="fas fa-right-from-bracket"></i><span>Logout</span></a>
+    </nav>
+
+<script>
+const SUPABASE_URL = "https://qvuenvngwgcknawfsnxl.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2dWVudm5nd2dja25hd2ZzbnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MzI1OTksImV4cCI6MjA5ODMwODU5OX0.MZgac469tvi9Xq9gyaRbHDc9t88Ww9dN8ldZ8JvKGVI";
+
+let sbClient = null;
+let currentUser = null;
+let activeChatSessionId = null;
+
+try {
+  sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} catch (e) { console.error('Init error:', e); }
+
+function comingSoon(name) {
+  alert(name + ' isn\'t built yet — coming soon!');
+}
+
+async function doLogout() {
+  if (!sbClient) return;
+  await sbClient.auth.signOut();
+  window.location.href = '/enterportal.html';
+}
+
+async function init() {
+  if (!sbClient) return;
+  const { data: { user }, error } = await sbClient.auth.getUser();
+  if (error || !user) {
+    window.location.href = '/enterportal.html';
+    return;
+  }
+  currentUser = user;
+  document.getElementById('userAvatarInitial').textContent = (user.email || '?').charAt(0).toUpperCase();
+  document.getElementById('greetingText').textContent = 'Welcome back 👋';
+  document.getElementById('greetingSub').textContent = user.email;
+
+  await loadChildren();
+  await loadRoutine();
+  await loadMilestones();
+}
+
+async function loadChildren() {
+  const { data: children, error } = await sbClient
+    .from('children')
+    .select('id, name, age, conditions')
+    .eq('user_id', currentUser.id);
+
+  const chipsEl = document.getElementById('childChips');
+  const labelEl = document.getElementById('childNameLabel');
+  const initialEl = document.getElementById('childInitial');
+
+  if (error || !children || !children.length) {
+    chipsEl.innerHTML = '';
+    labelEl.textContent = 'No child added yet';
+    return;
+  }
+
+  const first = children[0];
+  labelEl.textContent = first.name || 'Your child';
+  initialEl.textContent = (first.name || '?').charAt(0).toUpperCase();
+
+  chipsEl.innerHTML = children.map(c => `
+    <div class="flex items-center gap-2 bg-white/60 px-4 py-2 rounded-xl shadow-sm">
+      <i class="fas fa-child text-blue-400"></i>
+      <span class="text-sm font-medium">${escapeHtml(c.name || 'Unnamed')}</span>
+      ${c.age ? `<span class="text-xs text-slate-400">${c.age} yrs</span>` : ''}
+    </div>
+  `).join('');
+}
+
+async function loadRoutine() {
+  const today = new Date().toISOString().split('T')[0];
+  const { data: routines, error } = await sbClient
+    .from('daily_routines')
+    .select('id, activity, completed, routine_date')
+    .eq('user_id', currentUser.id)
+    .eq('routine_date', today);
+
+  const listEl = document.getElementById('routineList');
+  const fractionEl = document.getElementById('routineFraction');
+  const percentEl = document.getElementById('routinePercentLabel');
+  const fillEl = document.getElementById('routineProgressFill');
+
+  if (error || !routines || !routines.length) {
+    listEl.innerHTML = '<div class="empty-note">No routine activities logged for today yet.</div>';
+    fractionEl.textContent = '0/0 completed';
+    percentEl.textContent = '0%';
+    fillEl.style.width = '0%';
+    document.getElementById('statPlanned').textContent = '0';
+    document.getElementById('statCompleted').textContent = '0';
+    document.getElementById('statRemaining').textContent = '0';
+    return;
+  }
+
+  const completedCount = routines.filter(r => r.completed).length;
+  const total = routines.length;
+  const pct = Math.round((completedCount / total) * 100);
+
+  listEl.innerHTML = routines.map(r => `
+    <div class="timeline-item">
+      <div class="timeline-dot ${r.completed ? 'checked' : ''}"></div>
+      <div class="flex-1 flex items-center justify-between">
+        <span class="text-sm ${r.completed ? 'font-medium text-slate-700' : 'text-slate-500'}">${escapeHtml(r.activity)}</span>
+        ${r.completed ? '<i class="fas fa-check text-green-400 text-xs"></i>' : ''}
+      </div>
+    </div>
+  `).join('');
+
+  fractionEl.textContent = `${completedCount}/${total} completed`;
+  percentEl.textContent = pct + '%';
+  fillEl.style.width = pct + '%';
+  document.getElementById('statPlanned').textContent = total;
+  document.getElementById('statCompleted').textContent = completedCount;
+  document.getElementById('statRemaining').textContent = total - completedCount;
+
+  // Growth Journey — only show real observation-based content, never fabricated skill percentages
+  const growthEl = document.getElementById('growthContent');
+  if (total >= 5) {
+    growthEl.innerHTML = `<div class="p-3 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-100/50">
+      <p class="text-sm text-slate-700"><span class="font-semibold text-blue-600">📈 Evidence-based note:</span> ${completedCount} of ${total} routine activities completed today.</p>
+    </div>`;
+  } else {
+    growthEl.innerHTML = '<div class="empty-note">Not enough data yet to show growth trends. Logging routine activities for a few more days will unlock this.</div>';
+  }
+}
+
+async function loadMilestones() {
+  const { data: milestones, error } = await sbClient
+    .from('milestones')
+    .select('title, achieved_at')
+    .eq('user_id', currentUser.id)
+    .order('achieved_at', { ascending: false })
+    .limit(5);
+
+  const el = document.getElementById('milestonesList');
+  if (error || !milestones || !milestones.length) {
+    el.innerHTML = '<div class="empty-note">No milestones logged yet.</div>';
+    return;
+  }
+  el.innerHTML = milestones.map(m => `
+    <div class="p-3 rounded-xl bg-slate-50/70 border border-slate-100 mb-2">
+      <p class="text-sm text-slate-700">${escapeHtml(m.title)}</p>
+      <p class="text-xs text-slate-400 mt-1">${new Date(m.achieved_at).toLocaleDateString()}</p>
+    </div>
+  `).join('');
+}
+
+// ─── SARATHI CHAT ───
+async function sendChatMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  appendChatMessage(text, 'user');
+  await callSarathi(text);
+}
+
+function sendSuggestion(text) {
+  appendChatMessage(text, 'user');
+  callSarathi(text);
+}
+
+function appendChatMessage(text, role) {
+  const messages = document.getElementById('chatMessages');
+  const el = document.createElement('div');
+  el.className = 'chat-message ' + (role === 'user' ? 'user' : 'ai');
+  el.textContent = text;
+  messages.appendChild(el);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+async function callSarathi(message) {
+  const btn = document.getElementById('chatSendBtn');
+  btn.disabled = true;
+  const thinkingEl = document.createElement('div');
+  thinkingEl.className = 'chat-message ai';
+  thinkingEl.id = 'thinkingMsg';
+  thinkingEl.textContent = 'Sarathi is thinking…';
+  document.getElementById('chatMessages').appendChild(thinkingEl);
+
+  try {
+    const { data, error } = await sbClient.functions.invoke('sarathi-chat', {
+      body: { message, sessionId: activeChatSessionId },
+    });
+    thinkingEl.remove();
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+    activeChatSessionId = data.sessionId;
+    appendChatMessage(data.reply, 'ai');
+  } catch (err) {
+    thinkingEl.remove();
+    appendChatMessage("I can't reach Sarathi's AI backend right now. (" + (err.message || 'connection issue') + ")", 'ai');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function toggleChat() {
+  document.getElementById('chatWindow').classList.toggle('open');
+  document.getElementById('chatStatusLabel').textContent = sbClient ? 'Online' : 'Offline';
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const hamburger = document.getElementById('hamburgerBtn');
+  function toggleSidebar() {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('active');
+    document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+  }
+  if (hamburger) hamburger.addEventListener('click', toggleSidebar);
+  if (overlay) overlay.addEventListener('click', toggleSidebar);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && sidebar.classList.contains('open')) toggleSidebar(); });
+
+  document.getElementById('aiAvatarFloat').addEventListener('click', toggleChat);
+  document.getElementById('chatInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChatMessage(); });
+
+  document.querySelectorAll('.menu-item').forEach(item => {
+    item.addEventListener('click', function() {
+      document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+      if (this.getAttribute('href') && this.getAttribute('href').startsWith('#')) this.classList.add('active');
+      if (window.innerWidth <= 768 && sidebar.classList.contains('open')) toggleSidebar();
+    });
+  });
+
+  document.getElementById('addChildBtn').addEventListener('click', () => comingSoon('Add Child'));
+  document.getElementById('notifBell').addEventListener('click', () => comingSoon('Notifications'));
+
+  init();
+});
+</script>
+
+</body>
+</html>

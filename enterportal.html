@@ -82,14 +82,14 @@ function debugLog(message, data = null) {
 
 try {
   debugLog('Attempting to initialize Supabase...');
-  
+
   if (typeof window.supabase === 'undefined') {
     throw new Error('Supabase library not loaded. Check your internet connection or script tag.');
   }
-  
+
   sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   debugLog('Supabase client created successfully');
-  
+
   sbClient.auth.getSession().then(({ data, error }) => {
     if (error) {
       debugLog('Session check error:', error);
@@ -99,20 +99,20 @@ try {
   }).catch(err => {
     debugLog('Session check failed:', err);
   });
-  
-} catch (e) { 
+
+} catch (e) {
   debugLog('Supabase initialization error:', e.message);
   console.error('Supabase initialization error:', e);
 }
 
 async function doLogin() {
   console.log('=== Login function called ===');
-  
+
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
   const msg = document.getElementById('msg');
   const btn = document.getElementById('submitBtn');
-  
+
   debugLog('Login attempt for email:', email);
   console.log('Email:', email);
   console.log('Password length:', password.length);
@@ -152,10 +152,10 @@ async function doLogin() {
   try {
     debugLog('Calling supabase.auth.signInWithPassword...');
     console.log('Supabase client:', supabase);
-    
-    const { data, error } = await sbClient.auth.signInWithPassword({ 
-      email, 
-      password 
+
+    const { data, error } = await sbClient.auth.signInWithPassword({
+      email,
+      password
     });
 
     debugLog('Response received:', { data, error });
@@ -170,23 +170,23 @@ async function doLogin() {
     msg.className = 'msg success';
     msg.textContent = '✅ Login successful! Redirecting...';
     msg.style.display = 'block';
-    
+
     if (data?.user) {
       localStorage.setItem('user', JSON.stringify(data.user));
       debugLog('User data stored in localStorage');
     }
 
-    setTimeout(() => { 
+    setTimeout(() => {
       debugLog('Redirecting to dashboard...');
-      window.location.href = '/dashboard.html'; 
+      window.location.href = '/dashboard.html';
     }, 1000);
 
   } catch (err) {
     debugLog('Catch block error:', err.message);
     console.error('Login error:', err);
-    
+
     let errorMessage = '❌ Something went wrong. Please try again.';
-    
+
     if (err.message.includes('Invalid login credentials')) {
       errorMessage = '❌ Invalid email or password. Please check your credentials and try again.';
     } else if (err.message.includes('Email not confirmed')) {
@@ -219,7 +219,7 @@ document.addEventListener('keydown', function(event) {
 
 async function checkExistingSession() {
   if (!sbClient) return;
-  
+
   try {
     const { data: { session }, error } = await sbClient.auth.getSession();
     if (session) {

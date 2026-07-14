@@ -1,0 +1,345 @@
+/* ============================================================
+   NEUROSARATHI V2 — animations.css
+   All Animations & Transitions
+   ============================================================ */
+
+/* ─── FLOATING AI AVATAR ────────────────────────────────────── */
+
+.ai-avatar-float {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 999;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #b8d4ff, #7ba3e6);
+    box-shadow: 0 8px 32px rgba(100, 150, 255, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 3px solid rgba(255, 255, 255, 0.7);
+    animation: floatBounce 3.5s ease-in-out infinite, glowPulse 2.8s ease-in-out infinite;
+}
+
+.ai-avatar-float:hover {
+    transform: scale(1.06) translateY(-2px);
+    box-shadow: 0 12px 40px rgba(100, 150, 255, 0.45);
+}
+
+.ai-avatar-float img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: contain;
+    background: white;
+    padding: 4px;
+}
+
+@keyframes floatBounce {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+}
+
+@keyframes glowPulse {
+    0%, 100% { box-shadow: 0 8px 32px rgba(100, 150, 255, 0.35); }
+    50% { box-shadow: 0 8px 48px rgba(100, 150, 255, 0.55), 0 0 60px rgba(100, 150, 255, 0.15); }
+}
+
+/* ─── AI GLOW RING ──────────────────────────────────────────── */
+
+.ai-glow-ring {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #b8d4ff, #7ba3e6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: glowPulse 3s ease-in-out infinite;
+    box-shadow: 0 0 40px rgba(100, 150, 255, 0.2);
+}
+
+.ai-glow-ring img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: contain;
+    background: white;
+    padding: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+/* ─── CARD HOVER ────────────────────────────────────────────── */
+
+.card-hover-lift {
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.card-hover-lift:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 60px rgba(80, 120, 200, 0.12);
+}
+
+/* ─── BUTTON RIPPLE ─────────────────────────────────────────── */
+
+.btn-ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-ripple::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: inherit;
+    transform: scale(0);
+    opacity: 0;
+    transition: transform 0.4s, opacity 0.3s;
+}
+
+.btn-ripple:active::after {
+    transform: scale(1);
+    opacity: 1;
+    transition: 0s;
+}
+
+/* ─── FADE IN ─────────────────────────────────────────────────── */
+
+.fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-delay-1 { animation-delay: 0.1s; }
+.fade-in-delay-2 { animation-delay: 0.2s; }
+.fade-in-delay-3 { animation-delay: 0.3s; }
+.fade-in-delay-4 { animation-delay: 0.4s; }
+.fade-in-delay-5 { animation-delay: 0.5s; }
+
+/* ─── SLIDE IN ───────────────────────────────────────────────── */
+
+.slide-in-left {
+    animation: slideInLeft 0.4s ease-out;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.slide-in-right {
+    animation: slideInRight 0.4s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.slide-in-up {
+    animation: slideInUp 0.4s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ─── SCALE IN ───────────────────────────────────────────────── */
+
+.scale-in {
+    animation: scaleIn 0.3s ease-out;
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ─── PROGRESS BAR ANIMATION ────────────────────────────────── */
+
+.progress-bar-animated {
+    transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ─── COUNTER ANIMATION ────────────────────────────────────── */
+
+.counter-animated {
+    transition: all 0.3s ease;
+}
+
+/* ─── SPINNER ────────────────────────────────────────────────── */
+
+.spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(91, 141, 217, 0.15);
+    border-top-color: #5b8dd9;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.spinner-sm {
+    width: 16px;
+    height: 16px;
+    border-width: 2px;
+}
+
+.spinner-lg {
+    width: 40px;
+    height: 40px;
+    border-width: 4px;
+}
+
+/* ─── PULSE ──────────────────────────────────────────────────── */
+
+.pulse {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ─── SHAKE ──────────────────────────────────────────────────── */
+
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+}
+
+/* ─── TREE GROWTH ───────────────────────────────────────────── */
+
+.tree-grow {
+    animation: treeGrow 1.5s ease-out;
+}
+
+@keyframes treeGrow {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ─── LEAF FALL ─────────────────────────────────────────────── */
+
+.leaf-fall {
+    animation: leafFall 0.6s ease-out;
+}
+
+@keyframes leafFall {
+    from {
+        transform: translateY(-20px) rotate(-20deg);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) rotate(0);
+        opacity: 1;
+    }
+}
+
+/* ─── FLOWER BLOOM ──────────────────────────────────────────── */
+
+.flower-bloom {
+    animation: flowerBloom 0.8s ease-out;
+}
+
+@keyframes flowerBloom {
+    from {
+        transform: scale(0.5) rotate(45deg);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) rotate(0);
+        opacity: 1;
+    }
+}
+
+/* ─── STAR TWINKLE ──────────────────────────────────────────── */
+
+.star-twinkle {
+    animation: starTwinkle 1.5s ease-in-out infinite;
+}
+
+@keyframes starTwinkle {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+}
+
+/* ─── SIDEBAR SLIDE ─────────────────────────────────────────── */
+
+.sidebar-slide {
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ─── NOTIFICATION POP ──────────────────────────────────────── */
+
+.notification-pop {
+    animation: notificationPop 0.4s ease-out;
+}
+
+@keyframes notificationPop {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}

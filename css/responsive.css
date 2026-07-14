@@ -1,0 +1,464 @@
+/* ============================================================
+   NEUROSARATHI V2 — responsive.css
+   Mobile-First Responsive Styles
+   ============================================================ */
+
+/* ─── BASE MOBILE (Default) ────────────────────────────────── */
+
+/* All styles are mobile-first by default */
+
+/* ─── TABLETS (768px and up) ────────────────────────────────── */
+
+@media (min-width: 768px) {
+    .container {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+
+    .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+
+    .hide-mobile {
+        display: block !important;
+    }
+
+    .show-mobile {
+        display: none !important;
+    }
+
+    .ai-avatar-float {
+        bottom: 32px;
+        right: 32px;
+        width: 80px;
+        height: 80px;
+    }
+
+    .ai-avatar-float img {
+        width: 66px;
+        height: 66px;
+    }
+
+    .ai-glow-ring {
+        width: 140px;
+        height: 140px;
+    }
+
+    .ai-glow-ring img {
+        width: 116px;
+        height: 116px;
+    }
+}
+
+/* ─── DESKTOP (1024px and up) ──────────────────────────────── */
+
+@media (min-width: 1024px) {
+    .container {
+        max-width: 960px;
+        padding: 0 32px;
+    }
+
+    .grid-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .grid-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .grid-5 {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 24px;
+    }
+
+    /* Desktop sidebar visible */
+    .sidebar-desktop {
+        transform: translateX(0) !important;
+        width: 260px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 100;
+    }
+
+    .sidebar-overlay {
+        display: none !important;
+    }
+
+    .main-content {
+        margin-left: 260px;
+        padding: 24px 32px 32px 32px;
+        min-height: 100vh;
+    }
+
+    .bottom-nav {
+        display: none !important;
+    }
+
+    .mobile-hamburger {
+        display: none !important;
+    }
+
+    .ai-avatar-float {
+        bottom: 40px;
+        right: 40px;
+    }
+}
+
+/* ─── LARGE DESKTOP (1440px and up) ────────────────────────── */
+
+@media (min-width: 1440px) {
+    .container {
+        max-width: 1200px;
+    }
+
+    .grid-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .grid-5 {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    .grid-6 {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 24px;
+    }
+}
+
+/* ─── MOBILE (up to 767px) ──────────────────────────────────── */
+
+@media (max-width: 767px) {
+    .hide-mobile {
+        display: none !important;
+    }
+
+    .show-mobile {
+        display: block !important;
+    }
+
+    .container {
+        padding: 0 16px;
+    }
+
+    .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    /* Mobile bottom navigation */
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-top: 1px solid rgba(203, 213, 225, 0.2);
+        display: flex;
+        justify-content: space-around;
+        padding: 6px 0 10px 0;
+        z-index: 100;
+    }
+
+    .bottom-nav .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        font-size: 10px;
+        color: #94a3b8;
+        transition: all 0.2s;
+        cursor: pointer;
+        padding: 4px 12px;
+        border-radius: 12px;
+        border: none;
+        background: transparent;
+        font-family: inherit;
+    }
+
+    .bottom-nav .nav-item i {
+        font-size: 20px;
+    }
+
+    .bottom-nav .nav-item.active {
+        color: #5b8dd9;
+        background: rgba(91, 141, 217, 0.08);
+    }
+
+    .bottom-nav .nav-item:hover {
+        color: #5b8dd9;
+    }
+
+    /* Mobile sidebar overlay */
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 999;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .sidebar-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    /* Mobile sidebar */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 280px;
+        height: 100vh;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-right: 1px solid rgba(203, 213, 225, 0.1);
+        z-index: 1000;
+        transform: translateX(-100%);
+        transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        overflow-y: auto;
+        padding: 20px 0 32px 0;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    /* Mobile AI avatar position */
+    .ai-avatar-float {
+        bottom: 80px;
+        right: 16px;
+        width: 60px;
+        height: 60px;
+    }
+
+    .ai-avatar-float img {
+        width: 50px;
+        height: 50px;
+    }
+
+    /* Mobile main content padding */
+    .main-content {
+        padding: 16px 16px 90px 16px;
+    }
+
+    /* Mobile modal adjustments */
+    .modal-content {
+        padding: 24px 20px;
+        border-radius: 24px;
+        max-height: 85vh;
+    }
+
+    .modal-content.modal-sm,
+    .modal-content.modal-lg,
+    .modal-content.modal-xl {
+        max-width: 100%;
+        margin: 12px;
+    }
+
+    /* Mobile toast adjustments */
+    .toast-container {
+        top: 16px;
+        right: 16px;
+        left: 16px;
+        max-width: 100%;
+    }
+
+    /* Mobile card adjustments */
+    .card-body {
+        padding: 18px;
+    }
+
+    .card-title {
+        font-size: 16px;
+    }
+
+    .card-text {
+        font-size: 13px;
+    }
+
+    /* Mobile form adjustments */
+    .form-control {
+        font-size: 16px; /* Prevent iOS zoom */
+        padding: 14px 16px;
+    }
+
+    /* Mobile button adjustments */
+    .btn {
+        padding: 12px 20px;
+        font-size: 14px;
+        border-radius: 14px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-sm {
+        padding: 8px 16px;
+        font-size: 12px;
+        width: auto;
+    }
+
+    .btn-lg {
+        padding: 16px 24px;
+        font-size: 16px;
+    }
+
+    /* Mobile hero adjustments */
+    .hero-section {
+        padding: 20px !important;
+    }
+
+    .hero-title {
+        font-size: 22px !important;
+    }
+
+    /* Mobile feed adjustments */
+    .feed-card {
+        padding: 16px !important;
+    }
+
+    /* Mobile quick actions */
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .quick-actions .action-btn {
+        padding: 12px 8px;
+        font-size: 12px;
+    }
+
+    .quick-actions .action-btn i {
+        font-size: 20px;
+    }
+
+    /* Mobile growth chart */
+    .growth-chart {
+        padding: 16px !important;
+    }
+
+    /* Mobile professionals */
+    .professional-card {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+
+    .professional-actions {
+        width: 100%;
+        justify-content: flex-start !important;
+        flex-wrap: wrap;
+    }
+
+    /* Mobile chat window */
+    .chat-window {
+        bottom: 140px !important;
+        right: 12px !important;
+        left: 12px !important;
+        width: auto !important;
+        max-height: 60vh !important;
+        border-radius: 20px !important;
+    }
+
+    /* Mobile document grid */
+    .document-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ─── PRINT STYLES ──────────────────────────────────────────── */
+
+@media print {
+    .sidebar,
+    .bottom-nav,
+    .ai-avatar-float,
+    .chat-window {
+        display: none !important;
+    }
+
+    .main-content {
+        margin: 0 !important;
+        padding: 20px !important;
+    }
+
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #e2e8f0 !important;
+        break-inside: avoid;
+    }
+
+    .btn {
+        background: #f1f5f9 !important;
+        color: #0b1a33 !important;
+        box-shadow: none !important;
+    }
+}
+
+/* ─── ACCESSIBILITY ─────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    /* We intentionally keep light theme only */
+    /* No dark mode */
+}
+
+/* ─── HIGH CONTRAST ─────────────────────────────────────────── */
+
+@media (prefers-contrast: high) {
+    .card {
+        border: 2px solid #0b1a33 !important;
+        background: white !important;
+        backdrop-filter: none !important;
+    }
+
+    .btn {
+        border: 2px solid currentColor !important;
+    }
+}
+
+/* ─── LARGE TEXT ────────────────────────────────────────────── */
+
+@media (min-width: 1200px) and (min-resolution: 1.5dppx) {
+    body {
+        font-size: 18px;
+    }
+
+    .card-title {
+        font-size: 22px;
+    }
+}

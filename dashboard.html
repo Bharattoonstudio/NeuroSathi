@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <meta name="theme-color" content="#5b8dd9" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    
+    <title>NeuroSarathi — Parent Dashboard</title>
+    
+    <!-- ===== CSS ===== -->
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <link rel="stylesheet" href="css/activities-professionals.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    
+    <!-- ===== FONTS & ICONS ===== -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    
+    <!-- ===== SUPABASE ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- ═══ SIDEBAR OVERLAY (Mobile) ═══ -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <aside class="sidebar sidebar-desktop" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="logo-icon">NS</div>
+                <div>
+                    <div class="logo-text">NeuroSarathi</div>
+                    <div class="logo-tagline">Every Child Can Shine ✨</div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-page="home">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="child.html" class="nav-item">
+                <i class="fas fa-child"></i>
+                <span>My Child</span>
+            </a>
+            <a href="#" class="nav-item" data-page="sarathi">
+                <i class="fas fa-robot"></i>
+                <span>AI Sarathi</span>
+            </a>
+            <a href="#" class="nav-item" data-page="activities">
+                <i class="fas fa-puzzle-piece"></i>
+                <span>Activities</span>
+            </a>
+            <a href="#" class="nav-item" data-page="learning">
+                <i class="fas fa-book-open"></i>
+                <span>Learning Centre</span>
+            </a>
+            <a href="#" class="nav-item" data-page="growth">
+                <i class="fas fa-chart-line"></i>
+                <span>Growth Journey</span>
+            </a>
+            <a href="#" class="nav-item" data-page="school">
+                <i class="fas fa-school"></i>
+                <span>School Support</span>
+            </a>
+            <a href="#" class="nav-item" data-page="documents">
+                <i class="fas fa-file-alt"></i>
+                <span>Documents</span>
+            </a>
+            <a href="#" class="nav-item" data-page="professionals">
+                <i class="fas fa-globe-asia"></i>
+                <span>Find Professionals</span>
+            </a>
+            <a href="#" class="nav-item" data-page="schemes">
+                <i class="fas fa-building-columns"></i>
+                <span>Government Schemes</span>
+            </a>
+            <a href="#" class="nav-item" data-page="community">
+                <i class="fas fa-users"></i>
+                <span>Community</span>
+            </a>
+            <a href="#" class="nav-item" data-page="subscription">
+                <i class="fas fa-credit-card"></i>
+                <span>Subscription</span>
+            </a>
+            <a href="#" class="nav-item" data-page="settings">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="#" class="nav-item logout" id="logoutBtn">
+                <i class="fas fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div class="main-content" id="mainContent">
+
+        <!-- ═══ TOP BAR ═══ -->
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <button class="hamburger-btn mobile-hamburger" id="hamburgerBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="child-selector" id="childSelector">
+                    <div class="child-selector-avatar" id="childAvatar">
+                        <span>?</span>
+                    </div>
+                    <div class="child-selector-info">
+                        <span class="child-selector-name" id="childName">Select Child</span>
+                        <span class="child-selector-age" id="childAge">—</span>
+                    </div>
+                    <i class="fas fa-chevron-down child-selector-arrow"></i>
+                </div>
+            </div>
+
+            <div class="top-bar-center" id="searchBar">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" id="globalSearch" placeholder="Search activities, articles, professionals..." />
+                    <button class="search-clear" id="searchClear" style="display:none;">×</button>
+                </div>
+            </div>
+
+            <div class="top-bar-right">
+                <button class="notification-bell" id="notificationBell">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge">0</span>
+                </button>
+                <div class="profile-avatar" id="profileAvatar">
+                    <span>?</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- ═══ PAGE CONTAINER ═══ -->
+        <div class="page-container" id="pageContainer">
+
+            <!-- ═══ HOME PAGE (Dashboard) ═══ -->
+            <div class="page active" id="page-home">
+
+                <!-- ====== SECTION 1: APP HERO (Apple-style) ====== -->
+                <section class="hero-app" id="heroApp">
+                    <div class="hero-animated-bg">
+                        <div class="floating-circle circle-1"></div>
+                        <div class="floating-circle circle-2"></div>
+                        <div class="floating-circle circle-3"></div>
+                        <div class="floating-circle circle-4"></div>
+                    </div>
+                    <div class="hero-app-content">
+                        <div class="hero-app-text">
+                            <div class="hero-app-greeting" id="heroGreeting">Loading your dashboard...</div>
+                            <div class="hero-app-subtitle" id="heroSubtitle">Setting things up for you.</div>
+                            <div class="hero-app-focus">
+                                <span class="focus-label">Communication Focus</span>
+                                <span class="focus-stars">⭐⭐⭐⭐⭐</span>
+                                <span class="focus-count" id="heroActivitiesCount">0 Activities Ready</span>
+                            </div>
+                            <div class="hero-app-actions">
+                                <button class="btn btn-primary hero-btn" id="heroContinueBtn">
+                                    <i class="fas fa-arrow-right"></i>
+                                    Continue Journey
+                                </button>
+                                <button class="btn btn-secondary hero-btn" id="heroAskBtn">
+                                    <i class="fas fa-robot"></i>
+                                    Ask Sarathi
+                                </button>
+                                <button class="btn btn-secondary hero-btn" id="heroRoutineBtn">
+                                    <i class="fas fa-calendar-day"></i>
+                                    Today's Routine
+                                </button>
+                            </div>
+                        </div>
+                        <div class="hero-app-visual">
+                            <div class="hero-illustration">
+                                <span class="hero-emoji-large">👩‍👦</span>
+                                <div class="hero-ai-orb">
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23e8f0fe' rx='100'/%3E%3Ccircle cx='100' cy='80' r='40' fill='%237ba3e6'/%3E%3Ccircle cx='80' cy='72' r='6' fill='white'/%3E%3Ccircle cx='120' cy='72' r='6' fill='white'/%3E%3Crect x='85' y='120' width='30' height='8' rx='4' fill='%235b8dd9'/%3E%3Crect x='75' y='135' width='50' height='8' rx='4' fill='%235b8dd9'/%3E%3Crect x='65' y='150' width='70' height='8' rx='4' fill='%235b8dd9'/%3E%3C/svg%3E" alt="AI Sarathi" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ====== SECTION 2: TODAY'S FIRST STEP ====== -->
+                <section class="first-step-card card-premium" id="firstStepCard">
+                    <div class="first-step-content">
+                        <div class="first-step-icon">🎯</div>
+                        <div class="first-step-text">
+                            <div class="first-step-title" id="firstStepTitle">Today's First Step</div>
+                            <div class="first-step-description" id="firstStepDesc">Add your child's first observation. It only takes one minute.</div>
+                        </div>
+                        <button class="btn btn-primary btn-sm" id="firstStepAction">Add Observation</button>
+                    </div>
+                </section>
+
+                <!-- ====== SECTION 3: AI SARATHI CARD ====== -->
+                <section class="ai-sarathi-card card-premium" id="aiSarathiCard">
+                    <div class="ai-sarathi-content">
+                        <div class="ai-sarathi-avatar">
+                            <div class="ai-glow-ring ai-glow-small">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23e8f0fe' rx='100'/%3E%3Ccircle cx='100' cy='80' r='40' fill='%237ba3e6'/%3E%3Ccircle cx='80' cy='72' r='6' fill='white'/%3E%3Ccircle cx='120' cy='72' r='6' fill='white'/%3E%3Crect x='85' y='120' width='30' height='8' rx='4' fill='%235b8dd9'/%3E%3Crect x='75' y='135' width='50' height='8' rx='4' fill='%235b8dd9'/%3E%3Crect x='65' y='150' width='70' height='8' rx='4' fill='%235b8dd9'/%3E%3C/svg%3E" alt="AI Sarathi" />
+                            </div>
+                        </div>
+                        <div class="ai-sarathi-text">
+                            <div class="ai-sarathi-greeting" id="aiGreeting">Hello! I'm AI Sarathi 🤖</div>
+                            <div class="ai-sarathi-message" id="aiMessage">Loading...</div>
+                            <div class="ai-sarathi-actions">
+                                <button class="btn btn-primary btn-sm" id="aiTodayPlan">
+                                    <i class="fas fa-calendar-day"></i>
+                                    Today's Plan
+                                </button>
+                                <button class="btn btn-secondary btn-sm" id="aiAskMe">
+                                    <i class="fas fa-comment"></i>
+                                    Ask Me
+                                </button>
+                                <button class="btn btn-secondary btn-sm" id="aiActivityIdeas">
+                                    <i class="fas fa-lightbulb"></i>
+                                    Activity Ideas
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ====== SECTION 4: DAILY LEARNING JOURNEY (Duolingo-style) ====== -->
+                <section class="daily-journey card-premium" id="dailyJourney">
+                    <div class="section-header">
+                        <h3 class="section-title">Today's Learning Journey</h3>
+                        <span class="section-progress" id="journeyProgress">0/3</span>
+                    </div>
+                    <div class="journey-steps" id="journeySteps">
+                        <div class="empty-state" style="padding:16px;">
+                            <span class="empty-state-icon">🗺️</span>
+                            <p>Your learning journey will appear here once activities are available.</p>
+                        </div>
+                    </div>
+                    <div class="journey-celebrate" id="journeyCelebrate" style="display:none;">
+                        <span class="celebrate-emoji">🎉</span>
+                        <span class="celebrate-text">All done! Great job today!</span>
+                    </div>
+                </section>
+
+                <!-- ====== SECTION 5: FACEBOOK FEED ====== -->
+                <section class="feed-section" id="feedSection">
+                    <div class="section-header">
+                        <h3 class="section-title">Your Feed</h3>
+                        <button class="feed-refresh" id="feedRefresh">
+                            <i class="fas fa-rotate"></i>
+                        </button>
+                    </div>
+                    <div class="feed-container" id="feedContainer">
+                        <!-- Feed cards dynamically loaded -->
+                    </div>
+                    <div class="feed-loader" id="feedLoader">
+                        <div class="spinner"></div>
+                        <span>Loading more...</span>
+                    </div>
+                </section>
+
+                <!-- ====== SECTION 6: CONTINUE LEARNING ====== -->
+                <section class="learning-section" id="learningSection">
+                    <div class="section-header">
+                        <h3 class="section-title">Continue Learning</h3>
+                        <button class="section-view-all" id="learningViewAll">View All</button>
+                    </div>
+                    <div class="learning-horizontal" id="learningHorizontal">
+                        <!-- Dynamically loaded -->
+                    </div>
+                </section>
+
+                <!-- ====== SECTION 7: GAMIFICATION ====== -->
+                <section class="gamification-section card-premium" id="gamificationSection">
+                    <div class="gamification-header">
+                        <h3 class="section-title">🏆 Your Progress</h3>
+                        <span class="gamification-xp" id="gamificationXP">0 XP</span>
+                    </div>
+                    <div class="gamification-badges" id="gamificationBadges">
+                        <!-- Dynamically rendered by ui/render.js -->
+                    </div>
+                    <div class="gamification-stats">
+                        <div class="gamification-stat">
+                            <span class="stat-value" id="gamificationStreak">0</span>
+                            <span class="stat-label">Day Streak</span>
+                        </div>
+                        <div class="gamification-stat">
+                            <span class="stat-value" id="gamificationActivities">0</span>
+                            <span class="stat-label">Activities</span>
+                        </div>
+                        <div class="gamification-stat">
+                            <span class="stat-value" id="gamificationObservations">0</span>
+                            <span class="stat-label">Observations</span>
+                        </div>
+                        <div class="gamification-stat">
+                            <span class="stat-value" id="gamificationArticles">0</span>
+                            <span class="stat-label">Articles Read</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ====== SECTION 8: FAMILY TREE ====== -->
+                <section class="family-tree-section card-premium" id="familyTreeSection">
+                    <div class="section-header">
+                        <h3 class="section-title">🌳 Family Tree</h3>
+                        <span class="section-subtitle" id="treeProgress">Plant your first seed!</span>
+                    </div>
+                    <div class="family-tree-container" id="familyTreeContainer">
+                        <div class="tree-root">🌟</div>
+                        <div class="tree-branches" id="treeBranches">
+                            <div class="tree-branch">
+                                <span class="tree-leaf empty">🌱</span>
+                                <span class="tree-leaf empty">🌱</span>
+                                <span class="tree-leaf empty">🌱</span>
+                            </div>
+                            <div class="tree-branch">
+                                <span class="tree-flower empty">🌱</span>
+                                <span class="tree-flower empty">🌱</span>
+                            </div>
+                            <div class="tree-branch">
+                                <span class="tree-star empty">🌱</span>
+                            </div>
+                        </div>
+                        <div class="tree-stats" id="treeStats">
+                            <span>🌿 0 Activities</span>
+                            <span>🌸 0 Milestones</span>
+                            <span>⭐ 0 Courses</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ====== SECTION 9: TODAY'S ROUTINE ====== -->
+                <section class="routine-section card-premium" id="routineSection">
+                    <div class="section-header">
+                        <h3 class="section-title">Today's Routine</h3>
+                        <span class="section-progress" id="routineProgress">0/0</span>
+                    </div>
+                    <div class="routine-timeline" id="routineTimeline">
+                        <div class="empty-state" style="padding:16px;">
+                            <span class="empty-state-icon">📋</span>
+                            <p>No routines set up yet.</p>
+                            <button class="btn btn-primary btn-sm" onclick="NeuroSarathi.Routines.createDefault()" style="margin-top:8px;">
+                                Create Default Routine
+                            </button>
+                        </div>
+                    </div>
+                    <div class="routine-progress-bar">
+                        <div class="routine-progress-fill" style="width:0%"></div>
+                    </div>
+                </section>
+
+                <!-- ====== SECTION 10: PARENT JOURNAL ====== -->
+                <section class="journal-section card-premium" id="journalSection">
+                    <div class="section-header">
+                        <h3 class="section-title">📖 Parent Journal</h3>
+                        <button class="section-view-all" id="journalAddBtn">
+                            <i class="fas fa-plus"></i>
+                            Add Entry
+                        </button>
+                    </div>
+                    <div class="journal-entries" id="journalEntries">
+                        <div class="journal-empty">
+                            <span class="journal-empty-icon">📝</span>
+                            <p class="journal-empty-text">Start your journal. Record daily wins, challenges, and memories.</p>
+                            <button class="btn btn-secondary btn-sm" id="journalEmptyAction">Write First Entry</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ====== SECTION 11: TIMELINE ====== -->
+                <section class="timeline-section card-premium" id="timelineSection">
+                    <div class="section-header">
+                        <h3 class="section-title">📜 Journey Timeline</h3>
+                    </div>
+                    <div class="timeline-container" id="timelineContainer">
+                        <div class="empty-state" style="padding:16px;">
+                            <span class="empty-state-icon">📜</span>
+                            <p>Your child's journey will appear here.</p>
+                            <p style="font-size:12px;color:#94a3b8;">Complete activities and add observations to build the timeline.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ====== SECTION 12: CALENDAR PREVIEW ====== -->
+                <section class="calendar-section card-premium" id="calendarSection">
+                    <div class="section-header">
+                        <h3 class="section-title">📅 Calendar</h3>
+                        <button class="section-view-all" id="calendarViewAll">View All</button>
+                    </div>
+                    <div class="calendar-preview" id="calendarPreview">
+                        <div class="calendar-weekdays">
+                            <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+                        </div>
+                        <div class="calendar-days" id="calendarDays">
+                            <!-- Dynamically generated -->
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- ═══ OTHER PAGES ═══ -->
+            <div class="page" id="page-sarathi">
+                <div class="page-placeholder">
+                    <span class="placeholder-icon">🤖</span>
+                    <h2>AI Sarathi</h2>
+                    <p>Full-page AI chat is on the roadmap — use the chat bubble in the corner for now.</p>
+                </div>
+            </div>
+
+            <div class="page" id="page-activities">
+                <div class="page-placeholder">
+                    <span class="placeholder-icon">🎯</span>
+                    <h2>Activities</h2>
+                    <p>The activity library is being built next (Phase 5).</p>
+                </div>
+            </div>
+
+            <div class="page" id="page-learning">
+                <div class="page-placeholder">
+                    <span class="placeholder-icon">📚</span>
+                    <h2>Learning Centre</h2>
+                    <p>Learning resources are being built next (Phase 5).</p>
+                </div>
+            </div>
+
+            <div class="page" id="page-growth">
+                <div class="page-placeholder">
+                    <span class="placeholder-icon">📈</span>
+                    <h2>Growth Journey</h2>
+                    <p>Growth tracking is being built next (Phase 3).</p>
+                </div>
+            </div>
+
+            <div class="page" id="page-school">
+                <div class="page-placeholder">
+                    <span class="placeholder-icon">🏫</span>
+                    <h2>School Support</h2>
+                    <p>School resources are being built next (Phase 5).</p>
+                </div>
+            </div>
+
+            <div class="page" id="page-documents">
+                <div class="page-placeholder">
+                    <span class="placeholder-icon">📄</span>
+                    <h2>Documents</h2>
+                    <p>Document manager is being built next (Phase 5).</p>
+                </div>
+            </div>
+
+            <div class="page" id="page-professionals">
+                <div class="page-placeholder">
+                    <span class="placeholder-icon">🌍</span>
+                    <h2>Find Professionals</h2>
+                    <p>Professional directory is being built next (Phase 5).</p>
+                </div>
+            </div>
+
+            <div class="page" id="page-schemes">
+                <div class="page-placeholder">
+                    <span class="placeholder-icon">🏛️</span>
+                    <h2>Government Schemes</h2>
+                    <p>Schemes information is being built next (Phase 5).</p>
+                </div>
+            </div>
+
+            <div class="page" id="page-community">
+                <div class="page-placeholder">
+                    <span class="placeholder-icon">👨‍👩‍👧‍👦</span>
+                    <h2>Community</h2>
+                    <p>Community feed is being built next (Phase 5).</p>
+                </div>
+            </div>
+
+            <div class="page" id="page-subscription">
+                <div class="page-placeholder">
+                    <span class="placeholder-icon">💳</span>
+                    <h2>Subscription</h2>
+                    <p>Subscription plans are being built next (Phase 5).</p>
+                </div>
+            </div>
+
+            <div class="page" id="page-settings">
+                <div class="page-placeholder">
+                    <span class="placeholder-icon">⚙️</span>
+                    <h2>Settings</h2>
+                    <p>Settings panel is being built next (Phase 5).</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ═══ FOOTER ═══ -->
+        <footer class="dashboard-footer">
+            <p class="footer-quote">✨ "Every small step is a victory." ✨</p>
+            <p class="footer-copy">NeuroSarathi — Every Child Can Shine</p>
+        </footer>
+
+    </div>
+
+    <!-- ═══ FLOATING AI AVATAR ═══ -->
+    <div class="ai-avatar-float" id="aiAvatarFloat" title="Chat with AI Sarathi">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23e8f0fe' rx='100'/%3E%3Ccircle cx='100' cy='80' r='40' fill='%237ba3e6'/%3E%3Ccircle cx='80' cy='72' r='6' fill='white'/%3E%3Ccircle cx='120' cy='72' r='6' fill='white'/%3E%3Crect x='85' y='120' width='30' height='8' rx='4' fill='%235b8dd9'/%3E%3Crect x='75' y='135' width='50' height='8' rx='4' fill='%235b8dd9'/%3E%3Crect x='65' y='150' width='70' height='8' rx='4' fill='%235b8dd9'/%3E%3C/svg%3E" alt="AI Sarathi" />
+    </div>
+
+    <!-- ═══ CHAT WINDOW ═══ -->
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23e8f0fe' rx='100'/%3E%3Ccircle cx='100' cy='80' r='40' fill='%237ba3e6'/%3E%3Ccircle cx='80' cy='72' r='6' fill='white'/%3E%3Ccircle cx='120' cy='72' r='6' fill='white'/%3E%3Crect x='85' y='120' width='30' height='8' rx='4' fill='%235b8dd9'/%3E%3Crect x='75' y='135' width='50' height='8' rx='4' fill='%235b8dd9'/%3E%3Crect x='65' y='150' width='70' height='8' rx='4' fill='%235b8dd9'/%3E%3C/svg%3E" alt="AI Sarathi" />
+            <div class="chat-header-info">
+                <div class="chat-header-name">AI Sarathi</div>
+                <div class="chat-header-status">
+                    <span class="status-dot"></span>
+                    Online
+                </div>
+            </div>
+            <button class="chat-close" id="chatClose">×</button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-message ai">👋 Hi! I'm AI Sarathi. How can I help you today?</div>
+        </div>
+
+        <div class="chat-suggestions" id="chatSuggestions">
+            <button class="chat-chip" data-prompt="Create today's routine">📅 Create Routine</button>
+            <button class="chat-chip" data-prompt="Suggest learning activities">💡 Activities</button>
+            <button class="chat-chip" data-prompt="Explain autism in simple terms">🧩 Autism</button>
+            <button class="chat-chip" data-prompt="Explain ADHD in simple terms">⚡ ADHD</button>
+            <button class="chat-chip" data-prompt="School support strategies">🏫 School</button>
+            <button class="chat-chip" data-prompt="Government schemes for children">🏛️ Govt Schemes</button>
+        </div>
+
+        <div class="chat-input">
+            <input type="text" class="chat-input-field" id="chatInput" placeholder="Ask me anything..." />
+            <button class="chat-send" id="chatSend">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══ CHILD SELECTOR DROPDOWN ═══ -->
+    <div class="child-dropdown" id="childDropdown">
+        <div class="child-dropdown-list" id="childDropdownList"></div>
+        <button class="child-dropdown-add" id="childAddBtn">
+            <i class="fas fa-plus"></i>
+            Add Child
+        </button>
+    </div>
+
+    <!-- ═══ NOTIFICATION PANEL ═══ -->
+    <div class="notification-panel" id="notificationPanel">
+        <div class="notification-header">
+            <h3>🔔 Notifications</h3>
+            <button class="notification-mark-all" id="markAllRead">Mark all read</button>
+            <button class="notification-close" id="notificationClose">×</button>
+        </div>
+        <div class="notification-list" id="notificationList"></div>
+    </div>
+
+    <!-- ═══ BOTTOM NAV (Mobile) ═══ -->
+    <nav class="bottom-nav" id="bottomNav">
+        <button class="nav-item active" data-page="home">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </button>
+        <button class="nav-item" data-page="sarathi">
+            <i class="fas fa-robot"></i>
+            <span>Sarathi</span>
+        </button>
+        <button class="nav-item" data-page="activities">
+            <i class="fas fa-puzzle-piece"></i>
+            <span>Activities</span>
+        </button>
+        <button class="nav-item" data-page="learning">
+            <i class="fas fa-book-open"></i>
+            <span>Learn</span>
+        </button>
+        <button class="nav-item" onclick="window.location.href='child.html'">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </button>
+    </nav>
+
+    <!-- ═══ JAVASCRIPT ═══ -->
+    <!-- Order matters: common.js must load first (defines window.supabase client
+         and shared utilities). neuro-sarathi.js registers the DOMContentLoaded
+         init hook but doesn't run anything until then, so everything else can
+         load in any order after common.js — kept grouped by concern below. -->
+    <script src="js/common.js"></script>
+    <script src="js/neuro-sarathi.js"></script>
+
+    <script src="js/core/config.js"></script>
+    <script src="js/core/state.js"></script>
+    <script src="js/core/auth.js"></script>
+    <script src="js/core/api.js"></script>
+
+    <script src="js/ui/toasts.js"></script>
+    <script src="js/ui/skeleton.js"></script>
+    <script src="js/ui/modals.js"></script>
+    <script src="js/ui/render.js"></script>
+
+    <script src="js/modules/children.js"></script>
+    <script src="js/modules/feed.js"></script>
+    <script src="js/modules/routines.js"></script>
+    <script src="js/modules/journal.js"></script>
+    <script src="js/modules/observations.js"></script>
+    <script src="js/modules/chat.js"></script>
+    <script src="js/modules/notifications.js"></script>
+    <script src="js/modules/search.js"></script>
+    <script src="js/modules/dashboard.js"></script>
+
+</body>
+</html>

@@ -32,6 +32,10 @@ h1{font-family:'Fraunces',serif;font-weight:500;font-size:1.8rem;margin-bottom:8
 p.sub{color:var(--ink-soft);margin-bottom:24px;font-size:.95rem}
 input{width:100%;padding:13px 16px;border-radius:14px;border:1px solid var(--border);margin-bottom:14px;font-family:inherit;font-size:.95rem;background:var(--background);color:var(--ink)}
 input:focus{outline:none;border-color:var(--terracotta)}
+.consent-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:18px;}
+.consent-row input[type="checkbox"]{width:auto;margin:2px 0 0 0;flex-shrink:0;accent-color:var(--terracotta);}
+.consent-row label{font-size:.85rem;color:var(--ink-soft);line-height:1.45;}
+.consent-row a{color:var(--terracotta);font-weight:600;text-decoration:none}
 .btn-primary{width:100%;background:var(--primary);color:var(--primary-foreground);border:none;padding:14px;border-radius:999px;font-weight:600;font-size:1rem;cursor:pointer;transition:transform .2s;box-shadow:var(--shadow-lift)}
 .btn-primary:hover{transform:scale(1.01)}
 .btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
@@ -52,9 +56,14 @@ input:focus{outline:none;border-color:var(--terracotta)}
     <input type="email" id="email" placeholder="Email address">
     <input type="password" id="password" placeholder="Password (min 6 characters)">
     <input type="password" id="confirmPassword" placeholder="Confirm password">
+
+    <div class="consent-row">
+      <input type="checkbox" id="agreeTerms">
+      <label for="agreeTerms">I have read and agree to NeuroSarathi's <a href="/terms.html" target="_blank" rel="noopener">Terms & Conditions</a> and <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>. I understand this platform is educational only, not medical advice, and I use it at my own discretion.</label>
+    </div>
+
     <button class="btn-primary" id="submitBtn" onclick="doSignup()">Create Account</button>
     <div class="msg" id="msg"></div>
-    <!-- FIX: was /login.html — that file was renamed to enterportal.html and never updated here -->
     <div class="switch">Already have an account? <a href="/enterportal.html">Log in</a></div>
     <div class="back"><a href="/parents.html">← Back to NeuroSarathi</a></div>
   </div>
@@ -75,6 +84,7 @@ async function doSignup() {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
   const confirmPassword = document.getElementById('confirmPassword').value;
+  const agreeTerms = document.getElementById('agreeTerms').checked;
   const msg = document.getElementById('msg');
   const btn = document.getElementById('submitBtn');
 
@@ -112,6 +122,12 @@ async function doSignup() {
     return;
   }
 
+  if (!agreeTerms) {
+    msg.className = 'msg error';
+    msg.textContent = '⚠️ Please agree to the Terms & Conditions and Privacy Policy to continue.';
+    return;
+  }
+
   btn.disabled = true;
   btn.textContent = '⏳ Creating account…';
 
@@ -120,8 +136,11 @@ async function doSignup() {
       email,
       password,
       options: {
-        // FIX: was /login.html
-        emailRedirectTo: window.location.origin + '/enterportal.html'
+        emailRedirectTo: window.location.origin + '/enterportal.html',
+        data: {
+          terms_accepted: true,
+          terms_accepted_at: new Date().toISOString()
+        }
       }
     });
 
@@ -139,7 +158,6 @@ async function doSignup() {
     msg.textContent = '✅ Account created! Please check your email for verification. Redirecting...';
 
     setTimeout(() => {
-      // FIX: was /login.html?verified=true
       window.location.href = '/enterportal.html?verified=true';
     }, 3000);
 

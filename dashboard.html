@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — NeuroSarathi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --background: oklch(0.983 0.012 85);
+    --ink: oklch(0.22 0.035 265);
+    --ink-soft: oklch(0.38 0.028 260);
+    --card: oklch(0.985 0.008 80);
+    --primary: oklch(0.5 0.1 165);
+    --primary-dark: oklch(0.4 0.1 165);
+    --primary-foreground: oklch(0.983 0.012 85);
+    --sage-soft: oklch(0.92 0.03 145);
+    --terracotta: oklch(0.62 0.13 45);
+    --gold: oklch(0.78 0.13 85);
+    --muted-foreground: oklch(0.48 0.025 260);
+    --border: oklch(0.88 0.02 70);
+    --shadow-lift: 0 2px 4px oklch(0.22 0.035 265 / 0.05), 0 24px 60px -20px oklch(0.28 0.08 265 / 0.18);
+    --shadow-soft: 0 1px 2px oklch(0.22 0.035 265 / 0.04), 0 8px 24px -12px oklch(0.28 0.08 265 / 0.12);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;font-family:'Manrope',system-ui,sans-serif;background:var(--background);color:var(--ink);
+    background-image: radial-gradient(1000px 500px at 15% 0%, oklch(0.92 0.05 55 / .4), transparent 60%), radial-gradient(800px 500px at 100% 20%, oklch(0.9 0.04 145 / .3), transparent 60%);
+    background-attachment:fixed;
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  /* Floating decorative texture, ambient not distracting */
+  .bg-blob{position:fixed;border-radius:50%;filter:blur(50px);opacity:.35;z-index:0;pointer-events:none;}
+  .bg-blob-1{width:260px;height:260px;top:-60px;right:-80px;background:var(--sage-soft);
+    animation:driftSlow 18s ease-in-out infinite;}
+  .bg-blob-2{width:200px;height:200px;bottom:10%;left:-90px;background:oklch(0.9 0.06 45 / .5);
+    animation:driftSlow 22s ease-in-out infinite reverse;}
+  @keyframes driftSlow{
+    0%,100%{transform:translate(0,0);}
+    50%{transform:translate(20px,-24px);}
+  }
+
+  .wrap{max-width:640px;margin:0 auto;padding:0 16px 90px;position:relative;z-index:1;}
+
+  /* Sticky top bar */
+  .topbar{position:sticky;top:0;z-index:900;display:flex;justify-content:space-between;align-items:center;
+    padding:16px 4px;margin-bottom:4px;backdrop-filter:blur(14px);
+    background:oklch(0.983 0.012 85 / 0.85);border-bottom:1px solid oklch(0.88 0.02 70 / .6);}
+  .topbar .brand{display:flex;align-items:center;gap:8px;font-family:'Fraunces',serif;font-weight:600;font-size:1.05rem;color:var(--primary-dark);}
+  .topbar .brand-dot{width:8px;height:8px;border-radius:50%;background:var(--terracotta);}
+  .topbar a{color:var(--muted-foreground);font-size:.8rem;text-decoration:none;font-weight:600;}
+
+  .disclaimer{background:oklch(0.93 0.05 45 / .5);border:1px solid var(--terracotta);color:oklch(0.4 0.13 45);
+    font-size:12.5px;padding:10px 14px;border-radius:14px;margin:14px 0 18px;line-height:1.4;}
+
+  /* Card entrance choreography */
+  @keyframes cardIn{
+    from{opacity:0;transform:translateY(14px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+  .story-row, .hero-cover, .card{animation:cardIn .5s cubic-bezier(.2,.7,.3,1) both;}
+  .story-row{animation-delay:.02s;}
+  .hero-cover{animation-delay:.08s;}
+  .card:nth-of-type(1){animation-delay:.14s;}
+  .card:nth-of-type(2){animation-delay:.2s;}
+  .card:nth-of-type(3){animation-delay:.26s;}
+  .card:nth-of-type(4){animation-delay:.32s;}
+  .card:nth-of-type(5){animation-delay:.38s;}
+  .card:nth-of-type(6){animation-delay:.44s;}
+
+  /* Story-ring child switcher */
+  .story-row{display:flex;gap:14px;overflow-x:auto;padding:6px 2px 18px;scrollbar-width:none;}
+  .story-row::-webkit-scrollbar{display:none;}
+  .story-item{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;cursor:pointer;}
+  .story-ring{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg, var(--border), var(--border));padding:3px;transition:transform .15s;}
+  .story-item.active .story-ring{background:linear-gradient(135deg, var(--terracotta), var(--gold), var(--primary));}
+  .story-item:active .story-ring{transform:scale(0.94);}
+  .story-avatar{width:100%;height:100%;border-radius:50%;background:var(--card);
+    display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;
+    font-weight:600;font-size:1.2rem;color:var(--primary-dark);border:2px solid var(--background);}
+  .story-item .story-label{font-size:11.5px;color:var(--ink-soft);max-width:64px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;}
+  .story-add .story-ring{background:none;border:2px dashed var(--border);}
+  .story-add .story-avatar{background:var(--background);color:var(--muted-foreground);font-size:1.5rem;border:none;}
+
+  /* Hero cover card */
+  .hero-cover{position:relative;border-radius:28px;overflow:hidden;margin-bottom:16px;
+    background:linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    box-shadow:var(--shadow-lift);padding:24px 22px;color:var(--primary-foreground);}
+  .hero-cover::before{content:'';position:absolute;inset:0;
+    background:radial-gradient(500px 260px at 100% 0%, oklch(1 0 0 / .12), transparent 60%);}
+  .hero-cover::after{content:'';position:absolute;width:180px;height:180px;border-radius:50%;
+    background:oklch(1 0 0 / .06);right:-60px;bottom:-70px;}
+  .hero-cover-inner{position:relative;display:flex;align-items:center;gap:16px;justify-content:space-between;}
+  .hero-text{flex:1;min-width:0;}
+  .hero-photo{width:84px;height:84px;border-radius:22px;flex-shrink:0;overflow:hidden;
+    border:3px solid oklch(1 0 0 / .35);box-shadow:0 6px 18px oklch(0.22 0.035 265 / .3);
+    background-size:cover;background-position:center;background-color:oklch(1 0 0 / .12);}
+  .hero-eyebrow{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;
+    opacity:.75;font-weight:700;margin-bottom:6px;}
+  .hero-greeting{font-family:'Fraunces',serif;font-weight:500;font-size:1.5rem;
+    margin:0 0 4px;line-height:1.2;}
+  .hero-wave{display:inline-block;animation:wave 2.2s ease-in-out infinite;transform-origin:70% 70%;}
+  @keyframes wave{
+    0%,60%,100%{transform:rotate(0deg);}
+    10%{transform:rotate(14deg);} 20%{transform:rotate(-8deg);}
+    30%{transform:rotate(14deg);} 40%{transform:rotate(-4deg);}
+  }
+  .hero-sub{opacity:.85;font-size:.85rem;margin:0;}
+  .hero-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+  .hero-btn{background:oklch(1 0 0 / .18);color:#fff;border:1px solid oklch(1 0 0 / .3);
+    padding:9px 16px;border-radius:999px;font-size:.8rem;font-weight:600;cursor:pointer;
+    backdrop-filter:blur(6px);transition:transform .15s;white-space:nowrap;}
+  .hero-btn:active{transform:scale(0.96);}
+  @media (max-width:400px){
+    .hero-photo{width:64px;height:64px;border-radius:16px;}
+    .hero-greeting{font-size:1.3rem;}
+  }
+
+  /* Content cards */
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+    padding:16px;margin-bottom:14px;box-shadow:var(--shadow-soft);transition:box-shadow .2s;}
+  .card-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .card-icon{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;
+    justify-content:center;font-size:16px;flex-shrink:0;background:var(--sage-soft);}
+  .card-icon.terracotta{background:oklch(0.93 0.06 45);}
+  .card-icon.gold{background:oklch(0.94 0.06 85);}
+
+  /* Facebook-style post header: avatar + name + timestamp */
+  .post-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .post-avatar{width:40px;height:40px;border-radius:50%;flex-shrink:0;overflow:hidden;
+    background:var(--primary);display:flex;align-items:center;justify-content:center;
+    color:var(--primary-foreground);font-family:'Fraunces',serif;font-weight:600;font-size:1rem;
+    background-size:cover;background-position:center;}
+  .post-meta{flex:1;min-width:0;}
+  .post-name{font-weight:700;font-size:.92rem;color:var(--ink);line-height:1.25;
+    display:flex;align-items:center;gap:5px;}
+  .post-time{font-size:.75rem;color:var(--muted-foreground);display:flex;align-items:center;gap:4px;}
+  .post-time-dot::before{content:'·';margin:0 1px;}
+  .post-badge{font-size:14px;flex-shrink:0;}
+
+  /* Composer bar */
+  .composer{background:var(--card);border:1px solid var(--border);border-radius:16px;
+    padding:12px 14px;margin-bottom:14px;box-shadow:var(--shadow-soft);
+    display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .15s;}
+  .composer:active{background:var(--background);}
+  .composer-avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;
+    background:var(--primary);color:var(--primary-foreground);display:flex;align-items:center;
+    justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:.9rem;
+    background-size:cover;background-position:center;}
+  .composer-input{flex:1;background:var(--background);border:1px solid var(--border);
+    border-radius:999px;padding:10px 16px;color:var(--muted-foreground);font-size:.88rem;}
+
+  /* Bottom action row like a Facebook post */
+  .post-actions{display:flex;border-top:1px solid var(--border);margin-top:12px;padding-top:6px;}
+  .post-action-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+    background:none;border:none;padding:9px 4px;border-radius:8px;cursor:pointer;
+    color:var(--muted-foreground);font-size:.82rem;font-weight:600;font-family:inherit;
+    transition:background .15s;}
+  .post-action-btn:active{background:var(--background);}
+  .post-action-btn.active-like{color:var(--primary);}
+
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:1.4rem;margin:0 0 4px;color:var(--ink);}
+  h2{font-family:'Fraunces',serif;font-weight:500;font-size:1.08rem;margin:0;color:var(--ink);}
+  p{color:var(--ink-soft);font-size:.92rem;line-height:1.55;}
+  label{display:block;font-size:.83rem;font-weight:600;margin:14px 0 6px;color:var(--ink);}
+  input[type=text], input[type=number], select{
+    width:100%;padding:13px 16px;border:1px solid var(--border);border-radius:14px;
+    font-family:inherit;font-size:.95rem;background:var(--background);color:var(--ink);}
+  input:focus, select:focus{outline:none;border-color:var(--terracotta);}
+  .chip-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+  .chip{border:1px solid var(--border);border-radius:999px;padding:8px 14px;
+    font-size:.85rem;cursor:pointer;background:var(--background);user-select:none;color:var(--ink);
+    transition:transform .1s;}
+  .chip:active{transform:scale(0.96);}
+  .chip.selected{background:var(--primary);color:var(--primary-foreground);border-color:var(--primary);}
+  .btn{display:inline-block;width:100%;text-align:center;background:var(--primary);
+    color:var(--primary-foreground);border:none;padding:14px;border-radius:999px;
+    font-weight:600;font-size:1rem;cursor:pointer;transition:transform .15s;
+    box-shadow:var(--shadow-soft);margin-top:18px;font-family:inherit;}
+  .btn:active{transform:scale(0.98);}
+  .btn.secondary{background:var(--background);color:var(--primary);border:1px solid var(--primary);box-shadow:none;}
+  .btn.small{width:auto;padding:10px 18px;font-size:.85rem;margin-top:0;}
+  .row{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;}
+  .row .btn{margin-top:0;}
+  .soon{opacity:0.65;}
+  .soon-tag{display:inline-block;font-size:10.5px;background:var(--sage-soft);
+    color:oklch(0.35 0.08 150);padding:3px 8px;border-radius:6px;margin-left:6px;font-weight:700;
+    letter-spacing:.02em;text-transform:uppercase;}
+  .loading{text-align:center;color:var(--ink-soft);padding:40px 0;}
+  .error{color:oklch(0.4 0.15 25);font-size:.85rem;margin-top:8px;background:oklch(0.93 0.05 25);padding:10px 14px;border-radius:10px;}
+
+  /* Empty state illustration */
+  .empty-illustration{width:96px;height:96px;border-radius:50%;margin:0 auto 16px;display:block;
+    box-shadow:var(--shadow-soft);animation:floatGentle 3.4s ease-in-out infinite;}
+  @keyframes floatGentle{
+    0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);}
+  }
+
+  /* Celebratory success feedback */
+  .success-pop{animation:popIn .4s cubic-bezier(.2,.8,.3,1.4);}
+  @keyframes popIn{
+    0%{opacity:0;transform:scale(.85);}
+    60%{transform:scale(1.03);}
+    100%{opacity:1;transform:scale(1);}
+  }
+
+  /* Milestone timeline */
+  .timeline{position:relative;padding-left:20px;margin-top:6px;}
+  .timeline::before{content:'';position:absolute;left:5px;top:4px;bottom:4px;width:2px;background:var(--border);}
+  .timeline-item{position:relative;padding-bottom:16px;animation:cardIn .35s ease both;}
+  .timeline-item:last-child{padding-bottom:0;}
+  .timeline-dot{position:absolute;left:-20px;top:3px;width:12px;height:12px;border-radius:50%;
+    background:var(--primary);border:2px solid var(--card);box-shadow:0 0 0 2px var(--primary);}
+  .timeline-tag{font-size:11.5px;font-weight:700;color:var(--primary-dark);margin-bottom:2px;
+    text-transform:uppercase;letter-spacing:.02em;}
+  .timeline-note{font-size:.9rem;color:var(--ink);margin:2px 0;}
+  .timeline-date{font-size:11.5px;color:var(--muted-foreground);}
+
+  .avatar-fab{position:fixed;bottom:20px;right:20px;width:60px;height:60px;border-radius:50%;
+    box-shadow:var(--shadow-lift);cursor:pointer;z-index:1000;
+    border:3px solid var(--card);background:var(--primary);overflow:hidden;display:none;
+    animation:fabPulse 2.4s ease-in-out infinite;}
+  .avatar-fab img{width:100%;height:100%;object-fit:cover;display:block;}
+  @keyframes fabPulse{
+    0%,100%{box-shadow:var(--shadow-lift), 0 0 0 0 oklch(0.5 0.1 165 / .35);}
+    50%{box-shadow:var(--shadow-lift), 0 0 0 8px oklch(0.5 0.1 165 / 0);}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .avatar-fab, .hero-wave, .bg-blob, .empty-illustration{animation:none;}
+    .story-row, .hero-cover, .card, .timeline-item{animation:none;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+
+</head>
+<body>
+<div class="bg-blob bg-blob-1"></div>
+<div class="bg-blob bg-blob-2"></div>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand"><span class="brand-dot"></span>NeuroSarathi</div>
+    <a href="#" id="signOutLink">Sign out</a>
+  </div>
+
+  <div class="disclaimer">
+    NeuroSarathi provides educational ideas to support your child's everyday development.
+    This is not medical, diagnostic, or therapeutic advice — always consult a qualified
+    professional for concerns about your child's health or development.
+  </div>
+
+  <div id="app"><div class="loading">Loading your dashboard…</div></div>
+</div>
+
+<div class="avatar-fab" id="avatarFab" title="Talk to Sarathi Avatar">
+  <img src="/sarathi-avatar.png" alt="Sarathi Avatar">
+</div>
+
+<script>
+const SUPABASE_URL = "https://qvuenvngwgcknawfsnxl.supabase.co";
+const SUPABASE_KEY = "sb_publishable_yxeYwwS9SIxxnavzwhGaxA_koX646U-";
+const dash2Client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SARATHI_CHAT_URL = SUPABASE_URL + "/functions/v1/sarathi-chat";
+
+const FOCUS_OPTIONS = [
+  {key:"communication", label:"Communication"},
+  {key:"routines", label:"Routines"},
+  {key:"focus", label:"Focus"},
+  {key:"social_play", label:"Social Play"},
+  {key:"big_emotions", label:"Big Emotions"},
+  {key:"school_readiness", label:"School Readiness"}
+];
+
+const app = document.getElementById("app");
+let currentUser = null;
+let currentChild = null;
+let allChildren = [];
+
+async function init(){
+  const { data: { session } } = await dash2Client.auth.getSession();
+  if(!session || !session.user){
+    window.location.href = "/enterportal.html";
+    return;
+  }
+  currentUser = session.user;
+  await loadChildren();
+}
+
+async function loadChildren(selectId){
+  app.innerHTML = '<div class="loading">Loading your dashboard…</div>';
+  const { data, error } = await dash2Client
+    .from("children")
+    .select("*")
+    .eq("parent_id", currentUser.id)
+    .is("deleted_at", null)
+    .order("created_at", { ascending: true });
+
+  if(error){
+    app.innerHTML = '<div class="card"><p class="error">Could not load your dashboard: '+error.message+'</p></div>';
+    return;
+  }
+
+  allChildren = data || [];
+
+  if(allChildren.length === 0){
+    currentChild = null;
+    renderAddChildForm();
+  } else {
+    if(selectId){
+      currentChild = allChildren.find(c=>c.id===selectId) || allChildren[0];
+    } else if(currentChild){
+      currentChild = allChildren.find(c=>c.id===currentChild.id) || allChildren[0];
+    } else {
+      currentChild = allChildren[0];
+    }
+    renderFeed(currentChild);
+  }
+  updateAvatarFab();
+}
+
+function updateAvatarFab(){
+  const fab = document.getElementById("avatarFab");
+  if(!fab) return;
+  fab.style.display = currentChild ? "block" : "none";
+}
+
+function renderAddChildForm(prefill){
+  const p = prefill || {};
+  const selected = new Set(p.focus_areas || []);
+  const isFirstEver = !p.id && allChildren.length === 0;
+  const initialFit = p.photo_fit || "cover";
+  const initialZoom = p.photo_zoom || 130;
+  const initialFocusY = (p.photo_focus_y !== undefined && p.photo_focus_y !== null) ? p.photo_focus_y : 30;
+
+  app.innerHTML = `
+    <div class="card">
+      ${isFirstEver ? '<img src="/sarathi-avatar.png" alt="Sarathi Avatar" class="empty-illustration">' : ''}
+      <h1 style="${isFirstEver ? 'text-align:center;' : ''}">${p.id ? "Edit your child's info" : "Let's add your child"}</h1>
+      <p style="${isFirstEver ? 'text-align:center;' : ''}">Just a few details so we can guide you with the right ideas each day.</p>
+
+      <label for="cPhoto">Photo (used as their banner)</label>
+      <input type="file" id="cPhoto" accept="image/*">
+      <div id="photoCropSection" style="display:none;margin-top:12px;">
+        <div id="photoPreviewBox" style="width:100%;aspect-ratio:3/1.1;border-radius:16px;overflow:hidden;
+          background:oklch(0.3 0.03 265);background-size:cover;background-position:50% 30%;
+          border:1px solid var(--border);"></div>
+
+        <label style="margin-top:12px;">How should it be shown?</label>
+        <div class="chip-grid">
+          <div class="chip crop-fit-chip ${initialFit==='cover'?'selected':''}" data-fit="cover">Zoom to face</div>
+          <div class="chip crop-fit-chip ${initialFit==='contain'?'selected':''}" data-fit="contain">Show full photo</div>
+        </div>
+
+        <div id="zoomControls" style="${initialFit==='contain' ? 'display:none;' : ''}">
+          <label for="cZoom">Zoom</label>
+          <input type="range" id="cZoom" min="100" max="220" value="${initialZoom}" style="width:100%;">
+
+          <label for="cFocusY">Vertical position</label>
+          <input type="range" id="cFocusY" min="0" max="100" value="${initialFocusY}" style="width:100%;">
+        </div>
+      </div>
+
+      <label for="cName">Child's name</label>
+      <input type="text" id="cName" value="${p.display_name ? escapeHtml(p.display_name) : ""}" placeholder="e.g. Aarav">
+
+      <label for="cAge">Age (years)</label>
+      <input type="number" id="cAge" min="0" max="18" value="${p.age !== undefined && p.age !== null ? p.age : ""}" placeholder="e.g. 4">
+
+      <label for="cGender">Gender (optional)</label>
+      <select id="cGender">
+        <option value="unknown" ${!p.biological_sex || p.biological_sex==='unknown' ? 'selected':''}>Prefer not to say</option>
+        <option value="M" ${p.biological_sex==='M' ? 'selected':''}>Male</option>
+        <option value="F" ${p.biological_sex==='F' ? 'selected':''}>Female</option>
+        <option value="I" ${p.biological_sex==='I' ? 'selected':''}>Intersex</option>
+      </select>
+
+      <label>What would you like help nurturing?</label>
+      <div class="chip-grid" id="focusGrid">
+        ${FOCUS_OPTIONS.map(o => `<div class="chip ${selected.has(o.key)?'selected':''}" data-key="${o.key}">${o.label}</div>`).join("")}
+      </div>
+
+      <div id="formError" class="error"></div>
+      <button class="btn" id="saveChildBtn">${p.id ? "Save changes" : "Add my child"}</button>
+      ${(p.id || (allChildren.length > 0 && currentChild)) ? '<button class="btn secondary" id="cancelEditBtn">Cancel</button>' : ''}
+    </div>
+  `;
+
+  document.querySelectorAll("#focusGrid .chip").forEach(chip=>{
+    chip.addEventListener("click", ()=> chip.classList.toggle("selected"));
+  });
+
+  let currentPhotoUrl = null;
+
+  function updateCropPreview(){
+    const box = document.getElementById("photoPreviewBox");
+    if(!box || !currentPhotoUrl) return;
+    const fit = document.querySelector(".crop-fit-chip.selected")?.dataset.fit || "cover";
+    if(fit === "contain"){
+      box.style.backgroundImage = `url('${currentPhotoUrl}')`;
+      box.style.backgroundSize = "contain";
+      box.style.backgroundPosition = "center";
+      box.style.backgroundColor = "oklch(0.3 0.03 265)";
+    } else {
+      const zoom = document.getElementById("cZoom").value;
+      const focusY = document.getElementById("cFocusY").value;
+      box.style.backgroundImage = `url('${currentPhotoUrl}')`;
+      box.style.backgroundSize = zoom + "%";
+      box.style.backgroundPosition = `50% ${focusY}%`;
+      box.style.backgroundColor = "transparent";
+    }
+  }
+
+  document.querySelectorAll(".crop-fit-chip").forEach(chip=>{
+    chip.addEventListener("click", ()=>{
+      document.querySelectorAll(".crop-fit-chip").forEach(c=>c.classList.remove("selected"));
+      chip.classList.add("selected");
+      document.getElementById("zoomControls").style.display = chip.dataset.fit === "contain" ? "none" : "block";
+      updateCropPreview();
+    });
+  });
+  document.getElementById("cZoom").addEventListener("input", updateCropPreview);
+  document.getElementById("cFocusY").addEventListener("input", updateCropPreview);
+
+  if(p.id && p.photo_path){
+    getChildPhotoUrl(p).then(url=>{
+      if(url){
+        currentPhotoUrl = url;
+        document.getElementById("photoCropSection").style.display = "block";
+        updateCropPreview();
+      }
+    });
+  }
+
+  document.getElementById("cPhoto").addEventListener("change", (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev)=>{
+      currentPhotoUrl = ev.target.result;
+      document.getElementById("photoCropSection").style.display = "block";
+      updateCropPreview();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById("saveChildBtn").addEventListener("click", ()=> saveChild(p.id));
+  const cancelBtn = document.getElementById("cancelEditBtn");
+  if(cancelBtn) cancelBtn.addEventListener("click", ()=> renderFeed(currentChild));
+}
+
+async function saveChild(existingId){
+  const name = document.getElementById("cName").value.trim();
+  const ageVal = document.getElementById("cAge").value;
+  const gender = document.getElementById("cGender").value;
+  const focus = Array.from(document.querySelectorAll("#focusGrid .chip.selected")).map(c=>c.dataset.key);
+  const photoFile = document.getElementById("cPhoto").files[0];
+  const cropFit = document.querySelector(".crop-fit-chip.selected")?.dataset.fit || "cover";
+  const cropZoom = document.getElementById("cZoom") ? parseFloat(document.getElementById("cZoom").value) : 130;
+  const cropFocusY = document.getElementById("cFocusY") ? parseFloat(document.getElementById("cFocusY").value) : 30;
+  const errEl = document.getElementById("formError");
+
+  if(!name){
+    errEl.textContent = "Please enter your child's name.";
+    return;
+  }
+
+  const saveBtn = document.getElementById("saveChildBtn");
+  saveBtn.textContent = "Saving...";
+  saveBtn.disabled = true;
+
+  const payload = {
+    display_name: name,
+    age: ageVal ? parseInt(ageVal, 10) : null,
+    biological_sex: gender,
+    focus_areas: focus,
+    photo_fit: cropFit,
+    photo_zoom: cropZoom,
+    photo_focus_y: cropFocusY
+  };
+
+  let result;
+  if(existingId){
+    result = await dash2Client.from("children").update(payload).eq("id", existingId).select();
+  } else {
+    payload.parent_id = currentUser.id;
+    result = await dash2Client.from("children").insert(payload).select();
+  }
+
+  if(result.error){
+    errEl.textContent = "Could not save: " + result.error.message;
+    saveBtn.textContent = existingId ? "Save changes" : "Add my child";
+    saveBtn.disabled = false;
+    return;
+  }
+
+  const savedChild = result.data[0];
+
+  if(photoFile){
+    const ext = (photoFile.name.split(".").pop() || "jpg").toLowerCase();
+    const path = `${currentUser.id}/${savedChild.id}.${ext}`;
+    const { error: uploadError } = await dash2Client.storage
+      .from("child-photos")
+      .upload(path, photoFile, { upsert: true });
+
+    if(uploadError){
+      errEl.textContent = "Saved, but photo upload failed: " + uploadError.message;
+    } else {
+      await dash2Client.from("children").update({ photo_path: path }).eq("id", savedChild.id);
+    }
+  }
+
+  await loadChildren(savedChild.id);
+}
+
+async function getChildPhotoUrl(child){
+  if(!child.photo_path) return null;
+  const { data, error } = await dash2Client.storage
+    .from("child-photos")
+    .createSignedUrl(child.photo_path, 3600);
+  if(error || !data) return null;
+  return data.signedUrl;
+}
+
+function initials(name){
+  return (name || "?").trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
+}
+
+function renderFeed(child){
+  const focusLabels = (child.focus_areas || []).map(k=>{
+    const found = FOCUS_OPTIONS.find(o=>o.key===k);
+    return found ? found.label : k;
+  });
+
+  const storyRow = `
+    <div class="story-row" id="childSwitcher">
+      ${allChildren.map(c => `
+        <div class="story-item ${c.id===child.id?'active':''}" data-child-id="${c.id}">
+          <div class="story-ring"><div class="story-avatar" id="storyAvatar-${c.id}">${initials(c.display_name)}</div></div>
+          <div class="story-label">${escapeHtml(c.display_name)}</div>
+        </div>
+      `).join("")}
+      <div class="story-item story-add" id="addAnotherChip">
+        <div class="story-ring"><div class="story-avatar">+</div></div>
+        <div class="story-label">Add child</div>
+      </div>
+    </div>
+  `;
+
+  app.innerHTML = `
+    ${storyRow}
+    <div id="avatarBanner"></div>
+
+    <div class="hero-cover" id="heroCover">
+      <div class="hero-cover-inner">
+        <div class="hero-text">
+          <div class="hero-eyebrow">Today · ${new Date().toLocaleDateString(undefined,{weekday:'long', month:'short', day:'numeric'})}</div>
+          <div class="hero-greeting"><span class="hero-wave">👋</span> Hi! Here's ${escapeHtml(child.display_name)}'s day</div>
+          <p class="hero-sub">Enrolled since ${new Date(child.enrollment_date).toLocaleDateString()}</p>
+          <div class="hero-actions">
+            <button class="hero-btn" id="editChildBtn">Edit info</button>
+            <button class="hero-btn" id="talkToSarathiBtn">💬 Talk to Sarathi Avatar</button>
+          </div>
+        </div>
+        <div class="hero-photo" id="heroPhoto"></div>
+      </div>
+    </div>
+
+    <div class="composer" id="composerBar">
+      <div class="composer-avatar" id="composerAvatar">${initials(child.display_name)}</div>
+      <div class="composer-input">Add a milestone for ${escapeHtml(child.display_name)}...</div>
+    </div>
+
+    <div class="card">
+      <div class="post-header">
+        <div class="post-avatar" id="postAvatarIdea">${initials(child.display_name)}</div>
+        <div class="post-meta">
+          <div class="post-name">${escapeHtml(child.display_name)}'s daily idea <span class="post-badge">✨</span></div>
+          <div class="post-time">Today<span class="post-time-dot"></span>Sarathi suggestion</div>
+        </div>
+      </div>
+      <p>${todaysSuggestion(focusLabels)}</p>
+      ${(child.ai_focus_areas && child.ai_focus_areas.length) ? `
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+          <p style="font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:8px;text-transform:uppercase;letter-spacing:.02em;">Sarathi Avatar's suggested focus areas</p>
+          <div class="chip-grid">
+            ${child.ai_focus_areas.map(a=>`<span class="chip selected" style="cursor:default;">${escapeHtml(a)}</span>`).join("")}
+          </div>
+        </div>
+      ` : ''}
+      <div class="post-actions">
+        <button class="post-action-btn" id="likeIdeaBtn">👍 <span id="likeIdeaLabel">Helpful</span></button>
+        <button class="post-action-btn" id="saveIdeaBtn">🔖 Save</button>
+        <button class="post-action-btn" id="shareIdeaBtn">↗ Share</button>
+      </div>
+    </div>
+
+    <div class="card" id="progressCard">
+      <div class="post-header">
+        <div class="post-avatar" style="background:var(--terracotta);" id="postAvatarProgress">${initials(child.display_name)}</div>
+        <div class="post-meta">
+          <div class="post-name">${escapeHtml(child.display_name)}'s progress <span class="post-badge">📈</span></div>
+          <div class="post-time">Updated just now</div>
+        </div>
+      </div>
+      <div class="row">
+        <button class="btn small" id="addMilestoneBtn">+ Add milestone</button>
+        <button class="btn small secondary" id="progressBtn">View progress</button>
+      </div>
+      <div id="progressPanel"></div>
+    </div>
+
+    <div class="card soon">
+      <div class="card-head">
+        <div class="card-icon gold">🗓️</div>
+        <h2>Routine Builder <span class="soon-tag">Coming soon</span></h2>
+      </div>
+      <p>Build a printable daily schedule tailored to ${escapeHtml(child.display_name)}.</p>
+    </div>
+
+    <div class="card" id="activityLibraryCard" style="cursor:pointer;">
+      <div class="card-head">
+        <div class="card-icon">📚</div>
+        <h2>Activity Library</h2>
+      </div>
+      <p>Browse activities by focus area, age, time available, and materials.</p>
+    </div>
+
+    <div class="card soon">
+      <div class="card-head">
+        <div class="card-icon terracotta">📍</div>
+        <h2>Find Professionals <span class="soon-tag">Coming soon</span></h2>
+      </div>
+      <p>A directory of professionals near you.</p>
+    </div>
+
+    <div class="card soon">
+      <div class="card-head">
+        <div class="card-icon">🔍</div>
+        <h2>Early Screening <span class="soon-tag">Coming soon</span></h2>
+      </div>
+      <p>Simple, evidence-informed screening checklists to help you understand ${escapeHtml(child.display_name)}'s development.</p>
+    </div>
+
+    <div class="card soon">
+      <div class="card-head">
+        <div class="card-icon terracotta">🏫</div>
+        <h2>School Support <span class="soon-tag">Coming soon</span></h2>
+      </div>
+      <p>Guidance and templates for working with ${escapeHtml(child.display_name)}'s school or teachers.</p>
+    </div>
+
+    <div class="card soon">
+      <div class="card-head">
+        <div class="card-icon gold">🤝</div>
+        <h2>Government Schemes <span class="soon-tag">Coming soon</span></h2>
+      </div>
+      <p>Find schemes and benefits your family may be eligible for.</p>
+    </div>
+
+    <div class="card soon">
+      <div class="card-head">
+        <div class="card-icon">🍎</div>
+        <h2>Food & Nutrition <span class="soon-tag">Coming soon</span></h2>
+      </div>
+      <p>Simple, culturally familiar meal ideas for ${escapeHtml(child.display_name)}.</p>
+    </div>
+
+    <div class="card soon">
+      <div class="card-head">
+        <div class="card-icon terracotta">📖</div>
+        <h2>Trusted Learning Library <span class="soon-tag">Coming soon</span></h2>
+      </div>
+      <p>Curated, vetted articles and resources you can trust.</p>
+    </div>
+  `;
+
+  document.getElementById("editChildBtn").addEventListener("click", ()=> renderAddChildForm(child));
+  document.getElementById("activityLibraryCard").addEventListener("click", ()=> renderActivityLibrary(child));
+  document.getElementById("addMilestoneBtn").addEventListener("click", ()=> showMilestoneForm(child));
+  document.getElementById("progressBtn").addEventListener("click", ()=> showProgress(child));
+  document.getElementById("addAnotherChip").addEventListener("click", ()=> renderAddChildForm());
+  document.getElementById("talkToSarathiBtn").addEventListener("click", ()=> startAvatarIntake(child));
+  document.getElementById("composerBar").addEventListener("click", ()=> showMilestoneForm(child));
+
+  document.getElementById("likeIdeaBtn").addEventListener("click", (e)=>{
+    const btn = e.currentTarget;
+    const label = document.getElementById("likeIdeaLabel");
+    const isActive = btn.classList.toggle("active-like");
+    label.textContent = isActive ? "Helpful ✓" : "Helpful";
+  });
+  document.getElementById("saveIdeaBtn").addEventListener("click", ()=> alert("Saved for later."));
+  document.getElementById("shareIdeaBtn").addEventListener("click", ()=> alert("Sharing is coming soon."));
+
+  const switcher = document.getElementById("childSwitcher");
+  if(switcher){
+    switcher.querySelectorAll(".story-item[data-child-id]").forEach(item=>{
+      item.addEventListener("click", ()=>{
+        const selected = allChildren.find(c=>c.id===item.dataset.childId);
+        if(selected){
+          currentChild = selected;
+          renderFeed(currentChild);
+          updateAvatarFab();
+        }
+      });
+    });
+  }
+
+  maybeShowAvatarBanner(child);
+  updateAvatarFab();
+  loadChildPhotos();
+}
+
+function photoStyleFor(child){
+  const fit = child.photo_fit || "cover";
+  const zoom = child.photo_zoom || 100;
+  const focusY = (child.photo_focus_y !== undefined && child.photo_focus_y !== null) ? child.photo_focus_y : 30;
+  if(fit === "contain"){
+    return { backgroundSize: "contain", backgroundPosition: "center", backgroundColor: "oklch(0.3 0.03 265)" };
+  }
+  return { backgroundSize: zoom + "%", backgroundPosition: `50% ${focusY}%`, backgroundColor: "transparent" };
+}
+
+function applyPhotoToEl(el, url, child){
+  if(!el || !url) return;
+  const style = photoStyleFor(child);
+  el.style.backgroundImage = `url('${url}')`;
+  el.style.backgroundSize = style.backgroundSize;
+  el.style.backgroundPosition = style.backgroundPosition;
+  el.style.backgroundColor = style.backgroundColor;
+  el.style.backgroundRepeat = "no-repeat";
+  el.textContent = "";
+}
+
+async function loadChildPhotos(){
+  // Hero thumbnail for the currently viewed child
+  const activeChild = allChildren.find(c=>c.id===currentChild.id);
+  if(activeChild && activeChild.photo_path){
+    const url = await getChildPhotoUrl(activeChild);
+    applyPhotoToEl(document.getElementById("heroPhoto"), url, activeChild);
+    // Composer + post-header avatars for the active child (always cover, small circles)
+    ["composerAvatar", "postAvatarIdea", "postAvatarProgress"].forEach(id=>{
+      const el = document.getElementById(id);
+      if(url && el){
+        el.style.backgroundImage = `url('${url}')`;
+        el.style.backgroundSize = "cover";
+        el.style.backgroundPosition = `50% ${(activeChild.photo_focus_y !== undefined && activeChild.photo_focus_y !== null) ? activeChild.photo_focus_y : 30}%`;
+        el.textContent = "";
+      }
+    });
+  }
+
+  // Story-ring thumbnails for every child with a photo
+  allChildren.forEach(async (c)=>{
+    if(!c.photo_path) return;
+    const url = await getChildPhotoUrl(c);
+    const el = document.getElementById(`storyAvatar-${c.id}`);
+    if(url && el){
+      el.style.backgroundImage = `url('${url}')`;
+      el.style.backgroundSize = "cover";
+      el.style.backgroundPosition = `50% ${(c.photo_focus_y !== undefined && c.photo_focus_y !== null) ? c.photo_focus_y : 30}%`;
+      el.textContent = "";
+    }
+  });
+}
+
+function maybeShowAvatarBanner(child){
+  const banner = document.getElementById("avatarBanner");
+  if(!banner) return;
+  const promptedKey = "ns_avatar_prompted_" + child.id;
+  const alreadyPrompted = localStorage.getItem(promptedKey);
+  const hasAiAreas = child.ai_focus_areas && child.ai_focus_areas.length > 0;
+
+  if(alreadyPrompted || hasAiAreas){
+    banner.innerHTML = "";
+    return;
+  }
+
+  banner.innerHTML = `
+    <div class="card" style="background:var(--sage-soft);border-color:var(--primary);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+        <img src="/sarathi-avatar.png" alt="Sarathi Avatar" style="width:48px;height:48px;border-radius:50%;">
+        <h2 style="margin:0;">Want a hand finding focus areas?</h2>
+      </div>
+      <p style="margin-bottom:0;">Sarathi Avatar can chat with you for a few minutes about ${escapeHtml(child.display_name)} and suggest some everyday focus areas.</p>
+      <div class="row" style="margin-top:14px;">
+        <button class="btn small" id="bannerYesBtn">Let's chat</button>
+        <button class="btn small secondary" id="bannerLaterBtn">Maybe later</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("bannerYesBtn").addEventListener("click", ()=>{
+    localStorage.setItem(promptedKey, "1");
+    startAvatarIntake(child);
+  });
+  document.getElementById("bannerLaterBtn").addEventListener("click", ()=>{
+    localStorage.setItem(promptedKey, "1");
+    banner.innerHTML = "";
+  });
+}
+
+function focusLabel(key){
+  const found = FOCUS_OPTIONS.find(o=>o.key===key);
+  return found ? found.label : key;
+}
+
+function showMilestoneForm(child){
+  const panel = document.getElementById("progressPanel");
+  const today = new Date().toISOString().slice(0,10);
+  panel.innerHTML = `
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+      <label for="mFocus">Focus area</label>
+      <select id="mFocus">
+        ${FOCUS_OPTIONS.map(o=>`<option value="${o.key}">${o.label}</option>`).join("")}
+      </select>
+
+      <label for="mNote">What happened?</label>
+      <input type="text" id="mNote" placeholder="e.g. Said a full sentence unprompted">
+
+      <label for="mDate">Date</label>
+      <input type="text" id="mDate" value="${today}" placeholder="YYYY-MM-DD">
+
+      <div id="mError" class="error"></div>
+      <button class="btn small" id="saveMilestoneBtn" style="margin-top:12px;">Save milestone</button>
+    </div>
+  `;
+  document.getElementById("saveMilestoneBtn").addEventListener("click", ()=> saveMilestone(child));
+}
+
+async function saveMilestone(child){
+  const focus_area = document.getElementById("mFocus").value;
+  const note = document.getElementById("mNote").value.trim();
+  const milestone_date = document.getElementById("mDate").value.trim();
+  const errEl = document.getElementById("mError");
+
+  if(!note){
+    errEl.textContent = "Please add a short note about what happened.";
+    return;
+  }
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(milestone_date)){
+    errEl.textContent = "Please enter the date as YYYY-MM-DD.";
+    return;
+  }
+
+  const { error } = await dash2Client.from("child_milestones").insert({
+    child_id: child.id,
+    focus_area,
+    note,
+    milestone_date
+  });
+
+  if(error){
+    errEl.textContent = "Could not save: " + error.message;
+    return;
+  }
+
+  document.getElementById("progressPanel").innerHTML =
+    '<p class="success-pop" style="margin-top:14px;color:var(--primary);font-weight:700;">✓ Milestone saved 🎉</p>';
+}
+
+async function showProgress(child){
+  const panel = document.getElementById("progressPanel");
+  panel.innerHTML = '<p style="margin-top:14px;">Loading…</p>';
+
+  const { data, error } = await dash2Client
+    .from("child_milestones")
+    .select("*")
+    .eq("child_id", child.id)
+    .order("milestone_date", { ascending: false });
+
+  if(error){
+    panel.innerHTML = '<p class="error" style="margin-top:14px;">Could not load progress: '+error.message+'</p>';
+    return;
+  }
+
+  if(!data || data.length === 0){
+    panel.innerHTML = '<p style="margin-top:14px;color:var(--ink-soft);">No milestones logged yet for '+escapeHtml(child.display_name)+'. Add the first one above!</p>';
+    return;
+  }
+
+  const items = data.map(m => `
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-tag">${focusLabel(m.focus_area)}</div>
+      <div class="timeline-note">${escapeHtml(m.note)}</div>
+      <div class="timeline-date">${new Date(m.milestone_date).toLocaleDateString()}</div>
+    </div>
+  `).join("");
+
+  panel.innerHTML = `
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+      <p style="color:var(--ink);font-weight:700;margin-bottom:10px;font-size:.85rem;text-transform:uppercase;letter-spacing:.02em;">${data.length} milestone${data.length===1?'':'s'} since enrolment</p>
+      <div class="timeline">${items}</div>
+    </div>
+  `;
+}
+
+function todaysSuggestion(focusLabels){
+  if(focusLabels.length === 0){
+    return "Try a few minutes of calm, focused play together today — following your child's lead.";
+  }
+  const area = focusLabels[Math.floor(Math.random()*focusLabels.length)];
+  const ideas = {
+    "Communication":"Narrate what you're doing during a routine task — it gives your child gentle, low-pressure language exposure.",
+    "Routines":"Use a simple visual cue (like a picture card) before transitioning to the next activity today.",
+    "Focus":"Try a short, single-step task with a clear start and end — celebrate the finish, however small.",
+    "Social Play":"Sit alongside your child during play and imitate what they're doing, without directing it.",
+    "Big Emotions":"Name the feeling you notice ('That looked frustrating') before offering any solution.",
+    "School Readiness":"Practice one small self-help step today, like packing a bag or putting on shoes."
+  };
+  return ideas[area] || "Spend a few unhurried minutes together today, following your child's lead.";
+}
+
+// ─── Activity Library (Phase 3) ───
+
+let libraryState = null;
+
+async function renderActivityLibrary(child){
+  libraryState = {
+    child,
+    focusFilter: null,
+    timeFilter: null,
+    materialsFilter: null
+  };
+
+  app.innerHTML = `
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon">📚</div>
+        <h1 style="margin:0;">Activities for ${escapeHtml(child.display_name)}</h1>
+      </div>
+
+      <label>Focus area</label>
+      <div class="chip-grid" id="libFocusFilter">
+        <div class="chip selected" data-val="">All</div>
+        ${FOCUS_OPTIONS.map(o=>`<div class="chip" data-val="${o.key}">${o.label}</div>`).join("")}
+      </div>
+
+      <label>Time available</label>
+      <div class="chip-grid" id="libTimeFilter">
+        <div class="chip selected" data-val="">Any</div>
+        <div class="chip" data-val="5">Under 5 min</div>
+        <div class="chip" data-val="15">Under 15 min</div>
+        <div class="chip" data-val="30">Under 30 min</div>
+      </div>
+
+      <label>Materials</label>
+      <div class="chip-grid" id="libMaterialsFilter">
+        <div class="chip selected" data-val="">Any</div>
+        <div class="chip" data-val="none">No materials</div>
+        <div class="chip" data-val="household">Things around the house</div>
+      </div>
+
+      <button class="btn secondary" id="suggestMoreBtn" style="margin-top:16px;">✨ Suggest more with Sarathi Avatar</button>
+      <button class="btn secondary" id="libBackBtn">Back to dashboard</button>
+    </div>
+
+    <div id="libraryResults"><div class="loading">Loading activities…</div></div>
+  `;
+
+  document.getElementById("libBackBtn").addEventListener("click", ()=> renderFeed(currentChild));
+  document.getElementById("suggestMoreBtn").addEventListener("click", ()=> generateAiActivities(child));
+
+  ["libFocusFilter","libTimeFilter","libMaterialsFilter"].forEach(id=>{
+    document.getElementById(id).querySelectorAll(".chip").forEach(chip=>{
+      chip.addEventListener("click", ()=>{
+        document.getElementById(id).querySelectorAll(".chip").forEach(c=>c.classList.remove("selected"));
+        chip.classList.add("selected");
+        if(id==="libFocusFilter") libraryState.focusFilter = chip.dataset.val || null;
+        if(id==="libTimeFilter") libraryState.timeFilter = chip.dataset.val || null;
+        if(id==="libMaterialsFilter") libraryState.materialsFilter = chip.dataset.val || null;
+        loadLibraryResults();
+      });
+    });
+  });
+
+  await loadLibraryResults();
+}
+
+async function loadLibraryResults(){
+  const resultsEl = document.getElementById("libraryResults");
+  resultsEl.innerHTML = '<div class="loading">Loading activities…</div>';
+
+  const { child, focusFilter, timeFilter, materialsFilter } = libraryState;
+
+  const { data, error } = await dash2Client
+    .from("activities")
+    .select("*")
+    .or(`is_public.eq.true,parent_id.eq.${currentUser.id}`)
+    .order("created_at", { ascending: false });
+
+  if(error){
+    resultsEl.innerHTML = `<div class="card"><p class="error">Could not load activities: ${escapeHtml(error.message)}</p></div>`;
+    return;
+  }
+
+  let activities = data || [];
+
+  activities = activities.filter(a=>{
+    if(a.min_age !== null && child.age !== null && child.age !== undefined && child.age < a.min_age) return false;
+    if(a.max_age !== null && child.age !== null && child.age !== undefined && child.age > a.max_age) return false;
+    if(focusFilter && !(a.focus_areas || []).includes(focusFilter)) return false;
+    if(timeFilter && a.time_minutes > parseInt(timeFilter, 10)) return false;
+    if(materialsFilter && a.materials_level !== materialsFilter) return false;
+    return true;
+  });
+
+  if(activities.length === 0){
+    resultsEl.innerHTML = `
+      <div class="card">
+        <p>No activities match these filters yet. Try widening your filters, or ask Sarathi Avatar to suggest some new ones.</p>
+      </div>
+    `;
+    return;
+  }
+
+  resultsEl.innerHTML = activities.map(a => {
+    const imgMeta = activityImageMap[a.title];
+    const thumbSrc = imgMeta ? `/${imgMeta.slug}-step1.png` : null;
+    return `
+    <div class="card activity-card" data-id="${a.id}" style="cursor:pointer;">
+      ${thumbSrc ? `<img src="${thumbSrc}" alt="" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;margin-bottom:10px;background:#f4f1de;">` : ''}
+      <div class="card-head">
+        <div class="card-icon ${a.source==='ai' ? 'gold' : ''}">${a.source==='ai' ? '✨' : '🧩'}</div>
+        <h2 style="margin:0;">${escapeHtml(a.title)}</h2>
+      </div>
+      <p>${escapeHtml(a.objective)}</p>
+      <div class="chip-grid">
+        <span class="chip" style="cursor:default;">${a.time_minutes} min</span>
+        <span class="chip" style="cursor:default;">${a.materials_level === 'none' ? 'No materials' : a.materials_level === 'household' ? 'Household items' : 'Special items'}</span>
+        ${(a.focus_areas||[]).map(f=>`<span class="chip" style="cursor:default;">${focusLabel(f)}</span>`).join("")}
+      </div>
+    </div>
+  `;
+  }).join("");
+
+  resultsEl.querySelectorAll(".activity-card").forEach(card=>{
+    card.addEventListener("click", ()=>{
+      const activity = activities.find(a=>a.id===card.dataset.id);
+      if(activity) renderActivityDetail(activity);
+    });
+  });
+}
+
+// Maps curated activity titles to their generated illustration set.
+// "count" = total images (last image in the set is the "result" image).
+const activityImageMap = {
+  "Backpack Ready Routine": { slug: "backpack", count: 5 },
+  "Calm Down Breathing Buddy": { slug: "breathing", count: 4 },
+  "Feelings Faces Mirror": { slug: "mirror", count: 5 },
+  "Follow-the-Leader Movement": { slug: "follow", count: 5 },
+  "Picture Card Transition Cue": { slug: "cards", count: 4 },
+  "Sock Matching Sort": { slug: "socks", count: 4 }
+};
+
+function renderActivityDetail(activity){
+  const imgMeta = activityImageMap[activity.title];
+  const steps = activity.steps || [];
+
+  app.innerHTML = `
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon ${activity.source==='ai' ? 'gold' : ''}">${activity.source==='ai' ? '✨' : '🧩'}</div>
+        <h1 style="margin:0;">${escapeHtml(activity.title)}</h1>
+      </div>
+      <p>${escapeHtml(activity.objective)}</p>
+
+      <div class="chip-grid" style="margin-bottom:16px;">
+        <span class="chip" style="cursor:default;">${activity.time_minutes} min</span>
+        ${(activity.focus_areas||[]).map(f=>`<span class="chip" style="cursor:default;">${focusLabel(f)}</span>`).join("")}
+      </div>
+
+      ${activity.materials && activity.materials.length ? `
+        <h2 style="font-size:1rem;">What you'll need</h2>
+        <p>${activity.materials.map(m=>escapeHtml(m)).join(", ")}</p>
+      ` : '<p style="font-style:italic;">No materials needed.</p>'}
+
+      <h2 style="font-size:1rem;margin-top:16px;">Steps</h2>
+      <div class="timeline">
+        ${steps.map((s, i)=>{
+          const stepImgAvailable = imgMeta && (i + 1) < imgMeta.count;
+          const stepImgSrc = stepImgAvailable ? `/${imgMeta.slug}-step${i+1}.png` : null;
+          return `
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-note">
+              ${stepImgSrc ? `<img src="${stepImgSrc}" alt="" style="width:100%;max-width:220px;border-radius:12px;margin-bottom:8px;background:#f4f1de;display:block;">` : ''}
+              ${escapeHtml(s)}
+            </div>
+          </div>
+        `;
+        }).join("")}
+      </div>
+
+      ${imgMeta ? `
+        <h2 style="font-size:1rem;margin-top:16px;">What success looks like</h2>
+        <img src="/${imgMeta.slug}-step${imgMeta.count}.png" alt="Result" style="width:100%;max-width:260px;border-radius:12px;background:#f4f1de;display:block;margin-top:8px;">
+      ` : ''}
+
+      ${activity.safety_tip ? `
+        <div class="disclaimer" style="margin-top:16px;">⚠️ ${escapeHtml(activity.safety_tip)}</div>
+      ` : ''}
+
+      <button class="btn secondary" id="activityBackBtn">Back to activities</button>
+    </div>
+  `;
+  document.getElementById("activityBackBtn").addEventListener("click", ()=> renderActivityLibrary(libraryState.child));
+}
+
+async function generateAiActivities(child){
+  const resultsEl = document.getElementById("libraryResults");
+  resultsEl.innerHTML = '<div class="loading">Sarathi Avatar is thinking of some ideas…</div>';
+
+  const { data: { session } } = await dash2Client.auth.getSession();
+  if(!session){
+    window.location.href = "/enterportal.html";
+    return;
+  }
+
+  const combinedFocusAreas = [
+    ...(child.focus_areas || []).map(k=>focusLabel(k)),
+    ...(child.ai_focus_areas || [])
+  ];
+
+  try {
+    const resp = await fetch(SARATHI_CHAT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + session.access_token
+      },
+      body: JSON.stringify({
+        mode: "generate_activities",
+        childId: child.id,
+        focusAreas: combinedFocusAreas,
+        age: child.age
+      })
+    });
+
+    const data = await resp.json();
+    if(!resp.ok) throw new Error(data.error || "Something went wrong generating activities.");
+
+    let parsed;
+    try {
+      const cleaned = data.reply.trim().replace(/^```json/i, "").replace(/^```/, "").replace(/```$/, "").trim();
+      parsed = JSON.parse(cleaned);
+    } catch(e){
+      throw new Error("Sarathi Avatar's suggestions weren't in the expected format. Please try again.");
+    }
+
+    const rows = (parsed.activities || []).map(a => ({
+      title: a.title,
+      objective: a.objective,
+      steps: a.steps || [],
+      materials: a.materials || [],
+      materials_level: a.materials_level || "none",
+      safety_tip: a.safety_tip || null,
+      focus_areas: (a.focus_areas || []).filter(f => FOCUS_OPTIONS.some(o=>o.key===f)),
+      min_age: a.min_age || null,
+      max_age: a.max_age || null,
+      time_minutes: a.time_minutes || 15,
+      source: "ai",
+      parent_id: currentUser.id,
+      child_id: child.id,
+      is_public: false
+    }));
+
+    if(rows.length > 0){
+      await dash2Client.from("activities").insert(rows);
+    }
+
+    await loadLibraryResults();
+  } catch(err){
+    resultsEl.innerHTML = `<div class="card"><p class="error">${escapeHtml(err.message)}</p></div>`;
+  }
+}
+
+function escapeHtml(str){
+  const d = document.createElement("div");
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// ─── Avatar Intake (Phase 2) ───
+
+let avatarState = null;
+
+const GREETING_TEXT = {
+  en: (name) => `Welcome, ${name}'s parent! I'm Sarathi Avatar. How can I help you today?`,
+  hi: (name) => `स्वागत है, ${name} के अभिभावक! मैं सारथी अवतार हूं। आज मैं आपकी कैसे मदद कर सकता हूं?`
+};
+
+const OPENING_LINE = {
+  en: (name) => `Hi! I'm here for you — ask me anything about ${name}, parenting, or what's on your mind today. Whenever you're ready, I can also ask you a bit about ${name} to help build out their focus areas.`,
+  hi: (name) => `नमस्ते! मैं आपके लिए यहां हूं — ${name} के बारे में, पेरेंटिंग के बारे में, या आज जो भी आपके मन में हो, कुछ भी पूछें। जब आप तैयार हों, मैं ${name} के बारे में कुछ सवाल भी पूछ सकता हूं।`
+};
+
+function startAvatarIntake(child){
+  avatarState = {
+    child,
+    messages: [],
+    language: "en"
+  };
+  const fab = document.getElementById("avatarFab");
+  if(fab) fab.style.display = "none";
+  renderAvatarGreeting();
+}
+
+function renderAvatarGreeting(){
+  const { child, language } = avatarState;
+
+  app.innerHTML = `
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <img src="/sarathi-avatar.png" alt="Sarathi Avatar" style="width:56px;height:56px;border-radius:50%;">
+        <h1 style="margin:0;">${escapeHtml(GREETING_TEXT[language](child.display_name))}</h1>
+      </div>
+      <p>Ask me anything, or share what's on your mind — I'm here to help.</p>
+
+      <button class="btn" id="avatarStartBtn">Let's begin</button>
+      <button class="btn secondary" id="avatarCancelBtn">Cancel</button>
+    </div>
+  `;
+
+  document.getElementById("avatarStartBtn").addEventListener("click", ()=>{
+    avatarState.messages.push({ role: "assistant", content: OPENING_LINE[avatarState.language](child.display_name) });
+    renderAvatarChatTurn();
+  });
+  document.getElementById("avatarCancelBtn").addEventListener("click", ()=> renderFeed(currentChild));
+}
+
+async function fetchAvatarReply(finalize){
+  app.innerHTML = `
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+        <img src="/sarathi-avatar.png" alt="Sarathi Avatar" style="width:44px;height:44px;border-radius:50%;">
+        <h1 style="margin:0;">Chatting with Sarathi Avatar</h1>
+      </div>
+      <div class="loading">Sarathi Avatar is thinking…</div>
+    </div>
+  `;
+
+  const { data: { session } } = await dash2Client.auth.getSession();
+  if(!session){
+    window.location.href = "/enterportal.html";
+    return;
+  }
+
+  try {
+    const resp = await fetch(SARATHI_CHAT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + session.access_token
+      },
+      body: JSON.stringify({
+        mode: "avatar_intake",
+        childId: avatarState.child.id,
+        messages: avatarState.messages,
+        finalize: !!finalize,
+        language: avatarState.language
+      })
+    });
+
+    const data = await resp.json();
+    if(!resp.ok){
+      throw new Error(data.error || "Something went wrong talking to Sarathi.");
+    }
+
+    if(finalize){
+      handleFinalizeReply(data.reply);
+    } else {
+      avatarState.messages.push({ role: "assistant", content: data.reply });
+      renderAvatarChatTurn();
+    }
+  } catch(err){
+    app.innerHTML = `
+      <div class="card">
+        <h1>Something went wrong</h1>
+        <p class="error">${escapeHtml(err.message)}</p>
+        <button class="btn secondary" id="avatarBackBtn">Back to dashboard</button>
+      </div>
+    `;
+    document.getElementById("avatarBackBtn").addEventListener("click", ()=> renderFeed(currentChild));
+  }
+}
+
+function renderAvatarChatTurn(){
+  const { child, messages } = avatarState;
+  const lastAssistant = [...messages].reverse().find(m=>m.role==="assistant");
+
+  const historyHtml = messages.map(m => `
+    <div style="margin-bottom:10px;">
+      <div style="font-size:12px;font-weight:600;color:${m.role==='assistant' ? 'var(--primary)' : 'var(--ink-soft)'};margin-bottom:2px;">
+        ${m.role === 'assistant' ? 'Sarathi Avatar' : 'You'}
+      </div>
+      <div style="font-size:14px;color:var(--ink);">${escapeHtml(m.content)}</div>
+    </div>
+  `).join("");
+
+  app.innerHTML = `
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+        <img src="/sarathi-avatar.png" alt="Sarathi Avatar" style="width:44px;height:44px;border-radius:50%;">
+        <h1 style="margin:0;">Chatting about ${escapeHtml(child.display_name)}</h1>
+      </div>
+      <div style="max-height:280px;overflow-y:auto;margin-bottom:12px;">${historyHtml}</div>
+      <label for="chatReply">Your reply</label>
+      <input type="text" id="chatReply" placeholder="Type your reply...">
+      <div id="avatarError" class="error"></div>
+      <button class="btn" id="chatSendBtn">Send</button>
+      <button class="btn secondary" id="chatFinalizeBtn">I'm done — show suggestions</button>
+      <button class="btn secondary" id="avatarCancelBtn">Cancel</button>
+    </div>
+  `;
+
+  document.getElementById("chatSendBtn").addEventListener("click", ()=>{
+    const input = document.getElementById("chatReply");
+    const val = input.value.trim();
+    const errEl = document.getElementById("avatarError");
+    if(!val){
+      errEl.textContent = "Please type a reply first.";
+      return;
+    }
+    avatarState.messages.push({ role: "user", content: val });
+    fetchAvatarReply(false);
+  });
+
+  document.getElementById("chatFinalizeBtn").addEventListener("click", ()=> fetchAvatarReply(true));
+  document.getElementById("avatarCancelBtn").addEventListener("click", ()=> renderFeed(currentChild));
+}
+
+function handleFinalizeReply(rawReply){
+  let parsed;
+  try {
+    const cleaned = rawReply.trim().replace(/^```json/i, "").replace(/^```/, "").replace(/```$/, "").trim();
+    parsed = JSON.parse(cleaned);
+  } catch(e){
+    app.innerHTML = `
+      <div class="card">
+        <h1>Hmm, that didn't parse</h1>
+        <p>Sarathi Avatar's response wasn't in the expected format. You can try finalizing again.</p>
+        <button class="btn" id="retryFinalizeBtn">Try again</button>
+        <button class="btn secondary" id="avatarCancelBtn">Back to dashboard</button>
+      </div>
+    `;
+    document.getElementById("retryFinalizeBtn").addEventListener("click", ()=> fetchAvatarReply(true));
+    document.getElementById("avatarCancelBtn").addEventListener("click", ()=> renderFeed(currentChild));
+    return;
+  }
+
+  const suggestions = (parsed.suggestions || []).map(s => ({ ...s, approved: true }));
+  avatarState.suggestions = suggestions;
+  renderSuggestionApproval();
+}
+
+function renderSuggestionApproval(){
+  const { child, suggestions } = avatarState;
+
+  app.innerHTML = `
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+        <img src="/sarathi-avatar.png" alt="Sarathi Avatar" style="width:44px;height:44px;border-radius:50%;">
+        <h1 style="margin:0;">Suggested focus areas for ${escapeHtml(child.display_name)}</h1>
+      </div>
+      <p>Based on your conversation, Sarathi Avatar suggests these. Tap any to remove it — only the ones you approve will be saved.</p>
+      <div class="chip-grid" id="suggestionGrid" style="margin-top:14px;">
+        ${suggestions.map((s,i) => `
+          <div class="chip ${s.approved ? 'selected' : ''}" data-idx="${i}" title="${escapeHtml(s.reason||'')}">${escapeHtml(s.label)}</div>
+        `).join("")}
+      </div>
+      <div id="avatarError" class="error"></div>
+      <button class="btn" id="saveSuggestionsBtn">Save approved areas</button>
+      <button class="btn secondary" id="avatarCancelBtn">Cancel</button>
+    </div>
+  `;
+
+  document.querySelectorAll("#suggestionGrid .chip").forEach(chip=>{
+    chip.addEventListener("click", ()=>{
+      const idx = parseInt(chip.dataset.idx, 10);
+      avatarState.suggestions[idx].approved = !avatarState.suggestions[idx].approved;
+      chip.classList.toggle("selected");
+    });
+  });
+
+  document.getElementById("saveSuggestionsBtn").addEventListener("click", saveApprovedSuggestions);
+  document.getElementById("avatarCancelBtn").addEventListener("click", ()=> renderFeed(currentChild));
+}
+
+async function saveApprovedSuggestions(){
+  const { child, suggestions } = avatarState;
+  const approvedLabels = suggestions.filter(s=>s.approved).map(s=>s.label);
+  const errEl = document.getElementById("avatarError");
+
+  const { error } = await dash2Client
+    .from("children")
+    .update({ ai_focus_areas: approvedLabels })
+    .eq("id", child.id);
+
+  if(error){
+    errEl.textContent = "Could not save: " + error.message;
+    return;
+  }
+
+  avatarState = null;
+  await loadChildren(child.id);
+}
+
+document.getElementById("avatarFab").addEventListener("click", ()=>{
+  if(currentChild) startAvatarIntake(currentChild);
+});
+
+document.getElementById("signOutLink").addEventListener("click", async (e)=>{
+  e.preventDefault();
+  await dash2Client.auth.signOut();
+  window.location.href = "/enterportal.html";
+});
+
+init();
+</script>
+</body>
+</html>

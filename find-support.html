@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find Support — NeuroSarathi</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Manrope',sans-serif;background:#F8FAFC;color:#1C1917;min-height:100vh}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600}
+  .topbar{background:#1a1a1a;color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+  .topbar .brand{font-family:'Fraunces',serif;font-weight:600;font-size:1.1rem}
+  .topbar a{color:#fff;text-decoration:none;font-size:.85rem;border:1px solid rgba(255,255,255,.3);padding:6px 14px;border-radius:50px}
+  .wrap{max-width:720px;margin:0 auto;padding:20px}
+  .filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px}
+  .filters button{flex:none;padding:9px 16px;border-radius:50px;border:1.5px solid #E5E7EB;background:#fff;font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;color:#57534E}
+  .filters button.active{background:#1C1917;color:#fff;border-color:#1C1917}
+  .search-box{width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid #E5E7EB;margin-bottom:16px;font-family:inherit;font-size:.9rem;box-sizing:border-box}
+  .card{background:#fff;border:1px solid #EDE9E3;border-radius:16px;padding:16px;margin-bottom:12px}
+  .card .type-tag{display:inline-block;font-size:.68rem;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#FF6B1A;margin-bottom:4px}
+  .card .name{font-size:1.05rem;font-weight:700}
+  .card .meta{font-size:.83rem;color:#78716C;margin:4px 0 10px}
+  .card .fee{font-size:.9rem;font-weight:700;color:#1C1917;margin-bottom:10px}
+  .card .bio{font-size:.85rem;color:#57534E;margin-bottom:12px;line-height:1.5}
+  .book-btn{background:linear-gradient(135deg,#FF6B1A,#FF8C42);color:#fff;border:none;border-radius:50px;padding:11px 22px;font-family:inherit;font-size:.85rem;font-weight:800;cursor:pointer}
+  .book-btn:disabled{opacity:.5;cursor:not-allowed}
+  .empty-note{color:#888;font-size:.88rem;padding:40px 20px;text-align:center}
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end;justify-content:center}
+  .modal-bg.active{display:flex}
+  .modal{background:#fff;border-radius:20px 20px 0 0;padding:24px 20px 32px;width:100%;max-width:480px}
+  .modal h3{font-size:1.15rem;margin-bottom:6px}
+  .modal .sub{font-size:.85rem;color:#78716C;margin-bottom:18px}
+  .modal label{display:block;font-size:.8rem;font-weight:700;color:#57534E;margin-bottom:6px}
+  .modal input,.modal textarea{width:100%;padding:11px 13px;border-radius:10px;border:1.5px solid #E5E7EB;margin-bottom:14px;font-family:inherit;font-size:.88rem;box-sizing:border-box}
+  .amount-row{display:flex;justify-content:space-between;align-items:center;background:#F8FAFC;border-radius:12px;padding:14px 16px;margin-bottom:16px}
+  .amount-row .label{font-size:.85rem;color:#57534E}
+  .amount-row .value{font-size:1.3rem;font-weight:800;font-family:'Fraunces',serif}
+  .fee-note{font-size:.75rem;color:#A8A29E;margin-top:-10px;margin-bottom:16px}
+  .modal-actions{display:flex;gap:10px}
+  .modal-actions button{flex:1;padding:13px;border-radius:50px;font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;border:none}
+  .btn-cancel{background:#F3F4F6;color:#57534E}
+  .btn-pay{background:linear-gradient(135deg,#FF6B1A,#FF8C42);color:#fff}
+  .btn-pay:disabled{opacity:.6;cursor:not-allowed}
+  .status-msg{font-size:.82rem;margin-top:10px;min-height:1em;color:#c0392b}
+  .success-msg{font-size:.85rem;color:#2a7b47;font-weight:700}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">Find Support</div>
+  <a href="/parents.html">← Dashboard</a>
+</div>
+
+<div class="wrap">
+  <div class="filters" style="margin-bottom:14px">
+    <button class="active" id="navFind" onclick="showView('find')">Find Support</button>
+    <button id="navBookings" onclick="showView('bookings')">My Bookings</button>
+  </div>
+
+  <div id="findView">
+  <input class="search-box" id="searchBox" placeholder="Search by name or city…" oninput="renderList()">
+  <div class="filters" id="filterRow">
+    <button class="active" data-f="all" onclick="setFilter('all')">All</button>
+    <button data-f="professional" onclick="setFilter('professional')">Doctors & Therapists</button>
+    <button data-f="educator" onclick="setFilter('educator')">Special Educators</button>
+    <button data-f="caregiver" onclick="setFilter('caregiver')">Caregivers</button>
+  </div>
+  <div id="listMount"><div class="empty-note">Loading…</div></div>
+  </div>
+
+  <div id="bookingsView" style="display:none">
+    <div id="myBookingsListMount"><div class="empty-note">Loading…</div></div>
+  </div>
+</div>
+
+<!-- Booking modal -->
+<div class="modal-bg" id="bookModalBg">
+  <div class="modal">
+    <h3 id="bookModalName">Book a consultation</h3>
+    <div class="sub" id="bookModalMeta"></div>
+
+    <div id="bookFormArea">
+      <label>Your name</label>
+      <input type="text" id="bookParentName" placeholder="For the provider's records">
+      <label>Your phone / WhatsApp number</label>
+      <input type="tel" id="bookParentPhone" placeholder="Shared with the provider once you pay">
+      <label>Preferred date</label>
+      <input type="date" id="bookDate">
+      <label>Notes for the provider (optional)</label>
+      <textarea id="bookNotes" rows="2" placeholder="What would you like help with?"></textarea>
+
+      <div class="amount-row">
+        <div class="label">Consultation fee</div>
+        <div class="value" id="bookAmountDisplay">₹0</div>
+      </div>
+      <div class="fee-note">You'll pay this now via Razorpay to confirm your booking.</div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeBookModal()">Cancel</button>
+        <button class="btn-pay" id="payBtn" onclick="startPayment()">Pay & Book →</button>
+      </div>
+      <div class="status-msg" id="bookStatusMsg"></div>
+    </div>
+
+    <div id="bookSuccessArea" style="display:none">
+      <p class="success-msg">✓ Booking confirmed! The provider has been notified. You can see this booking anytime from your dashboard.</p>
+      <div class="modal-actions" style="margin-top:16px">
+        <button class="btn-pay" style="flex:1" onclick="closeBookModal()">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const NS_URL = 'https://qvuenvngwgcknawfsnxl.supabase.co';
+const NS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2dWVudm5nd2dja25hd2ZzbnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MzI1OTksImV4cCI6MjA5ODMwODU5OX0.MZgac469tvi9Xq9gyaRbHDc9t88Ww9dN8ldZ8JvKGVI';
+let sb = null;
+let currentUserId = null;
+let allProviders = [];
+let activeFilter = 'all';
+let selectedProvider = null;
+
+const PROF_TYPE_LABELS = {
+  developmental_pediatrician: 'Developmental Pediatrician',
+  child_psychiatrist: 'Child Psychiatrist',
+  occupational_therapist: 'Occupational Therapist',
+  speech_language_pathologist: 'Speech-Language Pathologist',
+  applied_behavior_analyst: 'Applied Behavior Analyst (ABA)',
+  clinical_psychologist: 'Clinical Psychologist',
+  physiotherapist: 'Physiotherapist',
+  dietitian: 'Dietitian',
+  special_educator: 'Special Educator',
+};
+const CAREGIVER_TYPE_LABELS = {
+  babysitter: 'Babysitting / Childcare',
+  home_tutor: 'Home Tutor',
+  special_needs_caregiver: 'Special Needs Caregiver',
+  respite_care: 'Respite Care',
+};
+
+(async function init(){
+  sb = window.supabase.createClient(NS_URL, NS_KEY);
+  const { data: userData } = await sb.auth.getUser();
+  if (!userData || !userData.user) {
+    window.location.href = '/enterportal.html?redirect=find-support.html';
+    return;
+  }
+  currentUserId = userData.user.id;
+  await loadProviders();
+})();
+
+async function loadProviders(){
+  const mount = document.getElementById('listMount');
+  try{
+    const [{ data: pros, error: proErr }, { data: cgs, error: cgErr }] = await Promise.all([
+      sb.from('professionals')
+        .select('id, user_id, professional_type, display_name, city, state, area, bio, consultation_fee_min, consultation_fee_max, verification_status, qualifications, years_of_experience, intro_video_url')
+        .eq('verification_status', 'verified'),
+      sb.from('caregivers')
+        .select('user_id, caregiver_type, display_name, city, state, area, bio, hourly_rate_min, hourly_rate_max, verification_status, qualifications, years_experience, intro_video_url')
+        .eq('verification_status', 'verified'),
+    ]);
+    if (proErr) console.error(proErr);
+    if (cgErr) console.error(cgErr);
+
+    const proList = (pros || []).map(p => ({
+      kind: p.professional_type === 'special_educator' ? 'educator' : 'professional',
+      providerId: p.id,
+      name: p.display_name,
+      typeLabel: PROF_TYPE_LABELS[p.professional_type] || p.professional_type,
+      city: p.city, state: p.state, area: p.area,
+      bio: p.bio,
+      feeMin: p.consultation_fee_min, feeMax: p.consultation_fee_max,
+      qualifications: p.qualifications, yearsExp: p.years_of_experience, videoUrl: p.intro_video_url,
+    }));
+    const cgList = (cgs || []).map(c => ({
+      kind: 'caregiver',
+      providerId: c.user_id,
+      name: c.display_name,
+      typeLabel: CAREGIVER_TYPE_LABELS[c.caregiver_type] || c.caregiver_type,
+      city: c.city, state: c.state, area: c.area,
+      bio: c.bio,
+      feeMin: c.hourly_rate_min, feeMax: c.hourly_rate_max,
+      qualifications: c.qualifications, yearsExp: c.years_experience, videoUrl: c.intro_video_url,
+    }));
+
+    allProviders = [...proList, ...cgList];
+    await loadRatingsSummary();
+    renderList();
+  }catch(err){
+    console.error('Load providers error:', err);
+    mount.innerHTML = '<div class="empty-note">Something went wrong loading the directory. Please try again.</div>';
+  }
+}
+
+let ratingsSummary = {};
+async function loadRatingsSummary(){
+  try{
+    const { data } = await sb.from('ratings').select('provider_type, provider_id, stars');
+    ratingsSummary = {};
+    (data || []).forEach(r => {
+      const key = r.provider_type + ':' + r.provider_id;
+      if (!ratingsSummary[key]) ratingsSummary[key] = { sum: 0, count: 0 };
+      ratingsSummary[key].sum += r.stars;
+      ratingsSummary[key].count += 1;
+    });
+  }catch(err){
+    console.error('Load ratings summary error:', err);
+  }
+}
+
+function setFilter(f){
+  activeFilter = f;
+  document.querySelectorAll('#filterRow button').forEach(b => b.classList.toggle('active', b.dataset.f === f));
+  renderList();
+}
+
+function renderList(){
+  const mount = document.getElementById('listMount');
+  const q = (document.getElementById('searchBox').value || '').toLowerCase();
+  const filtered = allProviders.filter(p =>
+    (activeFilter === 'all' || p.kind === activeFilter) &&
+    ((p.name || '').toLowerCase().includes(q) || (p.city || '').toLowerCase().includes(q))
+  );
+  if (!filtered.length){
+    mount.innerHTML = `<div class="empty-note">${allProviders.length ? 'No matches. Try a different search.' : 'No verified providers listed yet — check back soon.'}</div>`;
+    return;
+  }
+  mount.innerHTML = filtered.map((p, i) => {
+    const loc = [p.area, p.city, p.state].filter(Boolean).join(', ');
+    const feeLabel = feeRangeLabel(p);
+    const ratingKey = p.kind + ':' + p.providerId;
+    const rs = ratingsSummary[ratingKey];
+    const ratingLabel = rs ? `★ ${(rs.sum / rs.count).toFixed(1)} (${rs.count})` : 'No ratings yet';
+    const expLabel = p.yearsExp ? ` · ${p.yearsExp} yrs experience` : '';
+    return `
+      <div class="card">
+        <div class="type-tag">${escapeHtml(kindLabel(p.kind))}</div>
+        <div class="name">${escapeHtml(p.name)}</div>
+        <div class="meta">${escapeHtml(p.typeLabel)}${loc ? ' · ' + escapeHtml(loc) : ''}${expLabel} · ${escapeHtml(ratingLabel)}</div>
+        ${p.qualifications ? `<div style="font-size:.82rem;color:#57534E;margin-bottom:6px"><strong>Qualifications:</strong> ${escapeHtml(p.qualifications)}</div>` : ''}
+        ${p.bio ? `<div class="bio">${escapeHtml(p.bio)}</div>` : ''}
+        ${p.videoUrl ? renderVideoEmbed(p.videoUrl) : ''}
+        <div class="fee">${feeLabel}</div>
+        <button class="book-btn" ${p.feeMin ? '' : 'disabled'} onclick='openBookModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'>${p.feeMin ? 'Book & Pay →' : 'Fee not listed yet'}</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function kindLabel(k){
+  return k === 'professional' ? 'Doctor / Therapist' : k === 'educator' ? 'Special Educator' : 'Caregiver';
+}
+function feeRangeLabel(p){
+  if (!p.feeMin && !p.feeMax) return 'Fee not listed';
+  if (p.feeMin && p.feeMax && p.feeMin !== p.feeMax) return `₹${p.feeMin} – ₹${p.feeMax}`;
+  return `₹${p.feeMin || p.feeMax}`;
+}
+
+function openBookModal(p){
+  selectedProvider = p;
+  document.getElementById('bookModalName').textContent = 'Book ' + p.name;
+  document.getElementById('bookModalMeta').textContent = p.typeLabel + ([p.area,p.city].filter(Boolean).join(', ') ? ' · ' + [p.area,p.city].filter(Boolean).join(', ') : '');
+  document.getElementById('bookAmountDisplay').textContent = '₹' + (p.feeMin || p.feeMax);
+  document.getElementById('bookParentName').value = '';
+  document.getElementById('bookParentPhone').value = '';
+  document.getElementById('bookDate').value = '';
+  document.getElementById('bookNotes').value = '';
+  document.getElementById('bookStatusMsg').textContent = '';
+  document.getElementById('bookFormArea').style.display = 'block';
+  document.getElementById('bookSuccessArea').style.display = 'none';
+  document.getElementById('bookModalBg').classList.add('active');
+}
+function closeBookModal(){
+  document.getElementById('bookModalBg').classList.remove('active');
+  selectedProvider = null;
+}
+
+async function startPayment(){
+  const statusEl = document.getElementById('bookStatusMsg');
+  const btn = document.getElementById('payBtn');
+  statusEl.textContent = '';
+  btn.disabled = true; btn.textContent = 'Preparing payment…';
+
+  try{
+    const parentName = document.getElementById('bookParentName').value.trim();
+    const parentPhone = document.getElementById('bookParentPhone').value.trim();
+    if (!parentPhone) {
+      statusEl.textContent = 'Please enter your phone number so the provider can reach you.';
+      btn.disabled = false; btn.textContent = 'Pay & Book →';
+      return;
+    }
+    const amount = selectedProvider.feeMin || selectedProvider.feeMax;
+    const bookingDraft = {
+      provider_type: selectedProvider.kind,
+      provider_id: selectedProvider.providerId,
+      provider_name: selectedProvider.name,
+      amount: amount,
+      preferred_date: document.getElementById('bookDate').value || null,
+      notes: document.getElementById('bookNotes').value.trim() || null,
+      parent_name: parentName || null,
+      parent_phone: parentPhone,
+    };
+
+    const { data: { session } } = await sb.auth.getSession();
+    const orderRes = await fetch(`${NS_URL}/functions/v1/create-booking-order`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+      body: JSON.stringify({ amount }),
+    });
+    const orderData = await orderRes.json();
+    if (!orderRes.ok || !orderData.orderId) {
+      statusEl.textContent = orderData.error || 'Could not start payment. Please try again.';
+      btn.disabled = false; btn.textContent = 'Pay & Book →';
+      return;
+    }
+
+    btn.textContent = 'Waiting for payment…';
+
+    const rzp = new Razorpay({
+      key: orderData.keyId,
+      amount: orderData.amount,
+      currency: 'INR',
+      name: 'NeuroSarathi',
+      description: 'Booking: ' + selectedProvider.name,
+      order_id: orderData.orderId,
+      handler: async function(response){
+        btn.textContent = 'Confirming booking…';
+        try{
+          const verifyRes = await fetch(`${NS_URL}/functions/v1/verify-booking-payment`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              booking: bookingDraft,
+            }),
+          });
+          const verifyData = await verifyRes.json();
+          if (!verifyRes.ok || !verifyData.success) {
+            statusEl.textContent = verifyData.error || 'Payment succeeded but booking could not be confirmed. Contact support with your payment ID: ' + response.razorpay_payment_id;
+            btn.disabled = false; btn.textContent = 'Pay & Book →';
+            return;
+          }
+          document.getElementById('bookFormArea').style.display = 'none';
+          document.getElementById('bookSuccessArea').style.display = 'block';
+        }catch(err){
+          console.error('Verify error:', err);
+          statusEl.textContent = 'Payment succeeded but something went wrong confirming it. Contact support with payment ID: ' + response.razorpay_payment_id;
+          btn.disabled = false; btn.textContent = 'Pay & Book →';
+        }
+      },
+      modal: {
+        ondismiss: function(){
+          btn.disabled = false; btn.textContent = 'Pay & Book →';
+        }
+      },
+      theme: { color: '#FF6B1A' },
+    });
+    rzp.open();
+  }catch(err){
+    console.error('Start payment error:', err);
+    statusEl.textContent = 'Something went wrong. Please try again.';
+    btn.disabled = false; btn.textContent = 'Pay & Book →';
+  }
+}
+
+function renderVideoEmbed(url){
+  try{
+    const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if(ytMatch){
+      const videoId = ytMatch[1];
+      return `<div style="margin:10px 0;border-radius:12px;overflow:hidden;aspect-ratio:16/9"><iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}" title="Introduction video" frameborder="0" allowfullscreen></iframe></div>`;
+    }
+    return `<div style="margin:10px 0"><a href="${escapeHtml(url)}" target="_blank" rel="noopener" style="font-size:.82rem;color:#FF6B1A;font-weight:700">▶ Watch introduction video</a></div>`;
+  }catch(e){
+    return '';
+  }
+}
+
+function escapeHtml(s){
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+
+function showView(view){
+  document.getElementById('navFind').classList.toggle('active', view === 'find');
+  document.getElementById('navBookings').classList.toggle('active', view === 'bookings');
+  document.getElementById('findView').style.display = view === 'find' ? 'block' : 'none';
+  document.getElementById('bookingsView').style.display = view === 'bookings' ? 'block' : 'none';
+  if (view === 'bookings') loadMyBookings();
+}
+
+async function loadMyBookings(){
+  const mount = document.getElementById('myBookingsListMount');
+  try{
+    const { data, error } = await sb.from('bookings')
+      .select('id, provider_type, provider_name, amount, preferred_date, notes, status, created_at')
+      .eq('parent_user_id', currentUserId)
+      .order('created_at', { ascending: false });
+    if (error) { mount.innerHTML = `<div class="empty-note">Couldn't load your bookings.</div>`; return; }
+    if (!data || !data.length) { mount.innerHTML = `<div class="empty-note">No bookings yet — find a provider above to get started.</div>`; return; }
+
+    // fetch provider phone numbers + existing ratings in parallel
+    const proIds = data.filter(b => b.provider_type !== 'caregiver').map(b => b.provider_id);
+    const cgIds = data.filter(b => b.provider_type === 'caregiver').map(b => b.provider_id);
+    const bookingIds = data.map(b => b.id);
+    const [{ data: pros }, { data: cgs }, { data: ratings }] = await Promise.all([
+      proIds.length ? sb.from('professionals').select('id, phone_number').in('id', proIds) : Promise.resolve({ data: [] }),
+      cgIds.length ? sb.from('caregivers').select('user_id, phone_number').in('user_id', cgIds) : Promise.resolve({ data: [] }),
+      sb.from('ratings').select('booking_id, stars').in('booking_id', bookingIds),
+    ]);
+    const phoneByProId = {};
+    (pros || []).forEach(p => phoneByProId[p.id] = p.phone_number);
+    (cgs || []).forEach(c => phoneByProId[c.user_id] = c.phone_number);
+    const ratingByBooking = {};
+    (ratings || []).forEach(r => ratingByBooking[r.booking_id] = r.stars);
+
+    mount.innerHTML = data.map(b => {
+      const phone = phoneByProId[b.provider_id];
+      const existingRating = ratingByBooking[b.id];
+      return `
+      <div class="card">
+        <div class="type-tag">${escapeHtml(kindLabel(b.provider_type))}</div>
+        <div class="name">${escapeHtml(b.provider_name || 'Provider')}</div>
+        <div class="meta">₹${escapeHtml(String(b.amount))}${b.preferred_date ? ' · ' + escapeHtml(b.preferred_date) : ''} · ${escapeHtml(b.status)}</div>
+        ${(b.status === 'confirmed' || b.status === 'completed') && phone ? `<div style="font-size:.85rem;font-weight:700;color:#2a7b47;margin-bottom:10px">Provider contact: ${escapeHtml(phone)}</div>` : ''}
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${b.status === 'confirmed' ? `<button class="book-btn" onclick="markMeetingDone('${b.id}')">Mark Meeting Done</button>` : ''}
+          ${b.status === 'completed' ? `<button class="book-btn" style="background:#F3F4F6;color:#1C1917" onclick="viewInvoice(${JSON.stringify(b).replace(/'/g, "&#39;")})">View Invoice</button>` : ''}
+        </div>
+        ${b.status === 'completed' ? renderRatingWidget(b.id, existingRating) : ''}
+      </div>`;
+    }).join('');
+  }catch(err){
+    console.error('Load my bookings error:', err);
+    mount.innerHTML = `<div class="empty-note">Something went wrong loading your bookings.</div>`;
+  }
+}
+
+async function markMeetingDone(bookingId){
+  try{
+    const { error } = await sb.from('bookings').update({ status: 'completed', updated_at: new Date().toISOString() }).eq('id', bookingId);
+    if (error) { alert('Could not update: ' + error.message); return; }
+    loadMyBookings();
+  }catch(err){
+    console.error('Mark meeting done error:', err);
+    alert('Something went wrong.');
+  }
+}
+
+function renderRatingWidget(bookingId, existingStars){
+  if (existingStars) {
+    return `<div style="margin-top:10px;font-size:.85rem;color:#78716C">Your rating: ${'★'.repeat(existingStars)}${'☆'.repeat(5-existingStars)}</div>`;
+  }
+  const stars = [1,2,3,4,5].map(n => `<span onclick="submitRating('${bookingId}',${n})" style="cursor:pointer;font-size:1.3rem;color:#FF6B1A">★</span>`).join('');
+  return `<div style="margin-top:10px"><div style="font-size:.8rem;color:#78716C;margin-bottom:4px">Rate this provider:</div>${stars}</div>`;
+}
+
+async function submitRating(bookingId, stars){
+  try{
+    const { data: b } = await sb.from('bookings').select('provider_type, provider_id').eq('id', bookingId).maybeSingle();
+    const { error } = await sb.from('ratings').insert({
+      booking_id: bookingId,
+      provider_type: b?.provider_type || null,
+      provider_id: b?.provider_id || null,
+      parent_user_id: currentUserId,
+      stars: stars,
+    });
+    if (error) { alert('Could not submit rating: ' + error.message); return; }
+    loadMyBookings();
+  }catch(err){
+    console.error('Submit rating error:', err);
+    alert('Could not submit rating.');
+  }
+}
+
+function viewInvoice(booking){
+  const win = window.open('', '_blank');
+  const dateStr = new Date(booking.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+  win.document.write(`
+    <html><head><title>Invoice — NeuroSarathi</title>
+    <style>
+      body{font-family:Arial,sans-serif;padding:40px;color:#1C1917;max-width:600px;margin:0 auto}
+      h1{font-size:22px;margin-bottom:4px}
+      .sub{color:#78716C;font-size:13px;margin-bottom:24px}
+      table{width:100%;border-collapse:collapse;margin-top:20px}
+      td{padding:10px 0;border-bottom:1px solid #eee;font-size:14px}
+      td:last-child{text-align:right;font-weight:700}
+      .total{font-size:18px;font-weight:800;margin-top:16px;text-align:right}
+      .foot{margin-top:40px;font-size:12px;color:#A8A29E}
+    </style></head><body>
+      <h1>NeuroSarathi</h1>
+      <div class="sub">Consultation Invoice</div>
+      <table>
+        <tr><td>Provider</td><td>${escapeHtml(booking.provider_name || '')}</td></tr>
+        <tr><td>Service type</td><td>${escapeHtml(kindLabel(booking.provider_type))}</td></tr>
+        <tr><td>Date</td><td>${dateStr}</td></tr>
+        <tr><td>Status</td><td>Completed</td></tr>
+      </table>
+      <div class="total">Total paid: ₹${escapeHtml(String(booking.amount))}</div>
+      <div class="foot">This is a system-generated invoice from neurosarathi.com. For queries, contact info@neurosarathi.com.</div>
+      <script>window.print();${'</scr' + 'ipt>'}
+    </body></html>
+  `);
+  win.document.close();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sarathi Plans — NeuroSarathi</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Manrope',sans-serif;background:#F8FAFC;color:#1C1917;min-height:100vh}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600}
+  .topbar{background:#1a1a1a;color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+  .topbar .brand{font-family:'Fraunces',serif;font-weight:600;font-size:1.1rem}
+  .topbar a{color:#fff;text-decoration:none;font-size:.85rem;border:1px solid rgba(255,255,255,.3);padding:6px 14px;border-radius:50px}
+  .wrap{max-width:640px;margin:0 auto;padding:20px}
+  .usage-card{background:#fff;border:1px solid #EDE9E3;border-radius:16px;padding:18px;margin-bottom:20px}
+  .usage-card .plan-tag{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#FF6B1A;margin-bottom:6px}
+  .usage-card .headline{font-size:1.1rem;font-weight:700;margin-bottom:4px}
+  .usage-card .sub{font-size:.85rem;color:#78716C}
+  .section-title{font-family:'Fraunces',serif;font-weight:600;font-size:1.05rem;margin:24px 0 12px}
+  .plans-row{display:flex;flex-direction:column;gap:10px}
+  .plan-card{background:#fff;border:1.5px solid #EDE9E3;border-radius:14px;padding:16px 18px;display:flex;justify-content:space-between;align-items:center}
+  .plan-card.featured{border-color:#FF6B1A}
+  .plan-card .name{font-weight:700;font-size:.95rem}
+  .plan-card .desc{font-size:.78rem;color:#78716C;margin-top:2px}
+  .plan-card .price{font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem;white-space:nowrap;margin-left:14px}
+  .plan-card button{background:linear-gradient(135deg,#FF6B1A,#FF8C42);color:#fff;border:none;border-radius:50px;padding:9px 18px;font-family:inherit;font-size:.8rem;font-weight:800;cursor:pointer;margin-top:8px}
+  .payments-list{margin-top:24px}
+  .payment-row{background:#fff;border:1px solid #EDE9E3;border-radius:12px;padding:12px 14px;margin-bottom:8px;font-size:.85rem}
+  .payment-row .meta{color:#78716C;font-size:.78rem;margin-top:2px}
+  .refund-btn{background:#F3F4F6;color:#c0392b;border:1px solid #F0D0D0;border-radius:50px;padding:6px 14px;font-size:.75rem;font-weight:700;cursor:pointer;margin-top:8px}
+  .status-msg{font-size:.82rem;margin-top:10px;color:#c0392b}
+  .success-msg{font-size:.82rem;margin-top:10px;color:#2a7b47}
+  .empty-note{color:#888;font-size:.88rem;padding:20px 0;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">Sarathi Plans</div>
+  <a href="/parents.html">← Dashboard</a>
+</div>
+
+<div class="wrap">
+  <div class="usage-card" id="usageCard">
+    <div class="plan-tag">Loading…</div>
+  </div>
+
+  <div class="section-title">Sarathi</div>
+  <div class="plans-row">
+    <div class="plan-card">
+      <div><div class="name">1 Month</div><div class="desc">Chat freely, fair-use capped</div><button onclick="buyPlan('sarathi_1m')">Choose</button></div>
+      <div class="price">₹50</div>
+    </div>
+    <div class="plan-card">
+      <div><div class="name">6 Months</div><div class="desc">₹45.8/month · 50% refundable, 7 days</div><button onclick="buyPlan('sarathi_6m')">Choose</button></div>
+      <div class="price">₹275</div>
+    </div>
+    <div class="plan-card">
+      <div><div class="name">12 Months</div><div class="desc">₹41.7/month · 50% refundable, 7 days</div><button onclick="buyPlan('sarathi_12m')">Choose</button></div>
+      <div class="price">₹500</div>
+    </div>
+  </div>
+
+  <div class="section-title">Sarathi Unlimited</div>
+  <div class="plans-row">
+    <div class="plan-card featured">
+      <div><div class="name">1 Month</div><div class="desc">No daily cap · 50% refundable, 7 days</div><button onclick="buyPlan('unlimited_1m')">Choose</button></div>
+      <div class="price">₹199</div>
+    </div>
+    <div class="plan-card featured">
+      <div><div class="name">6 Months</div><div class="desc">₹166.5/month · 50% refundable, 7 days</div><button onclick="buyPlan('unlimited_6m')">Choose</button></div>
+      <div class="price">₹999</div>
+    </div>
+    <div class="plan-card featured">
+      <div><div class="name">12 Months</div><div class="desc">₹150/month · 50% refundable, 7 days</div><button onclick="buyPlan('unlimited_12m')">Choose</button></div>
+      <div class="price">₹1,799</div>
+    </div>
+  </div>
+
+  <div class="status-msg" id="statusMsg"></div>
+
+  <div class="payments-list">
+    <div class="section-title">Your Payments</div>
+    <div id="paymentsMount"><div class="empty-note">Loading…</div></div>
+  </div>
+</div>
+
+<script>
+const NS_URL = 'https://qvuenvngwgcknawfsnxl.supabase.co';
+const NS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2dWVudm5nd2dja25hd2ZzbnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MzI1OTksImV4cCI6MjA5ODMwODU5OX0.MZgac469tvi9Xq9gyaRbHDc9t88Ww9dN8ldZ8JvKGVI';
+let sb = null;
+let currentUserId = null;
+
+const PLAN_LABELS = {
+  sarathi_1m: 'Sarathi — 1 Month', sarathi_6m: 'Sarathi — 6 Months', sarathi_12m: 'Sarathi — 12 Months',
+  unlimited_1m: 'Unlimited — 1 Month', unlimited_6m: 'Unlimited — 6 Months', unlimited_12m: 'Unlimited — 12 Months',
+};
+
+(async function init(){
+  sb = window.supabase.createClient(NS_URL, NS_KEY);
+  const { data: userData } = await sb.auth.getUser();
+  if (!userData || !userData.user) {
+    window.location.href = '/enterportal.html?redirect=sarathi-billing.html';
+    return;
+  }
+  currentUserId = userData.user.id;
+  await loadUsage();
+  await loadPayments();
+})();
+
+async function loadUsage(){
+  const card = document.getElementById('usageCard');
+  try{
+    const { data } = await sb.from('sarathi_usage').select('*').eq('user_id', currentUserId).maybeSingle();
+    if (!data || data.plan === 'free') {
+      const used = data ? data.free_messages_used : 0;
+      card.innerHTML = `
+        <div class="plan-tag">Free Plan</div>
+        <div class="headline">${Math.max(0, 10 - used)} free messages left this month</div>
+        <div class="sub">Resets monthly. Upgrade below for unlimited-feeling daily chats.</div>
+      `;
+      return;
+    }
+    const expiry = data.subscription_expires_at ? new Date(data.subscription_expires_at) : null;
+    const active = expiry && expiry > new Date();
+    card.innerHTML = `
+      <div class="plan-tag">${data.plan === 'unlimited' ? 'Sarathi Unlimited' : 'Sarathi'}</div>
+      <div class="headline">${active ? 'Active subscription' : 'Subscription expired'}</div>
+      <div class="sub">${expiry ? (active ? 'Renews/expires on ' : 'Expired on ') + expiry.toLocaleDateString('en-IN') : ''}</div>
+    `;
+  }catch(err){
+    console.error('Load usage error:', err);
+    card.innerHTML = `<div class="plan-tag">Free Plan</div><div class="headline">Could not load usage</div>`;
+  }
+}
+
+async function loadPayments(){
+  const mount = document.getElementById('paymentsMount');
+  try{
+    const { data, error } = await sb.from('sarathi_payments').select('*').eq('user_id', currentUserId).order('purchased_at', { ascending: false });
+    if (error || !data || !data.length) { mount.innerHTML = `<div class="empty-note">No payments yet.</div>`; return; }
+    mount.innerHTML = data.map(p => {
+      const purchasedAt = new Date(p.purchased_at);
+      const withinWindow = (Date.now() - purchasedAt.getTime()) < 7 * 24 * 60 * 60 * 1000;
+      const canRefund = p.refund_eligible && p.refund_status === 'none' && withinWindow;
+      return `
+        <div class="payment-row">
+          <div><strong>${PLAN_LABELS[p.plan] || p.plan}</strong> — ₹${p.amount}</div>
+          <div class="meta">${purchasedAt.toLocaleDateString('en-IN')} · ${p.refund_status === 'refunded' ? `Refunded ₹${p.refund_amount}` : p.refund_status === 'requested' ? 'Refund in progress' : (p.refund_eligible ? (withinWindow ? '50% refundable until ' + new Date(purchasedAt.getTime() + 7*24*60*60*1000).toLocaleDateString('en-IN') : 'Refund window closed') : 'Not refundable')}</div>
+          ${canRefund ? `<button class="refund-btn" onclick="requestRefund('${p.id}')">Request 50% Refund</button>` : ''}
+        </div>
+      `;
+    }).join('');
+  }catch(err){
+    console.error('Load payments error:', err);
+    mount.innerHTML = `<div class="empty-note">Could not load payment history.</div>`;
+  }
+}
+
+async function buyPlan(plan){
+  const statusEl = document.getElementById('statusMsg');
+  statusEl.textContent = '';
+  statusEl.className = 'status-msg';
+  try{
+    const { data: { session } } = await sb.auth.getSession();
+    const orderRes = await fetch(`${NS_URL}/functions/v1/create-sarathi-order`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+      body: JSON.stringify({ plan }),
+    });
+    const orderData = await orderRes.json();
+    if (!orderRes.ok || !orderData.orderId) {
+      statusEl.textContent = orderData.error || 'Could not start payment.';
+      return;
+    }
+
+    const rzp = new Razorpay({
+      key: orderData.keyId,
+      amount: orderData.amount,
+      currency: 'INR',
+      name: 'NeuroSarathi',
+      description: PLAN_LABELS[plan],
+      order_id: orderData.orderId,
+      handler: async function(response){
+        try{
+          const verifyRes = await fetch(`${NS_URL}/functions/v1/verify-sarathi-payment`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              plan,
+            }),
+          });
+          const verifyData = await verifyRes.json();
+          if (!verifyRes.ok || !verifyData.success) {
+            statusEl.textContent = verifyData.error || 'Payment succeeded but activation failed. Contact support with payment ID: ' + response.razorpay_payment_id;
+            return;
+          }
+          statusEl.className = 'success-msg';
+          statusEl.textContent = '✓ Subscription activated!';
+          await loadUsage();
+          await loadPayments();
+        }catch(err){
+          console.error('Verify error:', err);
+          statusEl.textContent = 'Payment succeeded but something went wrong. Contact support with payment ID: ' + response.razorpay_payment_id;
+        }
+      },
+      theme: { color: '#FF6B1A' },
+    });
+    rzp.open();
+  }catch(err){
+    console.error('Buy plan error:', err);
+    statusEl.textContent = 'Something went wrong. Please try again.';
+  }
+}
+
+async function requestRefund(paymentId){
+  if (!confirm('Request a 50% refund for this plan? This will end your current subscription immediately.')) return;
+  const statusEl = document.getElementById('statusMsg');
+  statusEl.textContent = '';
+  try{
+    const { data: { session } } = await sb.auth.getSession();
+    const res = await fetch(`${NS_URL}/functions/v1/refund-sarathi-payment`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+      body: JSON.stringify({ payment_id: paymentId }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      statusEl.className = 'status-msg';
+      statusEl.textContent = data.error || 'Refund could not be processed.';
+      return;
+    }
+    statusEl.className = 'success-msg';
+    statusEl.textContent = `✓ ₹${data.refundAmount} refunded.`;
+    await loadUsage();
+    await loadPayments();
+  }catch(err){
+    console.error('Refund error:', err);
+    statusEl.textContent = 'Something went wrong requesting the refund.';
+  }
+}
+</script>
+</body>
+</html>

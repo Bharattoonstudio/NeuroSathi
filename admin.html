@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — NeuroSarathi</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@sbAdmin/supabase-js@2"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Manrope',sans-serif;background:#f4f2ee;color:#1a1a1a;min-height:100vh}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600}
+  #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .login-card{background:#fff;border-radius:24px;padding:36px 32px;max-width:400px;width:100%;box-shadow:0 20px 50px -20px rgba(0,0,0,0.15)}
+  .login-card h1{font-size:1.6rem;margin-bottom:4px}
+  .login-card p.sub{color:#888;font-size:.9rem;margin-bottom:24px}
+  input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #ddd;margin-bottom:12px;font-family:inherit;font-size:.92rem;box-sizing:border-box}
+  input:focus{outline:none;border-color:#FF6B1A}
+  .btn{width:100%;padding:13px;background:#FF6B1A;color:#fff;border:none;border-radius:50px;font-weight:700;font-size:.95rem;cursor:pointer;transition:opacity .2s}
+  .btn:hover{opacity:.9}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .error-msg{color:#c0392b;font-size:.82rem;margin-top:10px;min-height:1em}
+  #dashboard{display:none}
+  .topbar{background:#1a1a1a;color:#fff;padding:14px 24px;display:flex;justify-content:space-between;align-items:center}
+  .topbar .brand{font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem}
+  .topbar button{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:7px 16px;border-radius:50px;font-size:.8rem;cursor:pointer}
+  .tabs{display:flex;gap:8px;padding:16px 24px 0;background:#fff;border-bottom:1px solid #eee}
+  .tab{padding:10px 18px;border-radius:12px 12px 0 0;font-size:.88rem;font-weight:600;cursor:pointer;color:#888}
+  .tab.active{color:#FF6B1A;border-bottom:3px solid #FF6B1A}
+  .content{padding:24px;max-width:900px;margin:0 auto}
+  .panel{display:none}
+  .panel.active{display:block}
+  .panel h2{font-size:1.3rem;margin-bottom:4px}
+  .panel .sub{color:#888;font-size:.88rem;margin-bottom:20px}
+  .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+  .stat-card{background:#fff;border-radius:16px;padding:16px;border:1px solid #eee}
+  .stat-card .num{font-size:1.6rem;font-weight:700;font-family:'Fraunces',serif;color:#1a1a1a}
+  .stat-card .label{font-size:.75rem;color:#888;text-transform:uppercase;letter-spacing:.3px}
+  .item-card{background:#fff;border:1px solid #eee;border-radius:16px;padding:16px;margin-bottom:10px}
+  .item-card .name{font-weight:700;font-size:1rem}
+  .item-card .meta{font-size:.8rem;color:#888;margin:4px 0 10px}
+  .status-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700}
+  .status-submitted{background:#fff3e0;color:#e8a33d}
+  .status-under_review{background:#e3f2fd;color:#1976d2}
+  .status-verified{background:#e8f5e9;color:#2a7b47}
+  .status-rejected{background:#ffebee;color:#c0392b}
+  .action-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .action-row button{flex:1;min-width:80px;padding:9px;border:none;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;color:#fff}
+  .action-row button:disabled{opacity:.5;cursor:not-allowed}
+  .btn-verify{background:#2a7b47}
+  .btn-review{background:#e8a33d}
+  .btn-reject{background:#c0392b}
+  .empty-note{color:#888;font-size:.88rem;padding:20px;text-align:center}
+  .search-box{width:100%;padding:11px 14px;border-radius:12px;border:1px solid #ddd;margin-bottom:16px;font-family:inherit;box-sizing:border-box}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-card">
+    <h1>Admin Access</h1>
+    <p class="sub">NeuroSarathi staff only.</p>
+    <input type="email" id="loginEmail" placeholder="Email">
+    <input type="password" id="loginPassword" placeholder="Password">
+    <button class="btn" id="loginBtn">Log In</button>
+    <div class="error-msg" id="loginError"></div>
+    <div style="text-align:center;margin-top:14px">
+      <a href="javascript:void(0)" id="forgotPasswordLink" style="color:#78716C;font-size:0.85rem;text-decoration:underline">Forgot password?</a>
+    </div>
+  </div>
+</div>
+
+<div id="dashboard">
+  <div class="topbar">
+    <div class="brand">NeuroSarathi Admin</div>
+    <button onclick="doAdminLogout()">Log out</button>
+  </div>
+  <div class="tabs">
+    <div class="tab active" data-panel="panelOverview" onclick="switchTab('panelOverview')">Overview</div>
+    <div class="tab" data-panel="panelProfessionals" onclick="switchTab('panelProfessionals')">Professionals</div>
+    <div class="tab" data-panel="panelBookings" onclick="switchTab('panelBookings')">Bookings</div>
+    <div class="tab" data-panel="panelPayouts" onclick="switchTab('panelPayouts')">Payouts</div>
+    <div class="tab" data-panel="panelUsers" onclick="switchTab('panelUsers')">Users</div>
+  </div>
+  <div class="content">
+    <div class="panel active" id="panelOverview">
+      <h2>Overview</h2>
+      <p class="sub">Snapshot of platform activity.</p>
+      <div class="stat-row" id="overviewStats">
+        <div class="stat-card"><div class="num">—</div><div class="label">Professionals</div></div>
+        <div class="stat-card"><div class="num">—</div><div class="label">Pending Review</div></div>
+        <div class="stat-card"><div class="num">—</div><div class="label">Verified</div></div>
+        <div class="stat-card"><div class="num">—</div><div class="label">Children Registered</div></div>
+        <div class="stat-card"><div class="num">—</div><div class="label">New Bookings</div></div>
+        <div class="stat-card"><div class="num">—</div><div class="label">Payouts Pending</div></div>
+      </div>
+    </div>
+    <div class="panel" id="panelProfessionals">
+      <h2>Professional Verification</h2>
+      <p class="sub">Review and approve professional registrations.</p>
+      <input class="search-box" id="profSearch" placeholder="Search by name or city…" oninput="renderProfessionals()">
+      <div id="profList"><div class="empty-note">Loading…</div></div>
+    </div>
+    <div class="panel" id="panelBookings">
+      <h2>Bookings</h2>
+      <p class="sub">Consultations/engagements requested by parents. Mark a booking completed once the session is done — this auto-generates the payout entry.</p>
+      <input class="search-box" id="bookingSearch" placeholder="Search by provider or parent…" oninput="renderBookings()">
+      <div id="bookingList"><div class="empty-note">Loading…</div></div>
+    </div>
+    <div class="panel" id="panelPayouts">
+      <h2>Payouts</h2>
+      <p class="sub">90% of each completed booking is owed to the provider. Pay them manually via UPI, then mark it paid here.</p>
+      <div class="stat-row" id="payoutStats">
+        <div class="stat-card"><div class="num">—</div><div class="label">Total Collected</div></div>
+        <div class="stat-card"><div class="num">—</div><div class="label">Platform Fee Earned</div></div>
+        <div class="stat-card"><div class="num">—</div><div class="label">Pending Payout</div></div>
+      </div>
+      <input class="search-box" id="payoutSearch" placeholder="Search by provider name…" oninput="renderPayouts()">
+      <div id="payoutList"><div class="empty-note">Loading…</div></div>
+    </div>
+    <div class="panel" id="panelUsers">
+      <h2>Users</h2>
+      <p class="sub">Registered families, based on child profiles on file. Full account management (email, password resets) requires Supabase Dashboard access directly, since that needs service-role permissions this page intentionally doesn't hold.</p>
+      <input class="search-box" id="userSearch" placeholder="Search by child name or condition…" oninput="renderUsers()">
+      <div id="userList"><div class="empty-note">Loading…</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://qvuenvngwgcknawfsnxl.sbAdmin.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2dWVudm5nd2dja25hd2ZzbnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MzI1OTksImV4cCI6MjA5ODMwODU5OX0.MZgac469tvi9Xq9gyaRbHDc9t88Ww9dN8ldZ8JvKGVI";
+const ADMIN_EMAILS = ['bharattoonstudio@gmail.com'];
+
+let sbAdmin = null;
+let professionalsCache = [];
+let usersCache = [];
+let bookingsCache = [];
+let payoutsCache = [];
+let currentSession = null;
+
+(async function init() {
+  try {
+    sbAdmin = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('Supabase initialized');
+    const { data, error } = await sbAdmin.auth.getSession();
+    if (error) { console.error('Session error:', error); return; }
+    currentSession = data.session;
+    if (currentSession && currentSession.user && ADMIN_EMAILS.includes(currentSession.user.email)) {
+      showDashboard();
+    } else {
+      if (currentSession) { await sbAdmin.auth.signOut(); currentSession = null; }
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('dashboard').style.display = 'none';
+    }
+  } catch (err) {
+    console.error('Init error:', err);
+    document.getElementById('loginError').textContent = 'Failed to initialize. Check console.';
+  }
+})();
+
+document.addEventListener('DOMContentLoaded', function() {
+  const loginBtn = document.getElementById('loginBtn');
+  loginBtn.addEventListener('click', doAdminLogin);
+  document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doAdminLogin();
+  });
+  document.getElementById('loginEmail').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doAdminLogin();
+  });
+  document.getElementById('forgotPasswordLink').addEventListener('click', sendAdminPasswordReset);
+});
+
+async function sendAdminPasswordReset() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const errEl = document.getElementById('loginError');
+  errEl.style.color = '';
+  errEl.textContent = '';
+
+  if (!email) {
+    errEl.textContent = 'Enter your email above first, then tap "Forgot password?" again.';
+    return;
+  }
+  if (!ADMIN_EMAILS.includes(email)) {
+    errEl.textContent = 'This email is not authorized for admin access.';
+    return;
+  }
+
+  try {
+    const { error } = await sbAdmin.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/reset-password.html',
+    });
+    if (error) throw error;
+    errEl.style.color = '#2a7b47';
+    errEl.textContent = 'Password reset link sent — check your inbox (and spam folder).';
+  } catch (err) {
+    errEl.textContent = err.message || 'Something went wrong sending the reset email.';
+  }
+}
+
+async function doAdminLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
+  errEl.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'Logging in…';
+  try {
+    if (!email || !password) {
+      errEl.textContent = 'Enter both email and password.';
+      btn.disabled = false; btn.textContent = 'Log In'; return;
+    }
+    if (!ADMIN_EMAILS.includes(email)) {
+      errEl.textContent = 'This email is not authorized for admin access.';
+      btn.disabled = false; btn.textContent = 'Log In'; return;
+    }
+    const { data, error } = await sbAdmin.auth.signInWithPassword({ email, password });
+    if (error) {
+      errEl.textContent = error.message;
+      btn.disabled = false; btn.textContent = 'Log In'; return;
+    }
+    if (data && data.session) {
+      currentSession = data.session;
+      showDashboard();
+    } else {
+      errEl.textContent = 'Login failed. Please try again.';
+      btn.disabled = false; btn.textContent = 'Log In';
+    }
+  } catch (err) {
+    console.error('Login error:', err);
+    errEl.textContent = err.message || 'Something went wrong.';
+    btn.disabled = false; btn.textContent = 'Log In';
+  }
+}
+
+async function doAdminLogout() {
+  try {
+    await sbAdmin.auth.signOut();
+    currentSession = null;
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('loginError').textContent = '';
+  } catch (err) { console.error('Logout error:', err); }
+}
+
+function showDashboard() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  loadOverview();
+  loadProfessionals();
+  loadBookings();
+  loadPayouts();
+  loadUsers();
+}
+
+function switchTab(panelId) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.panel === panelId));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === panelId));
+}
+
+async function loadOverview() {
+  const statEls = document.querySelectorAll('#overviewStats .num');
+  try {
+    const [{ count: totalProf }, { count: pending }, { count: verified }, { count: children }, { count: newBookings }, { count: pendingPayouts }] = await Promise.all([
+      sbAdmin.from('professionals').select('*', { count: 'exact', head: true }),
+      sbAdmin.from('professionals').select('*', { count: 'exact', head: true }).in('verification_status', ['submitted', 'under_review']),
+      sbAdmin.from('professionals').select('*', { count: 'exact', head: true }).eq('verification_status', 'verified'),
+      sbAdmin.from('children').select('*', { count: 'exact', head: true }),
+      sbAdmin.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'requested'),
+      sbAdmin.from('payouts').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+    ]);
+    statEls[0].textContent = totalProf ?? '—';
+    statEls[1].textContent = pending ?? '—';
+    statEls[2].textContent = verified ?? '—';
+    statEls[3].textContent = children ?? '—';
+    statEls[4].textContent = newBookings ?? '—';
+    statEls[5].textContent = pendingPayouts ?? '—';
+  } catch (err) { console.error('Overview error:', err); }
+}
+
+async function loadProfessionals() {
+  const el = document.getElementById('profList');
+  try {
+    const { data, error } = await sbAdmin
+      .from('professionals')
+      .select('id, display_name, professional_type, city, state, verification_status, created_at, credential_doc_path')
+      .order('created_at', { ascending: false });
+    if (error) {
+      el.innerHTML = `<div class="empty-note">Couldn't load: ${escapeHtml(error.message)}</div>`;
+      return;
+    }
+    professionalsCache = data || [];
+    renderProfessionals();
+  } catch (err) {
+    console.error('Load professionals error:', err);
+    el.innerHTML = `<div class="empty-note">Error loading professionals.</div>`;
+  }
+}
+
+function renderProfessionals() {
+  const el = document.getElementById('profList');
+  const q = (document.getElementById('profSearch').value || '').toLowerCase();
+  const filtered = professionalsCache.filter(p =>
+    (p.display_name || '').toLowerCase().includes(q) || (p.city || '').toLowerCase().includes(q)
+  );
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty-note">${professionalsCache.length ? 'No matches.' : 'No professionals registered yet.'}</div>`;
+    return;
+  }
+  el.innerHTML = filtered.map(p => `
+    <div class="item-card">
+      <div class="name">${escapeHtml(p.display_name)}</div>
+      <div class="meta">${escapeHtml(p.professional_type || '')} · ${escapeHtml(p.city || '')}${p.state ? ', ' + escapeHtml(p.state) : ''}
+        &nbsp;<span class="status-badge status-${escapeHtml(p.verification_status || 'submitted')}">${escapeHtml((p.verification_status || 'submitted').replace('_',' '))}</span>
+      </div>
+      <div class="action-row">
+        <button class="btn-verify" onclick="setVerification('${p.id}','verified')">✓ Verify</button>
+        <button class="btn-review" onclick="setVerification('${p.id}','under_review')">Under Review</button>
+        <button class="btn-reject" onclick="setVerification('${p.id}','rejected')">✕ Reject</button>
+        ${p.credential_doc_path ? `<button class="btn-review" onclick="viewCredentialDoc('${escapeHtml(p.credential_doc_path)}')">📄 View Document</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+async function viewCredentialDoc(path){
+  try{
+    const { data, error } = await sbAdmin.storage.from('credentials').createSignedUrl(path, 300);
+    if (error || !data?.signedUrl) { alert('Could not open document: ' + (error?.message || 'unknown error')); return; }
+    window.open(data.signedUrl, '_blank');
+  }catch(err){
+    console.error('View credential doc error:', err);
+    alert('Something went wrong opening the document.');
+  }
+}
+
+async function setVerification(id, status) {
+  try {
+    const { data: { session } } = await sbAdmin.auth.getSession();
+    if (!session || !session.user || !ADMIN_EMAILS.includes(session.user.email)) {
+      alert('Your admin session has expired. Please log in again.');
+      doAdminLogout();
+      return;
+    }
+    const { error } = await sbAdmin
+      .from('professionals')
+      .update({ verification_status: status, verification_date: new Date().toISOString() })
+      .eq('id', id);
+    if (error) { alert('Update failed: ' + error.message); return; }
+    await loadProfessionals();
+    await loadOverview();
+  } catch (err) {
+    console.error('Set verification error:', err);
+    alert('Error updating verification status.');
+  }
+}
+
+async function loadUsers() {
+  const el = document.getElementById('userList');
+  try {
+    const { data, error } = await sbAdmin
+      .from('children')
+      .select('id, name, age, conditions, user_id, created_at')
+      .order('created_at', { ascending: false })
+      .limit(200);
+    if (error) {
+      el.innerHTML = `<div class="empty-note">Couldn't load: ${escapeHtml(error.message)}</div>`;
+      return;
+    }
+    usersCache = data || [];
+    renderUsers();
+  } catch (err) {
+    console.error('Load users error:', err);
+    el.innerHTML = `<div class="empty-note">Error loading users.</div>`;
+  }
+}
+
+function renderUsers() {
+  const el = document.getElementById('userList');
+  const q = (document.getElementById('userSearch').value || '').toLowerCase();
+  const filtered = usersCache.filter(c =>
+    (c.name || '').toLowerCase().includes(q) || (c.conditions || '').toLowerCase().includes(q)
+  );
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty-note">${usersCache.length ? 'No matches.' : 'No child profiles logged yet.'}</div>`;
+    return;
+  }
+  el.innerHTML = filtered.map(c => `
+    <div class="item-card">
+      <div class="name">${escapeHtml(c.name || 'Unnamed child')}</div>
+      <div class="meta">${c.age ? c.age + ' yrs · ' : ''}${escapeHtml(c.conditions || 'No concerns noted')}</div>
+    </div>
+  `).join('');
+}
+
+async function loadBookings() {
+  const el = document.getElementById('bookingList');
+  try {
+    const { data, error } = await sbAdmin
+      .from('bookings')
+      .select('id, provider_type, provider_name, amount, preferred_date, status, notes, parent_user_id, created_at')
+      .order('created_at', { ascending: false })
+      .limit(300);
+    if (error) {
+      el.innerHTML = `<div class="empty-note">Couldn't load: ${escapeHtml(error.message)}</div>`;
+      return;
+    }
+    bookingsCache = data || [];
+    renderBookings();
+  } catch (err) {
+    console.error('Load bookings error:', err);
+    el.innerHTML = `<div class="empty-note">Error loading bookings.</div>`;
+  }
+}
+
+function renderBookings() {
+  const el = document.getElementById('bookingList');
+  const q = (document.getElementById('bookingSearch').value || '').toLowerCase();
+  const filtered = bookingsCache.filter(b => (b.provider_name || '').toLowerCase().includes(q));
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty-note">${bookingsCache.length ? 'No matches.' : 'No bookings yet.'}</div>`;
+    return;
+  }
+  el.innerHTML = filtered.map(b => `
+    <div class="item-card">
+      <div class="name">${escapeHtml(b.provider_name || 'Unknown provider')} <span style="font-weight:400;color:#888">(${escapeHtml(b.provider_type)})</span></div>
+      <div class="meta">₹${escapeHtml(String(b.amount))}${b.preferred_date ? ' · ' + escapeHtml(b.preferred_date) : ''}
+        &nbsp;<span class="status-badge status-${b.status === 'completed' ? 'verified' : b.status === 'cancelled' ? 'rejected' : b.status === 'confirmed' ? 'under_review' : 'submitted'}">${escapeHtml(b.status)}</span>
+      </div>
+      ${b.notes ? `<div class="meta">${escapeHtml(b.notes)}</div>` : ''}
+      <div class="action-row">
+        ${b.status !== 'completed' && b.status !== 'cancelled' ? `<button class="btn-verify" onclick="setBookingStatus('${b.id}','completed')">Mark Completed</button>` : ''}
+        ${b.status === 'requested' ? `<button class="btn-review" onclick="setBookingStatus('${b.id}','confirmed')">Confirm</button>` : ''}
+        ${b.status !== 'completed' && b.status !== 'cancelled' ? `<button class="btn-reject" onclick="setBookingStatus('${b.id}','cancelled')">Cancel</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+async function setBookingStatus(id, status) {
+  try {
+    const { error } = await sbAdmin.from('bookings').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) { alert('Update failed: ' + error.message); return; }
+    await loadBookings();
+    await loadPayouts();
+    await loadOverview();
+  } catch (err) {
+    console.error('Set booking status error:', err);
+    alert('Error updating booking.');
+  }
+}
+
+async function loadPayouts() {
+  const el = document.getElementById('payoutList');
+  try {
+    const { data, error } = await sbAdmin
+      .from('payouts')
+      .select('id, provider_type, provider_name, upi_id, gross_amount, platform_fee, payout_amount, status, created_at, paid_at')
+      .order('created_at', { ascending: false })
+      .limit(300);
+    if (error) {
+      el.innerHTML = `<div class="empty-note">Couldn't load: ${escapeHtml(error.message)}</div>`;
+      return;
+    }
+    payoutsCache = data || [];
+    renderPayouts();
+    renderPayoutStats();
+  } catch (err) {
+    console.error('Load payouts error:', err);
+    el.innerHTML = `<div class="empty-note">Error loading payouts.</div>`;
+  }
+}
+
+function renderPayoutStats() {
+  const statEls = document.querySelectorAll('#payoutStats .num');
+  const totalCollected = payoutsCache.reduce((s, p) => s + Number(p.gross_amount || 0), 0);
+  const totalFee = payoutsCache.reduce((s, p) => s + Number(p.platform_fee || 0), 0);
+  const pending = payoutsCache.filter(p => p.status === 'pending').reduce((s, p) => s + Number(p.payout_amount || 0), 0);
+  statEls[0].textContent = '₹' + totalCollected.toLocaleString('en-IN');
+  statEls[1].textContent = '₹' + totalFee.toLocaleString('en-IN');
+  statEls[2].textContent = '₹' + pending.toLocaleString('en-IN');
+}
+
+function renderPayouts() {
+  const el = document.getElementById('payoutList');
+  const q = (document.getElementById('payoutSearch').value || '').toLowerCase();
+  const filtered = payoutsCache.filter(p => (p.provider_name || '').toLowerCase().includes(q));
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty-note">${payoutsCache.length ? 'No matches.' : 'No payouts yet — these appear automatically once a booking is marked Completed.'}</div>`;
+    return;
+  }
+  el.innerHTML = filtered.map(p => `
+    <div class="item-card">
+      <div class="name">${escapeHtml(p.provider_name || 'Unknown provider')} <span style="font-weight:400;color:#888">(${escapeHtml(p.provider_type)})</span></div>
+      <div class="meta">
+        Booking amount: ₹${escapeHtml(String(p.gross_amount))} · Platform fee (10%): ₹${escapeHtml(String(p.platform_fee))}<br>
+        <strong>Pay provider: ₹${escapeHtml(String(p.payout_amount))}</strong> to <strong>${escapeHtml(p.upi_id || 'no UPI ID on file — contact provider')}</strong>
+        &nbsp;<span class="status-badge status-${p.status === 'paid' ? 'verified' : 'submitted'}">${escapeHtml(p.status)}</span>
+      </div>
+      ${p.status === 'pending' ? `<div class="action-row"><button class="btn-verify" onclick="markPayoutPaid('${p.id}')">Mark as Paid</button></div>` : `<div class="meta">Paid on ${p.paid_at ? new Date(p.paid_at).toLocaleDateString('en-IN') : ''}</div>`}
+    </div>
+  `).join('');
+}
+
+async function markPayoutPaid(id) {
+  try {
+    const { error } = await sbAdmin.from('payouts').update({ status: 'paid', paid_at: new Date().toISOString() }).eq('id', id);
+    if (error) { alert('Update failed: ' + error.message); return; }
+    await loadPayouts();
+    await loadOverview();
+  } catch (err) {
+    console.error('Mark payout paid error:', err);
+    alert('Error updating payout.');
+  }
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+</script>
+</body>
+</html>

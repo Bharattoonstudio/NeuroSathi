@@ -4,45 +4,45 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Find Support — NeuroSarathi</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Manrope',sans-serif;background:#F8FAFC;color:#1C1917;min-height:100vh}
-  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600}
-  .topbar{background:#1a1a1a;color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
-  .topbar .brand{font-family:'Fraunces',serif;font-weight:600;font-size:1.1rem}
+  body{font-family:'Inter',sans-serif;background:#fffaf5;color:#0e1524;min-height:100vh}
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif;font-weight:600}
+  .topbar{background:#0e1524;color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+  .topbar .brand{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1.1rem}
   .topbar a{color:#fff;text-decoration:none;font-size:.85rem;border:1px solid rgba(255,255,255,.3);padding:6px 14px;border-radius:50px}
   .wrap{max-width:720px;margin:0 auto;padding:20px}
   .filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px}
   .filters button{flex:none;padding:9px 16px;border-radius:50px;border:1.5px solid #E5E7EB;background:#fff;font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;color:#57534E}
-  .filters button.active{background:#1C1917;color:#fff;border-color:#1C1917}
+  .filters button.active{background:#0e1524;color:#fff;border-color:#0e1524}
   .search-box{width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid #E5E7EB;margin-bottom:16px;font-family:inherit;font-size:.9rem;box-sizing:border-box}
-  .card{background:#fff;border:1px solid #EDE9E3;border-radius:16px;padding:16px;margin-bottom:12px}
-  .card .type-tag{display:inline-block;font-size:.68rem;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#FF6B1A;margin-bottom:4px}
+  .card{background:#fff;border:1px solid #f2e4d6;border-radius:16px;padding:16px;margin-bottom:12px}
+  .card .type-tag{display:inline-block;font-size:.68rem;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#ff8a5c;margin-bottom:4px}
   .card .name{font-size:1.05rem;font-weight:700}
-  .card .meta{font-size:.83rem;color:#78716C;margin:4px 0 10px}
-  .card .fee{font-size:.9rem;font-weight:700;color:#1C1917;margin-bottom:10px}
+  .card .meta{font-size:.83rem;color:#7b8194;margin:4px 0 10px}
+  .card .fee{font-size:.9rem;font-weight:700;color:#0e1524;margin-bottom:10px}
   .card .bio{font-size:.85rem;color:#57534E;margin-bottom:12px;line-height:1.5}
-  .book-btn{background:linear-gradient(135deg,#FF6B1A,#FF8C42);color:#fff;border:none;border-radius:50px;padding:11px 22px;font-family:inherit;font-size:.85rem;font-weight:800;cursor:pointer}
+  .book-btn{background:linear-gradient(135deg,#ff8a5c,#ffb083);color:#fff;border:none;border-radius:50px;padding:11px 22px;font-family:inherit;font-size:.85rem;font-weight:800;cursor:pointer}
   .book-btn:disabled{opacity:.5;cursor:not-allowed}
   .empty-note{color:#888;font-size:.88rem;padding:40px 20px;text-align:center}
   .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end;justify-content:center}
   .modal-bg.active{display:flex}
   .modal{background:#fff;border-radius:20px 20px 0 0;padding:24px 20px 32px;width:100%;max-width:480px}
   .modal h3{font-size:1.15rem;margin-bottom:6px}
-  .modal .sub{font-size:.85rem;color:#78716C;margin-bottom:18px}
+  .modal .sub{font-size:.85rem;color:#7b8194;margin-bottom:18px}
   .modal label{display:block;font-size:.8rem;font-weight:700;color:#57534E;margin-bottom:6px}
   .modal input,.modal textarea{width:100%;padding:11px 13px;border-radius:10px;border:1.5px solid #E5E7EB;margin-bottom:14px;font-family:inherit;font-size:.88rem;box-sizing:border-box}
-  .amount-row{display:flex;justify-content:space-between;align-items:center;background:#F8FAFC;border-radius:12px;padding:14px 16px;margin-bottom:16px}
+  .amount-row{display:flex;justify-content:space-between;align-items:center;background:#fffaf5;border-radius:12px;padding:14px 16px;margin-bottom:16px}
   .amount-row .label{font-size:.85rem;color:#57534E}
-  .amount-row .value{font-size:1.3rem;font-weight:800;font-family:'Fraunces',serif}
+  .amount-row .value{font-size:1.3rem;font-weight:800;font-family:'Space Grotesk',sans-serif}
   .fee-note{font-size:.75rem;color:#A8A29E;margin-top:-10px;margin-bottom:16px}
   .modal-actions{display:flex;gap:10px}
   .modal-actions button{flex:1;padding:13px;border-radius:50px;font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;border:none}
   .btn-cancel{background:#F3F4F6;color:#57534E}
-  .btn-pay{background:linear-gradient(135deg,#FF6B1A,#FF8C42);color:#fff}
+  .btn-pay{background:linear-gradient(135deg,#ff8a5c,#ffb083);color:#fff}
   .btn-pay:disabled{opacity:.6;cursor:not-allowed}
   .status-msg{font-size:.82rem;margin-top:10px;min-height:1em;color:#c0392b}
   .success-msg{font-size:.85rem;color:#2a7b47;font-weight:700}
@@ -360,7 +360,7 @@ async function startPayment(){
           btn.disabled = false; btn.textContent = 'Pay & Book →';
         }
       },
-      theme: { color: '#FF6B1A' },
+      theme: { color: '#ff8a5c' },
     });
     rzp.open();
   }catch(err){
@@ -377,7 +377,7 @@ function renderVideoEmbed(url){
       const videoId = ytMatch[1];
       return `<div style="margin:10px 0;border-radius:12px;overflow:hidden;aspect-ratio:16/9"><iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}" title="Introduction video" frameborder="0" allowfullscreen></iframe></div>`;
     }
-    return `<div style="margin:10px 0"><a href="${escapeHtml(url)}" target="_blank" rel="noopener" style="font-size:.82rem;color:#FF6B1A;font-weight:700">▶ Watch introduction video</a></div>`;
+    return `<div style="margin:10px 0"><a href="${escapeHtml(url)}" target="_blank" rel="noopener" style="font-size:.82rem;color:#ff8a5c;font-weight:700">▶ Watch introduction video</a></div>`;
   }catch(e){
     return '';
   }
@@ -431,7 +431,7 @@ async function loadMyBookings(){
         ${(b.status === 'confirmed' || b.status === 'completed') && phone ? `<div style="font-size:.85rem;font-weight:700;color:#2a7b47;margin-bottom:10px">Provider contact: ${escapeHtml(phone)}</div>` : ''}
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           ${b.status === 'confirmed' ? `<button class="book-btn" onclick="markMeetingDone('${b.id}')">Mark Meeting Done</button>` : ''}
-          ${b.status === 'completed' ? `<button class="book-btn" style="background:#F3F4F6;color:#1C1917" onclick="viewInvoice(${JSON.stringify(b).replace(/'/g, "&#39;")})">View Invoice</button>` : ''}
+          ${b.status === 'completed' ? `<button class="book-btn" style="background:#F3F4F6;color:#0e1524" onclick="viewInvoice(${JSON.stringify(b).replace(/'/g, "&#39;")})">View Invoice</button>` : ''}
         </div>
         ${b.status === 'completed' ? renderRatingWidget(b.id, existingRating) : ''}
       </div>`;
@@ -455,10 +455,10 @@ async function markMeetingDone(bookingId){
 
 function renderRatingWidget(bookingId, existingStars){
   if (existingStars) {
-    return `<div style="margin-top:10px;font-size:.85rem;color:#78716C">Your rating: ${'★'.repeat(existingStars)}${'☆'.repeat(5-existingStars)}</div>`;
+    return `<div style="margin-top:10px;font-size:.85rem;color:#7b8194">Your rating: ${'★'.repeat(existingStars)}${'☆'.repeat(5-existingStars)}</div>`;
   }
-  const stars = [1,2,3,4,5].map(n => `<span onclick="submitRating('${bookingId}',${n})" style="cursor:pointer;font-size:1.3rem;color:#FF6B1A">★</span>`).join('');
-  return `<div style="margin-top:10px"><div style="font-size:.8rem;color:#78716C;margin-bottom:4px">Rate this provider:</div>${stars}</div>`;
+  const stars = [1,2,3,4,5].map(n => `<span onclick="submitRating('${bookingId}',${n})" style="cursor:pointer;font-size:1.3rem;color:#ff8a5c">★</span>`).join('');
+  return `<div style="margin-top:10px"><div style="font-size:.8rem;color:#7b8194;margin-bottom:4px">Rate this provider:</div>${stars}</div>`;
 }
 
 async function submitRating(bookingId, stars){
@@ -485,9 +485,9 @@ function viewInvoice(booking){
   win.document.write(`
     <html><head><title>Invoice — NeuroSarathi</title>
     <style>
-      body{font-family:Arial,sans-serif;padding:40px;color:#1C1917;max-width:600px;margin:0 auto}
+      body{font-family:Arial,sans-serif;padding:40px;color:#0e1524;max-width:600px;margin:0 auto}
       h1{font-size:22px;margin-bottom:4px}
-      .sub{color:#78716C;font-size:13px;margin-bottom:24px}
+      .sub{color:#7b8194;font-size:13px;margin-bottom:24px}
       table{width:100%;border-collapse:collapse;margin-top:20px}
       td{padding:10px 0;border-bottom:1px solid #eee;font-size:14px}
       td:last-child{text-align:right;font-weight:700}

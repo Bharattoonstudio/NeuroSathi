@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroSarathi — Every Child Can Shine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0e1524; --paper:#fffaf5; --paper-2:#fdeee0;
+    --saffron:#ff8a5c; --saffron-deep:#e0632f; --saffron-light:#ffb083;
+    --indigo:#1e3a5f; --teal:#2d6b7a; --coral:#ff8a5c;
+    --line:hsl(24 40% 90%); --muted:hsl(215 12% 44%);
+    --radius:14px;
+    --shadow-sm:0 1px 2px rgba(10,10,10,0.04), 0 1px 3px rgba(10,10,10,0.06);
+    --shadow-md:0 2px 4px rgba(10,10,10,0.04), 0 8px 20px -6px rgba(10,10,10,0.12);
+    --shadow-lg:0 4px 10px rgba(10,10,10,0.05), 0 24px 48px -18px rgba(10,10,10,0.22);
+    --ease:cubic-bezier(0.4,0,0.2,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--paper); color:var(--ink); font-family:'Inter',sans-serif; overflow-x:hidden;}
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif; letter-spacing:-0.02em;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .italic{font-style:italic; color:var(--saffron-deep);}
+  .wrap{max-width:1100px; margin:0 auto; padding:0 24px;}
+  a{color:inherit;}
+  img{max-width:100%; display:block;}
+
+  /* ============ SCROLL REVEAL ============ */
+  .reveal{opacity:0; transform:translateY(28px); transition:opacity .7s var(--ease), transform .7s var(--ease);}
+  .reveal.in{opacity:1; transform:translateY(0);}
+  .reveal-scale{opacity:0; transform:scale(0.92); transition:opacity .6s var(--ease), transform .6s var(--ease);}
+  .reveal-scale.in{opacity:1; transform:scale(1);}
+  .stagger > *{transition-delay:calc(var(--i,0) * 90ms);}
+
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px; font-size:12px; letter-spacing:0.14em;
+    text-transform:uppercase; font-family:'IBM Plex Mono',monospace; color:var(--saffron-deep); font-weight:500;
+  }
+  .eyebrow::before{content:""; width:16px; height:1px; background:var(--saffron-deep);}
+  .eyebrow.on-dark{color:var(--saffron-light);}
+  .eyebrow.on-dark::before{background:var(--saffron-light);}
+
+  .btn{
+    display:inline-flex; align-items:center; gap:8px; font-family:'Inter',sans-serif; font-weight:700; font-size:14.5px;
+    border:none; cursor:pointer; padding:14px 26px; border-radius:999px; text-decoration:none;
+    transition:transform .25s var(--ease), box-shadow .25s var(--ease);
+  }
+  .btn-primary{background:var(--saffron); color:#1a1200; box-shadow:0 8px 20px -6px rgba(240,165,0,0.5);}
+  .btn-primary:hover{transform:translateY(-2px); box-shadow:0 12px 26px -6px rgba(240,165,0,0.6);}
+  .btn-outline{background:transparent; border:1.5px solid var(--line); color:var(--ink);}
+  .btn-outline:hover{border-color:var(--ink);}
+  .link-underline{font-weight:600; font-size:14.5px; text-decoration:underline; text-underline-offset:4px; color:var(--muted);}
+  .link-underline:hover{color:var(--ink);}
+
+  section{padding:100px 0;}
+  @media (max-width:760px){section{padding:64px 0;}}
+
+  /* ============ NAV ============ */
+  .site-nav{position:sticky; top:0; z-index:50; background:rgba(10,10,10,0.85); backdrop-filter:blur(10px); padding:16px 0;}
+  .site-nav .wrap{display:flex; justify-content:space-between; align-items:center;}
+  .nav-brand{color:#fff; font-weight:700; font-size:18px; display:flex; align-items:center; gap:8px; flex-shrink:0;}
+  .nav-logo-img{height:38px; width:auto; border-radius:6px; display:block;}
+  .nav-actions{display:flex; align-items:center; gap:12px; flex-shrink:0; white-space:nowrap;}
+  .nav-link{color:rgba(255,255,255,0.8); font-size:14px; font-weight:600; text-decoration:none; white-space:nowrap;}
+  .nav-link:hover{color:#fff;}
+  .btn-nav{background:var(--saffron); color:#1a1200; font-weight:700; font-size:13.5px; padding:10px 20px; border-radius:999px; text-decoration:none; white-space:nowrap;}
+  @media (max-width:400px){
+    .nav-brand{font-size:15px;}
+    .nav-logo-img{height:30px;}
+    .nav-link{display:none;}
+    .btn-nav{font-size:12px; padding:8px 14px;}
+  }
+
+  /* ============ AUDIENCE CAROUSEL ============ */
+  .aud-carousel{position:relative; width:100%; height:92svh; overflow:hidden; background:var(--ink);}
+  .aud-progress{position:absolute; top:0; left:0; right:0; height:3px; z-index:30; display:flex; gap:4px; padding:0 4px 0;}
+  .aud-progress .seg{flex:1; height:100%; background:rgba(255,255,255,0.15); border-radius:2px; overflow:hidden; margin-top:4px;}
+  .aud-progress .seg .fill{height:100%; width:0%; background:var(--saffron); border-radius:2px;}
+  .aud-progress .seg.active .fill{animation:fillbar 5s linear forwards;}
+  .aud-progress .seg.filled .fill{width:100%;}
+  @keyframes fillbar{from{width:0%}to{width:100%}}
+
+  .aud-topbar{position:absolute; top:18px; left:0; right:0; z-index:20; display:flex; justify-content:space-between; align-items:center; padding:14px 24px 0;}
+
+  .aud-slide{position:absolute; inset:0; display:flex; align-items:center; transition:transform .7s var(--ease), opacity .7s var(--ease);}
+  .aud-slide .aud-bg{position:absolute; inset:0; z-index:0;}
+  .aud-slide .aud-content{position:relative; z-index:2; max-width:600px; padding:0 24px; margin-top:20px;}
+  .aud-slide h1{font-weight:700; font-size:clamp(28px,5vw,48px); line-height:1.1; color:#fff; margin:16px 0;}
+  .aud-slide p{color:rgba(255,255,255,0.68); font-size:15px; max-width:440px; line-height:1.65; margin-bottom:24px;}
+
+  .aud-bg-sarathi{background:radial-gradient(circle at 70% 40%, #1e3a5f, #0e1524 70%);}
+  .aud-bg-photo{background-size:cover; background-position:center 28%;}
+  .aud-bg-photo::before{content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(14,21,36,0.94) 0%, rgba(14,21,36,0.6) 42%, rgba(14,21,36,0.15) 70%, rgba(14,21,36,0.35) 100%);}
+
+  .aud-art{position:absolute; right:6%; top:50%; transform:translateY(-50%); z-index:1; width:260px; height:260px;}
+  .aud-avatar-img{
+    position:absolute; inset:20px; width:calc(100% - 40px); height:calc(100% - 40px);
+    border-radius:50%; object-fit:cover; animation:bob 4s var(--ease) infinite;
+    box-shadow:0 0 50px 6px rgba(255,138,92,0.35), 0 0 0 6px rgba(255,255,255,0.06);
+  }
+  @media (max-width:760px){
+    .aud-art{position:absolute; right:-8%; top:8%; transform:none; width:190px; height:190px; opacity:0.9;}
+    .aud-content{margin-top:32vh !important;}
+  }
+
+  .aud-dots{position:absolute; bottom:26px; left:24px; z-index:20; display:flex; gap:8px;}
+  .aud-dots button{width:8px; height:8px; border-radius:50%; border:none; background:rgba(255,255,255,0.3); cursor:pointer; transition:all .3s var(--ease); padding:0;}
+  .aud-dots button.active{width:22px; border-radius:5px; background:var(--saffron);}
+
+  .aud-skip{position:absolute; bottom:26px; right:24px; z-index:20; color:rgba(255,255,255,0.5); font-size:12.5px; text-decoration:none; font-family:'IBM Plex Mono',monospace;}
+  .aud-skip:hover{color:#fff;}
+
+  /* ============ HERO ============ */
+  .hero{position:relative; background:var(--ink); color:#fff; overflow:hidden; padding:70px 0 90px;}
+  .hero::before{
+    content:""; position:absolute; width:480px; height:480px; border-radius:50%; filter:blur(110px); opacity:0.32;
+    background:radial-gradient(circle, var(--saffron), transparent 70%); top:-160px; right:-100px;
+    animation:float 10s ease-in-out infinite;
+  }
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-28px)}}
+
+  /* Rising sun scene */
+  .sunrise-scene{
+    position:absolute; left:0; right:0; bottom:0; height:340px; overflow:hidden; pointer-events:none; z-index:1;
+  }
+  .sunrise-horizon{
+    position:absolute; left:0; right:0; bottom:0; height:100%;
+    background:linear-gradient(0deg, rgba(255,138,92,0.28) 0%, rgba(255,138,92,0.08) 35%, transparent 70%);
+    opacity:0; animation:horizonGlow 3.2s ease-out 0.3s forwards, horizonPulse 6s ease-in-out 3.5s infinite;
+  }
+  @keyframes horizonGlow{from{opacity:0}to{opacity:1}}
+  @keyframes horizonPulse{0%,100%{opacity:1}50%{opacity:0.82}}
+  .sun-disc{
+    position:absolute; left:50%; bottom:-160px; width:340px; height:340px; margin-left:-170px;
+    border-radius:50%;
+    background:radial-gradient(circle at 50% 35%, #ffd8a8, var(--saffron-deep) 75%);
+    box-shadow:0 0 0 rgba(255,138,92,0);
+    animation:sunRise 3.4s cubic-bezier(0.22,1,0.36,1) 0.2s forwards, sunGlowPulse 5s ease-in-out 3.6s infinite;
+  }
+  @keyframes sunRise{
+    0%{transform:translateY(0); box-shadow:0 0 0 rgba(255,138,92,0); opacity:0;}
+    30%{opacity:1;}
+    100%{transform:translateY(-210px); box-shadow:0 0 120px 30px rgba(255,138,92,0.35); opacity:1;}
+  }
+  @keyframes sunGlowPulse{
+    0%,100%{box-shadow:0 0 120px 30px rgba(255,138,92,0.35);}
+    50%{box-shadow:0 0 150px 40px rgba(255,138,92,0.5);}
+  }
+  .sun-rays{
+    position:absolute; left:50%; bottom:-160px; width:340px; height:340px; margin-left:-170px;
+    animation:sunRise 3.4s cubic-bezier(0.22,1,0.36,1) 0.2s forwards, rayRotate 40s linear infinite;
+    opacity:0;
+  }
+  .sun-rays::before{
+    content:""; position:absolute; inset:-60px; border-radius:50%;
+    background:repeating-conic-gradient(rgba(255,216,168,0.14) 0deg 4deg, transparent 4deg 18deg);
+  }
+  @keyframes rayRotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+  .hero-grid{display:grid; grid-template-columns:1.1fr 0.9fr; gap:56px; align-items:center; position:relative; z-index:2;}
+  @media (max-width:860px){.hero-grid{grid-template-columns:1fr;}}
+  .hero h1{font-size:clamp(38px,6.4vw,64px); font-weight:700; line-height:1.05; margin:22px 0 20px;}
+  .hero-p{color:rgba(255,255,255,0.65); font-size:16.5px; line-height:1.7; max-width:520px; margin-bottom:30px;}
+  .hero-cta{display:flex; align-items:center; gap:22px; flex-wrap:wrap; margin-bottom:44px;}
+  .hero-cta .link-underline{color:rgba(255,255,255,0.6);}
+  .hero-cta .link-underline:hover{color:#fff;}
+  .audience-pills{display:flex; flex-wrap:wrap; gap:10px; margin:18px 0 24px;}
+  .audience-pills a{
+    display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.18); border-radius:999px; padding:9px 16px;
+    font-size:12.5px; font-weight:600; color:#fff; text-decoration:none;
+    transition:background .25s var(--ease), transform .25s var(--ease); backdrop-filter:blur(6px);
+  }
+  .audience-pills a:hover{background:rgba(255,255,255,0.16); transform:translateY(-2px);}
+  .stats{display:flex; gap:36px; list-style:none; flex-wrap:wrap;}
+  .stat dt{font-family:'Space Grotesk',sans-serif; font-weight:900; font-size:30px; color:var(--saffron-light);}
+  .stat dd{font-size:12px; color:rgba(255,255,255,0.5); font-family:'IBM Plex Mono',monospace; margin-top:2px;}
+
+  .hero-visual{position:relative;}
+  .hero-panel{
+    background:linear-gradient(155deg, var(--indigo), #17133a); border-radius:24px; padding:44px 32px;
+    box-shadow:var(--shadow-lg); position:relative; overflow:hidden; min-height:360px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .hero-panel::after{
+    content:""; position:absolute; width:220px; height:220px; border-radius:50%;
+    background:radial-gradient(circle, rgba(240,165,0,0.3), transparent 70%); bottom:-60px; left:-40px;
+  }
+  .hero-panel img{width:200px; height:200px; border-radius:50%; box-shadow:0 0 50px 6px rgba(240,165,0,0.3); animation:bob 4s var(--ease) infinite; position:relative; z-index:1;}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  .quote-card{
+    position:absolute; bottom:-30px; left:-20px; background:#fff; color:var(--ink); border-radius:16px;
+    padding:18px 22px; max-width:270px; box-shadow:var(--shadow-lg); font-size:13.5px;
+  }
+  .quote-card blockquote{font-style:italic; margin-bottom:8px; line-height:1.5;}
+  .quote-card figcaption{font-size:11.5px; color:var(--muted); font-family:'IBM Plex Mono',monospace;}
+  @media (max-width:860px){.quote-card{position:static; margin-top:20px; max-width:100%;}}
+
+  /* ============ PROMISE ============ */
+  .promise-head{text-align:center; max-width:680px; margin:0 auto 56px;}
+  .promise-head h2{font-size:clamp(28px,4.6vw,40px); font-weight:700; margin:16px 0;}
+  .promise-head .lead{color:var(--muted); font-size:16px; line-height:1.7;}
+  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  @media (max-width:760px){.steps{grid-template-columns:1fr;}}
+  .step-card{
+    background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); padding:30px 26px;
+    box-shadow:var(--shadow-sm); transition:transform .35s var(--ease), box-shadow .35s var(--ease);
+  }
+  .step-card:hover{transform:translateY(-6px); box-shadow:var(--shadow-md);}
+  .step-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;}
+  .step-k{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted);}
+  .step-dot{width:38px; height:38px; border-radius:12px; background:linear-gradient(150deg,var(--saffron-light),var(--saffron-deep)); box-shadow:0 8px 16px -6px rgba(10,10,10,0.18);}
+  .step-card:nth-child(2) .step-dot{background:linear-gradient(150deg,#1a8f78,var(--teal));}
+  .step-card:nth-child(3) .step-dot{background:linear-gradient(150deg,#4a3f8c,var(--indigo));}
+  .step-card h3{font-size:19px; font-weight:700; margin-bottom:10px;}
+  .step-card p{color:var(--muted); font-size:14px; line-height:1.65;}
+
+  /* ============ RITUAL ============ */
+  .ritual{background:var(--paper-2);}
+  .ritual-grid{display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center;}
+  @media (max-width:860px){.ritual-grid{grid-template-columns:1fr;}}
+  .ritual-left h2{font-size:clamp(26px,4.2vw,36px); font-weight:700; margin:16px 0;}
+  .ritual-left .lead{color:var(--muted); font-size:15.5px; line-height:1.7; margin-bottom:20px;}
+  .ritual-list{list-style:none; display:flex; flex-direction:column; gap:10px;}
+  .ritual-list li{font-size:14px; color:#3a3a3a; padding-left:26px; position:relative;}
+  .ritual-list li::before{content:"✓"; position:absolute; left:0; color:var(--teal); font-weight:700;}
+
+  .ritual-card{background:#fff; border-radius:20px; box-shadow:var(--shadow-lg); border:1px solid var(--line); padding:24px 22px;}
+  .ritual-card-head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px;}
+  .ritual-card-head .day{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); text-transform:uppercase;}
+  .ritual-card-head .name{font-size:18px; font-weight:700; margin-top:2px;}
+  .ritual-badge{background:var(--paper-2); border-radius:999px; padding:6px 14px; font-size:12px; font-weight:700; color:var(--teal);}
+  .ritual-items{list-style:none;}
+  .ritual-item{display:flex; align-items:center; gap:14px; padding:12px 0; border-top:1px solid var(--line);}
+  .ritual-item:first-child{border-top:none;}
+  .ritual-num{width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0;}
+  .ritual-num.done{background:linear-gradient(150deg,#1a8f78,var(--teal)); color:#fff;}
+  .ritual-num.todo{background:var(--paper-2); color:var(--muted); border:1.5px dashed var(--line);}
+  .ritual-item-body{flex:1;}
+  .ritual-item-body .act{font-size:14px; font-weight:600;}
+  .ritual-item-body .time{font-size:11.5px; color:var(--muted); font-family:'IBM Plex Mono',monospace;}
+  .ritual-tag{font-size:10.5px; background:var(--paper-2); padding:5px 10px; border-radius:999px; color:var(--muted); font-weight:600; white-space:nowrap;}
+
+  /* ============ TRANSFORMATION ============ */
+  .trans-head{text-align:center; max-width:720px; margin:0 auto 50px;}
+  .trans-head h2{font-size:clamp(26px,4vw,36px); font-weight:700; margin:16px 0;}
+  .trans-head p{color:var(--muted); font-size:15.5px; line-height:1.7;}
+  .trans-grid{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
+  @media (max-width:760px){.trans-grid{grid-template-columns:1fr;}}
+  .trans-card{border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-md); position:relative;}
+  .trans-card.before{background:linear-gradient(160deg,#3a3a3a,#1a1a1a);}
+  .trans-card:not(.before){background:linear-gradient(160deg,var(--saffron-deep),#7a4d00);}
+  .trans-tag{position:absolute; top:18px; left:18px; z-index:2; background:rgba(0,0,0,0.4); color:#fff; font-size:11px; font-weight:700; padding:6px 14px; border-radius:999px; text-transform:uppercase; letter-spacing:0.06em;}
+  .trans-tag.after{background:rgba(0,0,0,0.25);}
+  .trans-card-body{padding:70px 26px 30px; color:#fff;}
+  .trans-cap .quote{font-style:italic; font-size:15px; line-height:1.6; margin-bottom:12px;}
+  .trans-cap .meta{font-size:11.5px; color:rgba(255,255,255,0.6); font-family:'IBM Plex Mono',monospace;}
+  .trans-foot{display:flex; align-items:center; gap:20px; justify-content:center; margin-top:44px; max-width:560px; margin-left:auto; margin-right:auto;}
+  .trans-foot .hr{flex:1; height:1px; background:var(--line);}
+  .trans-foot p{font-size:14px; color:var(--muted); font-style:italic; text-align:center;}
+
+  /* ============ CIRCLE ============ */
+  .circle{background:var(--paper-2);}
+  .circle-grid{display:grid; grid-template-columns:1fr 1.1fr; gap:56px; align-items:center;}
+  @media (max-width:860px){.circle-grid{grid-template-columns:1fr;}}
+  .circle-left h2{font-size:clamp(26px,4.2vw,36px); font-weight:700; margin:16px 0;}
+  .circle-left .lead{color:var(--muted); font-size:15.5px; line-height:1.7;}
+  .circle-cards{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:500px){.circle-cards{grid-template-columns:1fr;}}
+  .circle-card{background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:24px 20px; box-shadow:var(--shadow-sm); transition:transform .3s var(--ease), box-shadow .3s var(--ease);}
+  .circle-card:hover{transform:translateY(-5px); box-shadow:var(--shadow-md);}
+  .circle-icon{width:46px; height:46px; border-radius:14px; margin-bottom:16px; box-shadow:0 8px 16px -6px rgba(10,10,10,0.18); display:flex; align-items:center; justify-content:center; font-size:20px;}
+  .circle-card:nth-child(1) .circle-icon{background:linear-gradient(150deg,#e8836a,var(--coral));}
+  .circle-card:nth-child(2) .circle-icon{background:linear-gradient(150deg,#1a8f78,var(--teal));}
+  .circle-card:nth-child(3) .circle-icon{background:linear-gradient(150deg,#4a3f8c,var(--indigo));}
+  .circle-card:nth-child(4) .circle-icon{background:linear-gradient(150deg,var(--saffron-light),var(--saffron-deep));}
+  .circle-card h3{font-size:16px; font-weight:700; margin-bottom:8px;}
+  .circle-card p{font-size:13px; color:var(--muted); line-height:1.55; margin-bottom:14px;}
+  .go{font-size:13px; font-weight:700; color:var(--ink); text-decoration:none;}
+  .go:hover{text-decoration:underline;}
+
+  /* ============ REACH ============ */
+  .reach{background:var(--ink); color:#fff; position:relative; overflow:hidden;}
+  .reach::before{
+    content:""; position:absolute; width:1px; height:1px; box-shadow:
+      120px 80px 0 1px rgba(255,255,255,0.4), 260px 200px 0 1px rgba(255,255,255,0.3),
+      400px 60px 0 1px rgba(255,255,255,0.3), 600px 260px 0 1px rgba(255,255,255,0.4),
+      800px 100px 0 1px rgba(255,255,255,0.3), 900px 300px 0 1px rgba(255,255,255,0.3);
+  }
+  .reach-head{text-align:center; max-width:700px; margin:0 auto 50px; position:relative; z-index:1;}
+  .reach-head h2{font-size:clamp(26px,4.4vw,38px); font-weight:700; margin-top:16px; color:#fff;}
+  .reach-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:24px; position:relative; z-index:1;}
+  @media (max-width:760px){.reach-grid{grid-template-columns:repeat(2,1fr);}}
+  .reach-item h3{font-size:16.5px; font-weight:700; margin-bottom:8px; color:var(--saffron-light);}
+  .reach-item p{font-size:13.5px; color:rgba(255,255,255,0.6); line-height:1.6;}
+
+  /* ============ PARTNERS ============ */
+  .partners{background:var(--paper-2);}
+  .partners-grid{display:grid; grid-template-columns:1.15fr 0.85fr; gap:56px; align-items:center;}
+  @media (max-width:860px){.partners-grid{grid-template-columns:1fr;}}
+  .partners-left h2{font-size:clamp(26px,4.2vw,36px); font-weight:700; margin:16px 0;}
+  .partners-left .lead{color:var(--muted); font-size:15.5px; line-height:1.7; margin-bottom:28px;}
+  .partner-feats{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:32px;}
+  .partner-feat h4{font-size:14.5px; font-weight:700; margin-bottom:4px;}
+  .partner-feat p{font-size:12.5px; color:var(--muted); line-height:1.5;}
+  .partners-cta{display:flex; gap:14px; flex-wrap:wrap;}
+  .partners-right{border-radius:22px; overflow:hidden; box-shadow:var(--shadow-lg);}
+  .partners-right img{width:100%; height:100%; object-fit:cover;}
+
+  /* ============ FINAL CTA ============ */
+  .finalcta{background:var(--ink); color:#fff; text-align:center; position:relative; overflow:hidden;}
+  .finalcta::before{
+    content:""; position:absolute; width:420px; height:420px; border-radius:50%; filter:blur(110px); opacity:0.35;
+    background:radial-gradient(circle, var(--saffron), transparent 70%); top:-140px; left:50%; transform:translateX(-50%);
+    animation:float 9s var(--ease) infinite;
+  }
+  .finalcta .wrap{position:relative; z-index:1;}
+  .finalcta h2{font-size:clamp(32px,6vw,50px); font-weight:700; margin:18px 0 22px;}
+  .finalcta .lead{color:rgba(255,255,255,0.65); font-size:16px; max-width:520px; margin:0 auto 34px; line-height:1.7;}
+  .finalcta-actions{display:flex; flex-direction:column; align-items:center; gap:16px;}
+  .finalcta-actions .link-underline{color:rgba(255,255,255,0.55);}
+  .finalcta-actions .link-underline:hover{color:#fff;}
+
+  /* ============ FOOTER ============ */
+  footer{background:#0a0a0a; color:rgba(255,255,255,0.7); padding:64px 0 28px;}
+  .footer-grid{max-width:1100px; margin:0 auto; padding:0 24px 44px; display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:40px;}
+  @media (max-width:760px){.footer-grid{grid-template-columns:1fr; gap:32px;}}
+  .footer-brand .logo{margin-bottom:16px;}
+  .footer-brand p{font-size:13.5px; line-height:1.65; color:rgba(255,255,255,0.45); max-width:280px;}
+  .footer-col h5{font-size:13px; text-transform:uppercase; letter-spacing:0.08em; color:rgba(255,255,255,0.4); margin-bottom:16px; font-family:'IBM Plex Mono',monospace; font-weight:500;}
+  .footer-col ul{list-style:none;}
+  .footer-col li{margin-bottom:10px;}
+  .footer-col a{font-size:14px; color:rgba(255,255,255,0.7); text-decoration:none;}
+  .footer-col a:hover{color:#fff;}
+  .footer-bottom{max-width:1100px; margin:0 auto; padding:24px 24px 0; border-top:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;}
+  .footer-bottom p{font-size:12.5px; color:rgba(255,255,255,0.35);}
+  .footer-bottom .links{display:flex; gap:20px;}
+  .footer-bottom a{font-size:12.5px; color:rgba(255,255,255,0.5); text-decoration:none;}
+  .footer-bottom a:hover{color:#fff;}
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <div class="nav-brand"><img src="/neurosarathi-logo.png" alt="NeuroSarathi" class="nav-logo-img"></div>
+  </div>
+</nav>
+
+<div class="aud-carousel" id="audCarousel">
+  <div class="aud-progress" id="audProgress"></div>
+  <div class="aud-topbar">
+    <div class="nav-brand" style="color:#fff; font-weight:700; font-size:19px; display:flex; align-items:center; gap:8px;"><img src="/neurosarathi-logo.png" alt="NeuroSarathi" class="nav-logo-img"></div>
+  </div>
+
+  <div class="aud-slide" data-i="0">
+    <div class="aud-bg aud-bg-sarathi"></div>
+    <div class="aud-content">
+      <p class="eyebrow on-dark">For Parents</p>
+      <h1>Everything your child needs, in one place.</h1>
+      <p>Daily routines shaped for your child, a Sarathi AI companion by your side, and verified doctors, educators & caregivers — all connected on one platform.</p>
+      <a href="/parents.html" class="btn btn-primary">Get Started Free →</a>
+    </div>
+    <div class="aud-art">
+      <img src="/sarathi-avatar.jpg" alt="AI Sarathi" class="aud-avatar-img">
+    </div>
+  </div>
+
+  <div class="aud-slide" data-i="1">
+    <div class="aud-bg aud-bg-photo" style="background-image:url('/professionals-photo.jpg')"></div>
+    <div class="aud-content">
+      <p class="eyebrow on-dark">For Doctors & Therapists</p>
+      <h1>Your practice. The whole world's families.</h1>
+      <p>Connect with families searching for exactly your specialty — anywhere on earth, not just your city. Verified profile, flexible schedule, fair pay.</p>
+      <a href="/professionals.html" class="btn btn-primary">Join as a Professional →</a>
+    </div>
+  </div>
+
+  <div class="aud-slide" data-i="2">
+    <div class="aud-bg aud-bg-photo" style="background-image:url('/educators-photo.jpg')"></div>
+    <div class="aud-content">
+      <p class="eyebrow on-dark">For Special Educators</p>
+      <h1>Looking to teach children with special needs?</h1>
+      <p>This is the platform where you connect directly with parents searching for exactly your kind of support — build your own client base, on your own time.</p>
+      <a href="/educators.html" class="btn btn-primary">Join as an Educator →</a>
+    </div>
+  </div>
+
+  <div class="aud-slide" data-i="3">
+    <div class="aud-bg aud-bg-photo" style="background-image:url('/caregivers-photo.jpg')"></div>
+    <div class="aud-content">
+      <p class="eyebrow on-dark">For Caregivers</p>
+      <h1>Looking for work caring for children with special needs?</h1>
+      <p>We connect you with families who need trained, trusted caregivers for their kids — verified, safe, steady work.</p>
+      <a href="/caregivers.html" class="btn btn-primary">Join as a Caregiver →</a>
+    </div>
+  </div>
+
+  <div class="aud-dots" id="audDots"></div>
+  <a href="#hero-main" class="aud-skip" id="audSkip">Skip intro ↓</a>
+</div>
+
+<section class="hero" id="hero-main">
+  <div class="sunrise-scene">
+    <div class="sunrise-horizon"></div>
+    <div class="sun-rays"></div>
+    <div class="sun-disc"></div>
+  </div>
+  <div class="wrap hero-grid">
+    <div class="reveal in">
+      <p class="eyebrow on-dark">A Sarathi for every parent, everywhere</p>
+      <h1>Every child <br><span class="italic" style="color:var(--saffron-light)">can shine.</span></h1>
+      <p class="hero-p">If you have lain awake wondering why your child is different — you are not alone, and you are not without a guide. NeuroSarathi walks beside families of children with autism, ADHD, dyslexia and more, from small villages to the world's largest cities, in the language you dream in.</p>
+      <div class="audience-pills">
+        <a href="/parents.html">👪 Parents</a>
+        <a href="/professionals.html">👨‍⚕️ Professionals</a>
+        <a href="/educators.html">🎓 Special Educators</a>
+        <a href="/caregivers.html">🤝 Caregivers</a>
+      </div>
+      <div class="hero-cta">
+        <a href="/parents.html" class="btn btn-primary">Begin your child's path →</a>
+        <a href="#promise" class="link-underline">How the Sarathi guides</a>
+      </div>
+      <dl class="stats">
+        <div class="stat"><dt>20+</dt><dd>CONDITIONS SUPPORTED</dd></div>
+        <div class="stat"><dt>40+</dt><dd>LANGUAGES WORLDWIDE</dd></div>
+        <div class="stat"><dt>6</dt><dd>CONTINENTS, ONE GUIDE</dd></div>
+      </dl>
+    </div>
+    <div class="hero-visual reveal-scale in">
+      <div class="hero-panel">
+        <img src="/sarathi-avatar.jpg" alt="AI Sarathi">
+        <figure class="quote-card">
+          <blockquote>"I'm Sarathi — I'm here to guide you, 24×7."</blockquote>
+          <figcaption>YOUR AI COMPANION</figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="promise" id="promise">
+  <div class="wrap">
+    <div class="promise-head reveal">
+      <p class="eyebrow">The Sarathi Promise</p>
+      <h2>Not a product. <span class="italic">A companion.</span></h2>
+      <p class="lead">Like the charioteer who guided Arjuna, a Sarathi doesn't fight your battle. They know the path — and walk it with you, one dawn at a time.</p>
+    </div>
+    <div class="steps reveal stagger">
+      <div class="step-card" style="--i:0">
+        <div class="step-top"><span class="step-k">01</span><span class="step-dot"></span></div>
+        <h3>Understand</h3>
+        <p>A gentle screening in your language. No jargon, no judgement. Only clarity about what your child may need.</p>
+      </div>
+      <div class="step-card" style="--i:1">
+        <div class="step-top"><span class="step-k">02</span><span class="step-dot"></span></div>
+        <h3>Guide</h3>
+        <p>A daily routine shaped for your child — small rituals of play, therapy and rest. Your Sarathi checks in every morning.</p>
+      </div>
+      <div class="step-card" style="--i:2">
+        <div class="step-top"><span class="step-k">03</span><span class="step-dot"></span></div>
+        <h3>Celebrate</h3>
+        <p>Track the small wins that matter — a new word, a calmer bedtime, a first friend. Progress that no one else can see, we help you honour.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ritual">
+  <div class="wrap ritual-grid">
+    <div class="ritual-left reveal">
+      <p class="eyebrow">One day at a time</p>
+      <h2>A daily ritual, <br><span class="italic">shaped for your child.</span></h2>
+      <p class="lead">No overwhelming plan. Just five to seven gentle acts a day — each one chosen with your therapist, each one tracked so you can see progress you might otherwise miss.</p>
+      <ul class="ritual-list">
+        <li>Reminders in your language, on any phone</li>
+        <li>Weekly summary you can share with your doctor</li>
+        <li>Small celebrations — because they matter</li>
+      </ul>
+    </div>
+    <div class="reveal-scale">
+      <div class="ritual-card">
+        <div class="ritual-card-head">
+          <div><p class="day">Tuesday</p><p class="name">Aarav's day</p></div>
+          <span class="ritual-badge">4 of 5 done</span>
+        </div>
+        <ol class="ritual-items">
+          <li class="ritual-item"><span class="ritual-num done">✓</span><div class="ritual-item-body"><p class="act">Morning stretch & song</p><p class="time">7:30 AM</p></div><span class="ritual-tag">Sensory</span></li>
+          <li class="ritual-item"><span class="ritual-num done">✓</span><div class="ritual-item-body"><p class="act">Speech play — 5 minutes</p><p class="time">10:00 AM</p></div><span class="ritual-tag">Therapy</span></li>
+          <li class="ritual-item"><span class="ritual-num done">✓</span><div class="ritual-item-body"><p class="act">Quiet lunch, no screens</p><p class="time">1:00 PM</p></div><span class="ritual-tag">Regulate</span></li>
+          <li class="ritual-item"><span class="ritual-num done">✓</span><div class="ritual-item-body"><p class="act">Colouring with Aai</p><p class="time">4:30 PM</p></div><span class="ritual-tag">Bond</span></li>
+          <li class="ritual-item"><span class="ritual-num todo">5</span><div class="ritual-item-body"><p class="act">Bedtime story in your tongue</p><p class="time">8:00 PM</p></div><span class="ritual-tag">Rest</span></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="transformation">
+  <div class="wrap">
+    <div class="trans-head reveal">
+      <p class="eyebrow">A story we hear every week</p>
+      <h2>From <span class="italic">"will he ever look at me?"</span> to a morning full of eye contact.</h2>
+      <p>Change does not arrive in one dramatic moment. It arrives in ten thousand small ones — a new sound, a shared glance, a first hug in months. NeuroSarathi is what stitches those moments into a life.</p>
+    </div>
+    <div class="trans-grid reveal stagger">
+      <figure class="trans-card before" style="--i:0">
+        <span class="trans-tag">Before</span>
+        <div class="trans-card-body">
+          <figcaption class="trans-cap">
+            <p class="quote">"He would sit in my lap and still feel far away. I did not know how to reach him."</p>
+            <p class="meta">MONTH 0 · THE FIRST SCREENING</p>
+          </figcaption>
+        </div>
+      </figure>
+      <figure class="trans-card" style="--i:1">
+        <span class="trans-tag after">After 6 months</span>
+        <div class="trans-card-body">
+          <figcaption class="trans-cap">
+            <p class="quote">"This morning he looked into my eyes and said 'Mumma'. I put down the phone and I cried for an hour."</p>
+            <p class="meta">MONTH 6 · DAILY RITUALS WITH HIS SARATHI</p>
+          </figcaption>
+        </div>
+      </figure>
+    </div>
+    <div class="trans-foot reveal">
+      <span class="hr"></span>
+      <p>The child did not change. He was always shining. We only helped him be seen.</p>
+      <span class="hr"></span>
+    </div>
+  </div>
+</section>
+
+<section class="circle" id="circle">
+  <div class="wrap circle-grid">
+    <div class="circle-left reveal">
+      <p class="eyebrow">A circle around your child</p>
+      <h2>One platform. <br><span class="italic">Every hand you need.</span></h2>
+      <p class="lead">No more scattered WhatsApp forwards or half-remembered names. Every professional on NeuroSarathi is verified, reviewed by families, and ready to work as one team around your child — whether they live down the road or across an ocean.</p>
+    </div>
+    <div class="circle-cards reveal stagger">
+      <div class="circle-card" style="--i:0"><div class="circle-icon">🩺</div><h3>Doctors</h3><p>Developmental pediatricians & psychiatrists, verified worldwide.</p><a href="/professionals.html" class="go">Explore →</a></div>
+      <div class="circle-card" style="--i:1"><div class="circle-icon">🧠</div><h3>Therapists</h3><p>Speech, occupational, ABA & play therapists — in-person or over video.</p><a href="/professionals.html" class="go">Explore →</a></div>
+      <div class="circle-card" style="--i:2"><div class="circle-icon">📘</div><h3>Educators</h3><p>Special educators & freelance teachers who truly understand your child.</p><a href="/educators.html" class="go">Explore →</a></div>
+      <div class="circle-card" style="--i:3"><div class="circle-icon">🤝</div><h3>Caregivers</h3><p>Trained babysitters, shadow aides & home tutors for neurodivergent kids.</p><a href="/caregivers.html" class="go">Explore →</a></div>
+    </div>
+  </div>
+</section>
+
+<section class="reach">
+  <div class="wrap">
+    <div class="reach-head reveal">
+      <p class="eyebrow on-dark">Built with love in India. Built for the whole world.</p>
+      <h2>The first platform that <br><span class="italic" style="color:var(--saffron-light)">actually speaks your world.</span></h2>
+    </div>
+    <div class="reach-grid reveal stagger">
+      <div class="reach-item" style="--i:0"><h3>40+ languages</h3><p>From Hindi to Mandarin, Arabic to Spanish. Every parent, in their voice.</p></div>
+      <div class="reach-item" style="--i:1"><h3>Local schemes & benefits</h3><p>UDID in India, IEP in the US, EHCP in the UK — we translate the paperwork.</p></div>
+      <div class="reach-item" style="--i:2"><h3>Culturally-honest care</h3><p>Diet, discipline and family life shaped for you — not a Silicon Valley template.</p></div>
+      <div class="reach-item" style="--i:3"><h3>Any village, any phone</h3><p>Works on 2G. Works offline. Works on your grandmother's phone.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="partners" id="partners">
+  <div class="wrap partners-grid">
+    <div class="partners-left reveal">
+      <p class="eyebrow">For doctors, therapists, educators & caregivers</p>
+      <h2>Do the work you love. <br><span class="italic">Reach the families who need you.</span></h2>
+      <p class="lead">NeuroSarathi is a livelihood for the professionals who make this movement possible. List your practice, take on families that fit your calendar, and get paid on time — while helping children who might otherwise never have found you, anywhere in the world.</p>
+      <div class="partner-feats">
+        <div class="partner-feat"><h4>Verified profile</h4><p>Trust that families actually read.</p></div>
+        <div class="partner-feat"><h4>Fair, transparent earning</h4><p>No hidden commissions. Paid weekly.</p></div>
+        <div class="partner-feat"><h4>Work from anywhere</h4><p>Reach a village or a metropolis from your clinic.</p></div>
+        <div class="partner-feat"><h4>Your calendar, your rules</h4><p>Take only the families you can serve well.</p></div>
+      </div>
+      <div class="partners-cta">
+        <a href="/professionals.html" class="btn btn-primary">Join as a partner →</a>
+        <a href="/professionals.html" class="btn btn-outline">How partners earn</a>
+      </div>
+    </div>
+    <div class="partners-right reveal-scale">
+      <img src="/professionals-photo.jpg" alt="A therapist smiling gently at a young child during a session">
+    </div>
+  </div>
+</section>
+
+<section class="finalcta" id="start">
+  <div class="wrap" style="max-width:768px;">
+    <p class="eyebrow on-dark">The first step is the hardest. Take it with us.</p>
+    <h2>Every child <br><span class="italic" style="color:var(--saffron-light)">can shine.</span></h2>
+    <p class="lead">Your Sarathi is ready. In your language, on your phone, for as long as you need. Begin with a free 3-minute screening — anywhere in the world.</p>
+    <div class="finalcta-actions">
+      <a href="/parents.html" class="btn btn-primary">Begin your child's screening →</a>
+      <a href="#partners" class="link-underline">I'm a doctor, therapist or educator</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo"><img src="/neurosarathi-logo.png" alt="NeuroSarathi — Every Child Can Shine" style="height:40px; width:auto;"></div>
+      <p>A gentle guide for every parent walking the path of neurodivergence. Born in India. Built for the whole world.</p>
+    </div>
+    <div class="footer-col">
+      <h5>For Families</h5>
+      <ul>
+        <li><a href="/parents.html">Screening</a></li>
+        <li><a href="/parents.html">Daily routines</a></li>
+        <li><a href="/professionals.html">Find a professional</a></li>
+        <li><a href="/parents.html">Local benefits</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>For Partners</h5>
+      <ul>
+        <li><a href="/professionals.html">Doctors & therapists</a></li>
+        <li><a href="/educators.html">Special educators</a></li>
+        <li><a href="/caregivers.html">Caregivers</a></li>
+        <li><a href="/professionals.html">How earning works</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 NeuroSarathi. Every child can shine.</p>
+    <div class="links">
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="mailto:info@neurosarathi.com">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal, .reveal-scale').forEach(el => observer.observe(el));
+
+  // ===== Audience carousel =====
+  const SLIDE_MS = 5000;
+  const audSlides = document.querySelectorAll('.aud-slide');
+  const audDotsWrap = document.getElementById('audDots');
+  const audProgWrap = document.getElementById('audProgress');
+  let audCurrent = 0;
+  let audTimer = null;
+
+  audSlides.forEach((s, i) => {
+    const dot = document.createElement('button');
+    dot.addEventListener('click', () => audGoTo(i));
+    audDotsWrap.appendChild(dot);
+    const seg = document.createElement('div');
+    seg.className = 'seg';
+    seg.innerHTML = '<div class="fill"></div>';
+    audProgWrap.appendChild(seg);
+  });
+
+  function audLayout(){
+    audSlides.forEach((s, i) => {
+      if (i === audCurrent) { s.style.transform = 'translateY(0%)'; s.style.opacity = '1'; s.style.zIndex = 2; }
+      else if (i < audCurrent) { s.style.transform = 'translateY(-100%)'; s.style.opacity = '0'; s.style.zIndex = 1; }
+      else { s.style.transform = 'translateY(100%)'; s.style.opacity = '0'; s.style.zIndex = 1; }
+    });
+    document.querySelectorAll('.aud-dots button').forEach((d,i) => d.classList.toggle('active', i===audCurrent));
+    document.querySelectorAll('.aud-progress .seg').forEach((seg,i) => {
+      seg.classList.remove('active','filled');
+      if (i < audCurrent) seg.classList.add('filled');
+      if (i === audCurrent) { void seg.offsetWidth; seg.classList.add('active'); }
+    });
+  }
+
+  function audGoTo(i){
+    audCurrent = i;
+    audLayout();
+    audResetTimer();
+  }
+
+  function audNext(){
+    if (audCurrent === audSlides.length - 1) {
+      // Finished the full cycle — scroll down into the main site
+      document.getElementById('hero-main').scrollIntoView({ behavior: 'smooth' });
+      if (audTimer) clearTimeout(audTimer);
+      return;
+    }
+    audCurrent = audCurrent + 1;
+    audLayout();
+    audResetTimer();
+  }
+
+  function audResetTimer(){
+    if (audTimer) clearTimeout(audTimer);
+    audTimer = setTimeout(audNext, SLIDE_MS);
+  }
+
+  // If the visitor scrolls manually at any point, stop the auto-advance/auto-scroll
+  let audUserScrolled = false;
+  window.addEventListener('scroll', () => {
+    if (!audUserScrolled && window.scrollY > 40) {
+      audUserScrolled = true;
+      if (audTimer) clearTimeout(audTimer);
+    }
+  }, { passive: true });
+
+  audLayout();
+  audResetTimer();
+</script>
+</body>
+</html>

@@ -114,4 +114,41 @@ NeuroSarathi.UI.Skeleton = {
     _createJournalSkeleton: function() {
         const div = document.createElement('div');
         div.className = 'skeleton skeleton-journal';
-        div.style.cssText = `background: rgba(255,255,255,0.6); border-radius: 12px; padding: 14px 16px; border: 
+        div.style.cssText = `background: rgba(255,255,255,0.6); border-radius: 12px; padding: 14px 16px; border: 1px solid rgba(0,0,0,0.04); margin-bottom: 12px;`;
+        div.innerHTML = `
+            <div class="skeleton-line shimmer" style="height:12px;background:rgba(226,232,240,0.6);border-radius:8px;width:30%;margin-bottom:10px;"></div>
+            <div class="skeleton-line shimmer" style="height:14px;background:rgba(226,232,240,0.6);border-radius:8px;width:90%;margin-bottom:6px;"></div>
+            <div class="skeleton-line shimmer" style="height:14px;background:rgba(226,232,240,0.6);border-radius:8px;width:70%;"></div>
+        `;
+        return div;
+    },
+
+    _createProfileSkeleton: function() {
+        const div = document.createElement('div');
+        div.className = 'skeleton skeleton-profile';
+        div.style.cssText = `display: flex; align-items: center; gap: 12px; padding: 12px 0;`;
+        div.innerHTML = `
+            <div class="skeleton-img shimmer" style="width:48px;height:48px;border-radius:50%;background:rgba(226,232,240,0.6);flex-shrink:0;"></div>
+            <div style="flex:1;">
+                <div class="skeleton-line shimmer" style="height:14px;background:rgba(226,232,240,0.6);border-radius:8px;width:50%;margin-bottom:6px;"></div>
+                <div class="skeleton-line shimmer" style="height:12px;background:rgba(226,232,240,0.6);border-radius:8px;width:30%;"></div>
+            </div>
+        `;
+        return div;
+    },
+
+    _createStatsSkeleton: function() {
+        const div = document.createElement('div');
+        div.className = 'skeleton skeleton-stats';
+        div.style.cssText = `background: rgba(255,255,255,0.6); border-radius: 16px; padding: 16px; text-align: center; border: 1px solid rgba(0,0,0,0.04);`;
+        div.innerHTML = `
+            <div class="skeleton-line shimmer" style="height:24px;background:rgba(226,232,240,0.6);border-radius:8px;width:50%;margin:0 auto 8px;"></div>
+            <div class="skeleton-line shimmer" style="height:12px;background:rgba(226,232,240,0.6);border-radius:8px;width:70%;margin:0 auto;"></div>
+        `;
+        return div;
+    }
+};
+
+window.NeuroSarathi = NeuroSarathi;
+console.log('✅ Skeleton module loaded');
+

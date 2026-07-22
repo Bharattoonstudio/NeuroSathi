@@ -199,4 +199,71 @@ NeuroSarathi.API = {
             { level: 3, xp_required: 250 }, { level: 4, xp_required: 500 },
             { level: 5, xp_required: 1000 }, { level: 6, xp_required: 2000 },
             { level: 7, xp_required: 3500 }, { level: 8, xp_required: 5000 },
-            { level: 9, xp_required: 7500 }, { level: 10, xp
+            { level: 9, xp_required: 7500 }, { level: 10, xp_required: 10000 }
+        ];
+        const next = levels.find(lvl => lvl.level === level + 1);
+        if (next) return next.xp_required;
+        // Already at (or above) the max defined level — return the top requirement.
+        return levels[levels.length - 1].xp_required;
+    },
+
+    _buildTimeline: async function(childId) {
+        // Merges recent activities and observations into a single
+        // chronological feed for the dashboard timeline widget.
+        const timeline = [];
+
+        try {
+            const { data: activities } = await supabase
+                .from('child_activities')
+                .select('*')
+                .eq('child_id', childId)
+                .eq('completed', true)
+                .order('completed_at', { ascending: false })
+                .limit(10);
+
+            (activities || []).forEach(a => {
+                timeline.push({
+                    type: 'activity',
+                    title: a.title || a.activity_name || 'Activity completed',
+                    description: a.description || 'Marked as complete',
+                    date: a.completed_at
+                });
+            });
+
+            const { data: observations } = await supabase
+                .from('observations')
+                .select('*')
+                .eq('child_id', childId)
+                .order('created_at', { ascending: false })
+                .limit(10);
+
+            (observations || []).forEach(o => {
+                timeline.push({
+                    type: 'observation',
+                    title: 'Observation logged',
+                    description: o.note || o.content || '',
+                    date: o.created_at
+                });
+            });
+
+            timeline.sort((a, b) => new Date(b.date) - new Date(a.date));
+            return timeline.slice(0, 10);
+
+        } catch (error) {
+            console.error('Timeline build error:', error);
+            return [];
+        }
+    },
+
+    _calculateBadges: function(stats) {
+        const badgeDefs = (window.NeuroSarathi.Config && window.NeuroSarathi.Config.BADGES) || [];
+        return badgeDefs.filter(badge => {
+            const req = badge.requirement || {};
+            return Object.keys(req).every(key => (stats[key] || 0) >= req[key]);
+        });
+    }
+};
+
+window.NeuroSarathi = NeuroSarathi;
+console.log('✅ API module loaded');
+

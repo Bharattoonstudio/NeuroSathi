@@ -462,3 +462,93 @@
         font-size: 22px;
     }
 }
+
+/* ============================================================
+   PHASE 4 — MOBILE QA ADDITIONS
+   Added: small-phone breakpoints + touch-target minimums.
+   Scoped to max-width:767px only, so desktop/tablet appearance
+   is completely unchanged.
+   ============================================================ */
+
+/* ─── TOUCH TARGETS (WCAG 2.5.5 / Android 48dp guidance) ─────
+   Buttons, tabs, filter chips, and icon buttons across the site
+   render below the ~44px minimum tappable height on phones.
+   This enforces a safe minimum without changing visual padding,
+   using min-height + centered content so text/icons stay put. */
+@media (max-width: 767px) {
+    .btn,
+    .btn-primary,
+    .btn-secondary,
+    .btn-success,
+    .btn-danger,
+    .btn-ghost,
+    .tab,
+    .filters button,
+    .prof-nav a,
+    button[type="submit"],
+    button[type="button"] {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-sm {
+        min-height: 40px;
+        padding: 8px 16px;
+    }
+
+    .btn-icon {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    /* Nav links and other tap targets that are plain <a> tags with
+       no button class — give them breathing room too. */
+    nav a,
+    .bottom-nav a,
+    .bottom-nav button {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+/* ─── SMALL PHONES (max-width: 374px) ─────────────────────────
+   iPhone SE / older/budget Android (320–374px). Tightens spacing
+   further than the general mobile rules above so nothing crowds
+   or clips on the narrowest common screens. */
+@media (max-width: 374px) {
+    .container,
+    .wrap {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+
+    .btn,
+    .btn-primary,
+    .btn-secondary,
+    .btn-lg {
+        padding-left: 16px;
+        padding-right: 16px;
+        font-size: 13px;
+    }
+
+    h1 {
+        font-size: clamp(20px, 7vw, 28px);
+    }
+}
+
+/* ─── MID-SIZE PHONES (375px–414px) ────────────────────────────
+   iPhone 12/13/14 standard widths, most mid-range Android.
+   No overflow was found at this width in the audit — this is a
+   light-touch spacing pass, not a layout change. */
+@media (min-width: 375px) and (max-width: 414px) {
+    .container,
+    .wrap {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}
+

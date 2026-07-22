@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0f766e">
+<link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16.png">
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
 <title>Dashboard — NeuroSarathi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -519,7 +524,7 @@
 </div>
 
 <div class="avatar-fab" id="avatarFab" title="Talk to Sarathi Avatar">
-  <img src="/sarathi-avatar.png" alt="Sarathi Avatar">
+  <img src="/images/sarathi-avatar.png" alt="Sarathi Avatar" loading="eager">
 </div>
 
 <script>
@@ -618,7 +623,7 @@ function renderAddChildForm(prefill){
 
   app.innerHTML = `
     <div class="card">
-      ${isFirstEver ? '<img src="/sarathi-avatar.png" alt="Sarathi Avatar" class="empty-illustration">' : ''}
+      ${isFirstEver ? '<img src="/images/sarathi-avatar.png" alt="Sarathi Avatar" class="empty-illustration" loading="lazy">' : ''}
       <h1 style="${isFirstEver ? 'text-align:center;' : ''}">${p.id ? "Edit your child's info" : "Let's add your child"}</h1>
       <p style="${isFirstEver ? 'text-align:center;' : ''}">Just a few details so we can guide you with the right ideas each day.</p>
 
@@ -1449,7 +1454,7 @@ function maybeShowAvatarBanner(child){
   banner.innerHTML = `
     <div class="card" style="background:var(--sage-soft);border-color:var(--primary);">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-        <img src="/sarathi-avatar.png" alt="Sarathi Avatar" style="width:48px;height:48px;border-radius:50%;">
+        <img src="/images/sarathi-avatar.png" alt="Sarathi Avatar" style="width:48px;height:48px;border-radius:50%;" loading="lazy">
         <h2 style="margin:0;">Want a hand finding focus areas?</h2>
       </div>
       <p style="margin-bottom:0;">Sarathi Avatar can chat with you for a few minutes about ${escapeHtml(child.display_name)} and suggest some everyday focus areas.</p>
@@ -1701,7 +1706,7 @@ async function loadLibraryResults(){
     return `
     <div class="card activity-card" data-id="${a.id}" style="cursor:pointer;position:relative;">
       <button class="fav-star-btn ${isFav ? 'is-fav' : ''}" data-fav-id="${a.id}" aria-label="Favorite">${isFav ? '⭐' : '☆'}</button>
-      ${thumbSrc ? `<img src="${thumbSrc}" alt="" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;margin-bottom:10px;background:#f4f1de;">` : `<div class="activity-icon-badge activity-badge-${(a.focus_areas&&a.focus_areas[0])||'default'}">${activityEmoji(a)}</div>`}
+      ${thumbSrc ? `<img src="${thumbSrc}" alt="" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;margin-bottom:10px;background:#f4f1de;" loading="lazy">` : `<div class="activity-icon-badge activity-badge-${(a.focus_areas&&a.focus_areas[0])||'default'}">${activityEmoji(a)}</div>`}
       <div class="card-head">
         <div class="card-icon ${a.source==='ai' ? 'gold' : ''}">${a.source==='ai' ? '✨' : '🧩'}</div>
         <h2 style="margin:0;">${escapeHtml(a.title)}</h2>
@@ -1817,7 +1822,7 @@ function renderActivityDetail(activity){
           <div class="timeline-item">
             <div class="timeline-dot"></div>
             <div class="timeline-note">
-              ${stepImgSrc ? `<img src="${stepImgSrc}" alt="" style="width:100%;max-width:220px;border-radius:12px;margin-bottom:8px;background:#f4f1de;display:block;">` : ''}
+              ${stepImgSrc ? `<img src="${stepImgSrc}" alt="" style="width:100%;max-width:220px;border-radius:12px;margin-bottom:8px;background:#f4f1de;display:block;" loading="lazy">` : ''}
               ${escapeHtml(s)}
             </div>
           </div>
@@ -1827,7 +1832,7 @@ function renderActivityDetail(activity){
 
       ${imgMeta ? `
         <h2 style="font-size:1rem;margin-top:16px;">What success looks like</h2>
-        <img src="/${imgMeta.slug}-step${imgMeta.count}.png" alt="Result" style="width:100%;max-width:260px;border-radius:12px;background:#f4f1de;display:block;margin-top:8px;">
+        <img src="/${imgMeta.slug}-step${imgMeta.count}.png" alt="Result" style="width:100%;max-width:260px;border-radius:12px;background:#f4f1de;display:block;margin-top:8px;" loading="lazy">
       ` : ''}
 
       ${activity.safety_tip ? `
@@ -2063,7 +2068,7 @@ async function openPrintableRoutine(child){
       <body>
         <button class="pr-print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
         <div class="pr-header">
-          ${photoUrl ? `<img class="pr-photo" src="${photoUrl}" alt="">` : `<div class="pr-photo-fallback">${initials(child.display_name)}</div>`}
+          ${photoUrl ? `<img class="pr-photo" src="${photoUrl}" alt="" loading="lazy">` : `<div class="pr-photo-fallback">${initials(child.display_name)}</div>`}
           <div>
             <h1 class="pr-title">${escapeHtml(child.display_name)}'s Weekly Routine</h1>
             <p class="pr-subtitle">Color a star each time a task is completed — a little celebration for every day! 🌟</p>
@@ -2078,7 +2083,7 @@ async function openPrintableRoutine(child){
           <tbody>${reportRows}</tbody>
         </table>
         <div class="pr-footer">Generated by NeuroSarathi · neurosarathi.com · This is an educational tracking tool, not a clinical assessment.</div>
-      </body>
+</body>
       </html>
     `);
     win.document.close();
@@ -3640,7 +3645,7 @@ function renderAvatarGreeting(){
   app.innerHTML = `
     <div class="card">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-        <img src="/sarathi-avatar.png" alt="Sarathi Avatar" style="width:56px;height:56px;border-radius:50%;">
+        <img src="/images/sarathi-avatar.png" alt="Sarathi Avatar" style="width:56px;height:56px;border-radius:50%;" loading="lazy">
         <h1 style="margin:0;">${escapeHtml(GREETING_TEXT[language](child.display_name))}</h1>
       </div>
       <p>Ask me anything, or share what's on your mind — I'm here to help.</p>
@@ -3662,7 +3667,7 @@ async function fetchAvatarReply(finalize){
     <div class="card thinking-card">
       <div class="thinking-stage">
         <div class="thinking-path"></div>
-        <img src="/sarathi-avatar.png" alt="Sarathi Avatar" class="thinking-avatar">
+        <img src="/images/sarathi-avatar.png" alt="Sarathi Avatar" class="thinking-avatar" loading="lazy">
         <div class="thinking-bubble">
           <span class="thinking-dot"></span><span class="thinking-dot"></span><span class="thinking-dot"></span>
         </div>
@@ -3752,7 +3757,7 @@ function renderSarathiPaywall(data){
   app.innerHTML = `
     <div class="card">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
-        <img src="/sarathi-avatar.png" alt="Sarathi Avatar" style="width:44px;height:44px;border-radius:50%;">
+        <img src="/images/sarathi-avatar.png" alt="Sarathi Avatar" style="width:44px;height:44px;border-radius:50%;" loading="lazy">
         <h1 style="margin:0;">${escapeHtml(data.title || "Upgrade to keep chatting")}</h1>
       </div>
       <p>${escapeHtml(data.message || "")}</p>
@@ -3847,9 +3852,9 @@ function renderAvatarChatTurn(){
     const imagePart = typeof m.content === "object" ? m.content.find(p=>p.type==="image_url") : null;
     return `
       <div class="chat-row ${isUser ? 'chat-row-user' : 'chat-row-bot'}">
-        ${!isUser ? `<img src="/sarathi-avatar.png" alt="" class="chat-avatar-sm">` : ''}
+        ${!isUser ? `<img src="/images/sarathi-avatar.png" alt="" class="chat-avatar-sm" loading="lazy">` : ''}
         <div class="chat-bubble ${isUser ? 'chat-bubble-user' : 'chat-bubble-bot'}">
-          ${imagePart ? `<img src="${imagePart.image_url.url}" class="chat-bubble-img" alt="Attached image">` : ''}
+          ${imagePart ? `<img src="${imagePart.image_url.url}" class="chat-bubble-img" alt="Attached image" loading="lazy">` : ''}
           ${textContent ? `<span>${escapeHtml(textContent)}</span>` : ''}
           ${(!isUser && textContent) ? `<button class="speak-btn" data-msg-index="${i}" title="Listen">🔊</button>` : ''}
         </div>
@@ -3861,7 +3866,7 @@ function renderAvatarChatTurn(){
     <div class="chat-screen">
       <div class="chat-header">
         <button class="chat-back-btn" id="avatarCancelBtn">←</button>
-        <img src="/sarathi-avatar.png" alt="" class="chat-header-avatar">
+        <img src="/images/sarathi-avatar.png" alt="" class="chat-header-avatar" loading="lazy">
         <div class="chat-header-name">Sarathi — chatting about ${escapeHtml(child.display_name)}</div>
         <button class="chat-lang-btn" id="chatLangBtn" title="Change language">${LANG_FLAGS[avatarState.language] || "🌐"} ${(LANG_LABELS[avatarState.language] || "EN")}</button>
         <button class="chat-lang-btn ${getAutoSpeak() ? 'autospeak-on' : ''}" id="autoSpeakBtn" title="Auto-play Sarathi's replies">${getAutoSpeak() ? '🔊' : '🔇'}</button>
@@ -3906,7 +3911,7 @@ function renderAvatarChatTurn(){
       pendingImage = { dataUrl: reader.result, mimeType: file.type };
       document.getElementById("attachPreviewWrap").innerHTML = `
         <div class="attach-preview">
-          <img src="${reader.result}" alt="">
+          <img src="${reader.result}" alt="" loading="lazy">
           <span>Photo ready to send</span>
           <button id="attachRemoveBtn" type="button">✕</button>
         </div>
@@ -4141,7 +4146,7 @@ function renderSuggestionApproval(){
   app.innerHTML = `
     <div class="card">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
-        <img src="/sarathi-avatar.png" alt="Sarathi Avatar" style="width:44px;height:44px;border-radius:50%;">
+        <img src="/images/sarathi-avatar.png" alt="Sarathi Avatar" style="width:44px;height:44px;border-radius:50%;" loading="lazy">
         <h1 style="margin:0;">Suggested focus areas for ${escapeHtml(child.display_name)}</h1>
       </div>
       <p>Based on your conversation, Sarathi Avatar suggests these. Tap any to remove it — only the ones you approve will be saved.</p>
@@ -4199,5 +4204,6 @@ document.getElementById("signOutLink").addEventListener("click", async (e)=>{
 
 init();
 </script>
+<script src="/js/sw-register.js"></script>
 </body>
 </html>

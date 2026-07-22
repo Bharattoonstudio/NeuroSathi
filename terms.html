@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0f766e">
+<link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16.png">
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
 <title>Terms & Conditions · NeuroSarathi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,7 +46,7 @@ a{color:var(--terracotta);}
 </head>
 <body>
 <div class="wrap">
-  <a href="/index.html"><img class="logo" src="/neurosarathi-logo-horizontal.png" alt="NeuroSarathi"></a>
+  <a href="/index.html"><picture><source srcset="/images/neurosarathi-logo-horizontal.webp" type="image/webp"><img class="logo" src="/images/neurosarathi-logo-horizontal.png" alt="NeuroSarathi" width="256" height="128"></picture></a>
   <div class="card">
     <h1>Terms & Conditions</h1>
     <p class="updated">Last updated: July 2026</p>
@@ -92,5 +97,6 @@ a{color:var(--terracotta);}
   </div>
   <div class="back"><a href="/parents.html">← Back to NeuroSarathi</a></div>
 </div>
+<script src="/js/sw-register.js"></script>
 </body>
 </html>

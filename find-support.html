@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0f766e">
+<link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16.png">
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
 <title>Find Support — NeuroSarathi</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -505,10 +510,11 @@ function viewInvoice(booking){
       <div class="total">Total paid: ₹${escapeHtml(String(booking.amount))}</div>
       <div class="foot">This is a system-generated invoice from neurosarathi.com. For queries, contact info@neurosarathi.com.</div>
       <script>window.print();${'</scr' + 'ipt>'}
-    </body></html>
+</body></html>
   `);
   win.document.close();
 }
 </script>
+<script src="/js/sw-register.js"></script>
 </body>
 </html>

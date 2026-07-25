@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0f766e">
+<link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16.png">
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<title>Delete Account · NeuroSarathi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --background: #fffaf5;
+  --ink: #0e1524;
+  --ink-soft: #4a5164;
+  --card: #ffffff;
+  --primary: #ff8a5c;
+  --primary-foreground: #1a1200;
+  --sage-soft: #e2f1ee;
+  --terracotta: #e0632f;
+  --muted-foreground: #7b8194;
+  --border: hsl(24 40% 90%);
+  --shadow-lift: 0 2px 4px oklch(0.22 0.035 265 / 0.05), 0 24px 60px -20px oklch(0.28 0.08 265 / 0.18);
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--background);color:var(--ink);min-height:100vh;padding:24px;
+  background-image: radial-gradient(1000px 500px at 15% 0%, oklch(0.92 0.05 55 / .45), transparent 60%), radial-gradient(800px 500px at 100% 100%, oklch(0.9 0.04 145 / .3), transparent 60%);
+}
+.logo{height:48px;width:auto;margin-bottom:24px;display:block}
+.wrap{max-width:720px;margin:0 auto;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:32px 28px;box-shadow:var(--shadow-lift);}
+h1{font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:1.9rem;margin-bottom:6px;color:var(--ink)}
+.updated{color:var(--muted-foreground);font-size:.85rem;margin-bottom:24px;}
+h2{font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:1.15rem;margin:24px 0 8px;color:var(--ink)}
+p, li{font-size:.92rem;line-height:1.65;color:var(--ink-soft);margin-bottom:10px;}
+ul{padding-left:20px;margin-bottom:10px;}
+.back{margin-top:28px;text-align:center}
+.back a{color:var(--muted-foreground);font-size:.85rem;text-decoration:none}
+a{color:var(--terracotta);}
+.btn{
+  display:inline-block;
+  background:var(--primary);
+  color:var(--primary-foreground);
+  padding:12px 22px;
+  border-radius:999px;
+  text-decoration:none;
+  font-weight:700;
+  font-size:.92rem;
+  margin-top:8px;
+}
+.note{
+  background:var(--sage-soft);
+  border-radius:12px;
+  padding:14px 16px;
+  font-size:.88rem;
+  color:var(--ink-soft);
+  margin:16px 0;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/index.html"><picture><source srcset="/images/neurosarathi-logo-horizontal.webp" type="image/webp"><img class="logo" src="/images/neurosarathi-logo-horizontal.png" alt="NeuroSarathi" width="256" height="128"></picture></a>
+  <div class="card">
+    <h1>Delete Your Account</h1>
+    <p class="updated">NeuroSarathi Account & Data Deletion</p>
+
+    <p>If you'd like to permanently delete your NeuroSarathi account and associated data, you can request this at any time by contacting us directly.</p>
+
+    <h2>How to Request Deletion</h2>
+    <p>Send an email to <a href="mailto:info@neurosarathi.com?subject=Account%20Deletion%20Request">info@neurosarathi.com</a> from the email address linked to your NeuroSarathi account, with the subject line "Account Deletion Request."</p>
+
+    <a class="btn" href="mailto:info@neurosarathi.com?subject=Account%20Deletion%20Request">Email Us to Delete My Account</a>
+
+    <div class="note">
+      Please include your registered email address and, if applicable, your child's profile name so we can locate and remove the correct records.
+    </div>
+
+    <h2>What Gets Deleted</h2>
+    <ul>
+      <li>Your account credentials and login information</li>
+      <li>Your child's profile information (name, age, developmental data, routines, milestones)</li>
+      <li>Screening and check-in responses</li>
+      <li>Chat history with Sarathi Avatar</li>
+    </ul>
+
+    <h2>What May Be Retained</h2>
+    <ul>
+      <li>Payment transaction records, as required for tax and financial compliance (typically retained for the legally required period, then deleted)</li>
+    </ul>
+
+    <h2>Processing Time</h2>
+    <p>We will process your deletion request within a reasonable timeframe, and confirm once it's complete via email.</p>
+
+    <h2>Questions?</h2>
+    <p>Contact us anytime at <a href="mailto:info@neurosarathi.com">info@neurosarathi.com</a>.</p>
+  </div>
+  <div class="back"><a href="/index.html">← Back to NeuroSarathi</a></div>
+</div>
+</body>
+</html>

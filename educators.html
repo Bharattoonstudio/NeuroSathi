@@ -3,22 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>For Special Educators & Freelance Teachers — NeuroSarathi</title>
-<meta name="description" content="List your services on NeuroSarathi. Connect with families looking for special educators and freelance teachers who understand their child's needs.">
+<title>For Special Educators & Home Tutors — NeuroSarathi</title>
+<meta name="description" content="List your services on NeuroSarathi. Connect with families looking for special educators and home tutors who understand their child's needs.">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#0e1524">
 <link rel="canonical" href="https://www.neurosarathi.com/educators.html">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://neurosarathi.com/educators.html">
-<meta property="og:title" content="For Special Educators & Freelance Teachers — NeuroSarathi">
-<meta property="og:description" content="List your services on NeuroSarathi. Connect with families looking for special educators and freelance teachers who understand their child's needs.">
+<meta property="og:title" content="For Special Educators & Home Tutors — NeuroSarathi">
+<meta property="og:description" content="List your services on NeuroSarathi. Connect with families looking for special educators and home tutors who understand their child's needs.">
 <meta property="og:image" content="https://raw.githubusercontent.com/Bharattoonstudio/NeuroSathi/main/neurosarathi-logo-horizontal.png">
 <meta property="og:site_name" content="NeuroSarathi">
 <meta property="og:locale" content="en_IN">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:url" content="https://neurosarathi.com/educators.html">
-<meta name="twitter:title" content="For Special Educators & Freelance Teachers — NeuroSarathi">
-<meta name="twitter:description" content="List your services on NeuroSarathi. Connect with families looking for special educators and freelance teachers who understand their child's needs.">
+<meta name="twitter:title" content="For Special Educators & Home Tutors — NeuroSarathi">
+<meta name="twitter:description" content="List your services on NeuroSarathi. Connect with families looking for special educators and home tutors who understand their child's needs.">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/Bharattoonstudio/NeuroSathi/main/neurosarathi-logo-horizontal.png">
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32.png">
@@ -88,7 +88,7 @@
 </nav>
 
 <div class="prof-hero">
-  <div style="font-size:12px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#ff8a5c;margin-bottom:12px">FOR SPECIAL EDUCATORS</div>
+  <div style="font-size:12px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#ff8a5c;margin-bottom:12px">FOR SPECIAL EDUCATORS & HOME TUTORS</div>
   <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(24px,4vw,38px);font-weight:800;color:#fff;max-width:700px;margin:0 auto 14px">
     Every child teaches you something new — meet more of them
   </h1>
@@ -118,6 +118,15 @@
 
     <form id="profFormStep2" style="display:none" onsubmit="submitProfessionalRegistration(event)">
       <h2 style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:800;color:#0e1524;margin-bottom:20px">Your professional profile</h2>
+
+      <div class="prof-field">
+        <label>I offer *</label>
+        <select id="profType" required>
+          <option value="">Select service type</option>
+          <option value="special_educator">Special Educator</option>
+          <option value="home_tutor">Home Tutor</option>
+        </select>
+      </div>
 
       <div class="prof-field">
         <label>Profile Photo (optional)</label>
@@ -411,6 +420,7 @@ async function profSignupOrLogin(){
 
 const PROF_TYPE_LABELS = {
   special_educator: 'Special Educator',
+  home_tutor: 'Home Tutor',
 };
 
 // Fixed condition/specialization tags — the first 5 use labels that match
@@ -561,7 +571,7 @@ function showProfileCard(payload){
     // Freshly submitted profile — re-fetch to get the row id for bookings lookup
     getSupabase().then(async sb => {
       const { data: userData } = await sb.auth.getUser();
-      const { data } = await sb.from('professionals').select('id').eq('user_id', userData?.user?.id).eq('professional_type', 'special_educator').maybeSingle();
+      const { data } = await sb.from('professionals').select('id').eq('user_id', userData?.user?.id).in('professional_type', ['special_educator', 'home_tutor']).maybeSingle();
       if(data?.id) loadMyBookings(data.id);
     });
   }
@@ -615,6 +625,7 @@ function editProfile(){
 
 function fillProfileForm(data){
   const setVal = (id, val) => { const el = document.getElementById(id); if(el && val != null) el.value = val; };
+  setVal('profType', data.professional_type);
   setVal('profDisplayName', data.display_name);
   setVal('profRegBody', data.registration_body);
   setVal('profQualifications', data.qualifications);
@@ -656,7 +667,7 @@ async function loadExistingProfile(){
     const { data: userData } = await sb.auth.getUser();
     const userId = userData?.user?.id;
     if(!userId) return;
-    const { data, error } = await sb.from('professionals').select('*').eq('user_id', userId).eq('professional_type', 'special_educator').maybeSingle();
+    const { data, error } = await sb.from('professionals').select('*').eq('user_id', userId).in('professional_type', ['special_educator', 'home_tutor']).maybeSingle();
     if(error || !data) return;
     showProfileCard(data);
   }catch(e){
@@ -767,7 +778,7 @@ async function submitProfessionalRegistration(event){
 
     const payload = {
       user_id: userId,
-      professional_type: 'special_educator',
+      professional_type: document.getElementById('profType').value,
       display_name: document.getElementById('profDisplayName').value.trim(),
       registration_body: document.getElementById('profRegBody').value.trim() || null,
       city: document.getElementById('profCity').value.trim(),

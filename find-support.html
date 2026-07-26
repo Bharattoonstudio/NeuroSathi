@@ -138,6 +138,17 @@
   </div>
 </div>
 
+<div class="modal-bg" id="reviewsModalBg">
+  <div class="modal">
+    <h3 id="reviewsModalName">Reviews</h3>
+    <div class="sub" id="reviewsModalMeta"></div>
+    <div id="reviewsModalList"></div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn-cancel" style="flex:1" onclick="closeReviewsModal()">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const NS_URL = 'https://qvuenvngwgcknawfsnxl.supabase.co';
 const NS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2dWVudm5nd2dja25hd2ZzbnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MzI1OTksImV4cCI6MjA5ODMwODU5OX0.MZgac469tvi9Xq9gyaRbHDc9t88Ww9dN8ldZ8JvKGVI';
@@ -294,13 +305,15 @@ function renderList(){
     const ratingLabel = rs ? `★ ${(rs.sum / rs.count).toFixed(1)} (${rs.count})` : 'No ratings yet';
     const expLabel = p.yearsExp ? ` · ${p.yearsExp} yrs experience` : '';
 
+    const ratingHtml = rs ? `<span style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted" onclick='openReviewsModal(${JSON.stringify(p.kind)}, ${JSON.stringify(p.providerId)}, ${JSON.stringify(p.name)})'>${escapeHtml(ratingLabel)}</span>` : escapeHtml(ratingLabel);
+
     if (p.kind === 'agency'){
       const rosterCount = (p.roster || []).length;
       return `
         <div class="card">
           <div class="type-tag">${escapeHtml(kindLabel(p.kind))}<span class="verified-tag">✓ Verified</span></div>
           <div class="name">${escapeHtml(p.name)}</div>
-          <div class="meta">${loc ? escapeHtml(loc) : ''} · ${escapeHtml(ratingLabel)}</div>
+          <div class="meta">${loc ? escapeHtml(loc) : ''} · ${ratingHtml}</div>
           ${p.languages && p.languages.length ? `<div style="font-size:.82rem;color:#57534E;margin-bottom:6px"><strong>Speaks:</strong> ${escapeHtml(p.languages.join(', '))}</div>` : ''}
           ${p.bio ? `<div class="bio">${escapeHtml(p.bio)}</div>` : ''}
           ${p.videoUrl ? renderVideoEmbed(p.videoUrl) : ''}
@@ -314,7 +327,7 @@ function renderList(){
       <div class="card">
         <div class="type-tag">${escapeHtml(kindLabel(p.kind))}<span class="verified-tag">✓ Verified</span></div>
         <div class="name">${escapeHtml(p.name)}</div>
-        <div class="meta">${escapeHtml(p.typeLabel)}${loc ? ' · ' + escapeHtml(loc) : ''}${expLabel} · ${escapeHtml(ratingLabel)}</div>
+        <div class="meta">${escapeHtml(p.typeLabel)}${loc ? ' · ' + escapeHtml(loc) : ''}${expLabel} · ${ratingHtml}</div>
         ${p.qualifications ? `<div style="font-size:.82rem;color:#57534E;margin-bottom:6px"><strong>Qualifications:</strong> ${escapeHtml(p.qualifications)}</div>` : ''}
         ${p.languages && p.languages.length ? `<div style="font-size:.82rem;color:#57534E;margin-bottom:6px"><strong>Speaks:</strong> ${escapeHtml(p.languages.join(', '))}</div>` : ''}
         ${p.bio ? `<div class="bio">${escapeHtml(p.bio)}</div>` : ''}
@@ -394,6 +407,43 @@ function closeRosterViewModal(){
 function bookRosterCaregiver(agency, caregiverName){
   closeRosterViewModal();
   openBookModal(agency, caregiverName);
+}
+
+async function openReviewsModal(kind, providerId, name){
+  document.getElementById('reviewsModalName').textContent = name;
+  const listEl = document.getElementById('reviewsModalList');
+  const metaEl = document.getElementById('reviewsModalMeta');
+  metaEl.textContent = 'Loading…';
+  listEl.innerHTML = '';
+  document.getElementById('reviewsModalBg').classList.add('active');
+  try{
+    const { data, error } = await sb.from('ratings')
+      .select('stars, review_text, created_at')
+      .eq('provider_type', kind)
+      .eq('provider_id', providerId)
+      .order('created_at', { ascending: false });
+    if (error || !data || !data.length){
+      metaEl.textContent = '';
+      listEl.innerHTML = '<div class="empty-note">No reviews yet.</div>';
+      return;
+    }
+    const avg = data.reduce((s,r)=>s+r.stars,0) / data.length;
+    metaEl.textContent = `★ ${avg.toFixed(1)} average · ${data.length} review${data.length===1?'':'s'}`;
+    listEl.innerHTML = data.map(r => `
+      <div class="roster-item">
+        <div style="color:#ff8a5c;font-size:.95rem">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
+        ${r.review_text ? `<div class="rbio" style="margin-top:4px">"${escapeHtml(r.review_text)}"</div>` : ''}
+        <div style="font-size:.72rem;color:#A8A29E;margin-top:4px">${new Date(r.created_at).toLocaleDateString('en-IN', { year:'numeric', month:'short' })}</div>
+      </div>
+    `).join('');
+  }catch(err){
+    console.error('Load reviews error:', err);
+    metaEl.textContent = '';
+    listEl.innerHTML = '<div class="empty-note">Something went wrong loading reviews.</div>';
+  }
+}
+function closeReviewsModal(){
+  document.getElementById('reviewsModalBg').classList.remove('active');
 }
 
 async function startPayment(){
@@ -531,14 +581,14 @@ async function loadMyBookings(){
       proIds.length ? sb.from('professionals').select('id, phone_number').in('id', proIds) : Promise.resolve({ data: [] }),
       cgIds.length ? sb.from('caregivers').select('user_id, phone_number').in('user_id', cgIds) : Promise.resolve({ data: [] }),
       agcIds.length ? sb.from('agencies').select('user_id, phone_number').in('user_id', agcIds) : Promise.resolve({ data: [] }),
-      sb.from('ratings').select('booking_id, stars').in('booking_id', bookingIds),
+      sb.from('ratings').select('booking_id, stars, review_text').in('booking_id', bookingIds),
     ]);
     const phoneByProId = {};
     (pros || []).forEach(p => phoneByProId[p.id] = p.phone_number);
     (cgs || []).forEach(c => phoneByProId[c.user_id] = c.phone_number);
     (agcs || []).forEach(a => phoneByProId[a.user_id] = a.phone_number);
     const ratingByBooking = {};
-    (ratings || []).forEach(r => ratingByBooking[r.booking_id] = r.stars);
+    (ratings || []).forEach(r => ratingByBooking[r.booking_id] = r);
 
     mount.innerHTML = data.map(b => {
       const phone = phoneByProId[b.provider_id];
@@ -574,16 +624,40 @@ async function markMeetingDone(bookingId){
   }
 }
 
-function renderRatingWidget(bookingId, existingStars){
-  if (existingStars) {
-    return `<div style="margin-top:10px;font-size:.85rem;color:#7b8194">Your rating: ${'★'.repeat(existingStars)}${'☆'.repeat(5-existingStars)}</div>`;
+function renderRatingWidget(bookingId, existingRating){
+  if (existingRating) {
+    const stars = existingRating.stars;
+    return `<div style="margin-top:10px">
+      <div style="font-size:.85rem;color:#7b8194">Your rating: ${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</div>
+      ${existingRating.review_text ? `<div style="font-size:.82rem;color:#57534E;margin-top:4px;font-style:italic">"${escapeHtml(existingRating.review_text)}"</div>` : ''}
+    </div>`;
   }
-  const stars = [1,2,3,4,5].map(n => `<span onclick="submitRating('${bookingId}',${n})" style="cursor:pointer;font-size:1.3rem;color:#ff8a5c">★</span>`).join('');
-  return `<div style="margin-top:10px"><div style="font-size:.8rem;color:#7b8194;margin-bottom:4px">Rate this provider:</div>${stars}</div>`;
+  const starSpans = [1,2,3,4,5].map(n => `<span class="rate-star" data-n="${n}" onclick="selectRatingStar('${bookingId}',${n})" style="cursor:pointer;font-size:1.3rem;color:#E5E7EB">★</span>`).join('');
+  return `<div style="margin-top:10px" id="rateWidget-${bookingId}">
+    <div style="font-size:.8rem;color:#7b8194;margin-bottom:4px">Rate this provider:</div>
+    <div id="rateStars-${bookingId}">${starSpans}</div>
+    <div id="rateExtra-${bookingId}" style="display:none;margin-top:8px">
+      <textarea id="rateText-${bookingId}" rows="2" placeholder="Optional: share a few words about your experience" style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid #E5E7EB;font-family:inherit;font-size:.85rem;box-sizing:border-box;margin-bottom:8px"></textarea>
+      <button class="book-btn" onclick="submitRating('${bookingId}')">Submit Review</button>
+    </div>
+  </div>`;
 }
 
-async function submitRating(bookingId, stars){
+function selectRatingStar(bookingId, n){
+  const container = document.getElementById('rateStars-' + bookingId);
+  container.dataset.selected = n;
+  container.querySelectorAll('.rate-star').forEach(s => {
+    s.style.color = parseInt(s.dataset.n) <= n ? '#ff8a5c' : '#E5E7EB';
+  });
+  document.getElementById('rateExtra-' + bookingId).style.display = 'block';
+}
+
+async function submitRating(bookingId){
   try{
+    const container = document.getElementById('rateStars-' + bookingId);
+    const stars = parseInt(container?.dataset.selected || '0');
+    if (!stars) { alert('Please select a star rating first.'); return; }
+    const reviewText = document.getElementById('rateText-' + bookingId).value.trim();
     const { data: b } = await sb.from('bookings').select('provider_type, provider_id').eq('id', bookingId).maybeSingle();
     const { error } = await sb.from('ratings').insert({
       booking_id: bookingId,
@@ -591,6 +665,7 @@ async function submitRating(bookingId, stars){
       provider_id: b?.provider_id || null,
       parent_user_id: currentUserId,
       stars: stars,
+      review_text: reviewText || null,
     });
     if (error) { alert('Could not submit rating: ' + error.message); return; }
     loadMyBookings();

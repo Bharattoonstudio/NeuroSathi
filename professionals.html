@@ -588,9 +588,9 @@ function renderProfileCard(p){
         <div class="fb-bio">${p.bio ? escapeHtml(p.bio) : '<span style="color:#A8A29E">No bio added yet.</span>'}</div>
         ${p.intro_video_url ? renderVideoEmbed(p.intro_video_url) : ''}
 
-        <div class="fb-reviews">
-          <div class="fb-reviews-stars">★★★★★</div>
-          <div class="fb-reviews-note">No Reviews Yet</div>
+        <div class="fb-reviews" id="reviewsMount">
+          <div class="fb-reviews-stars" style="color:#E5E7EB">★★★★★</div>
+          <div class="fb-reviews-note">Loading reviews…</div>
         </div>
 
         <div class="fb-actions">
@@ -635,6 +635,41 @@ function showProfileCard(payload){
   document.getElementById('profFormStep2').style.display = 'none';
   document.getElementById('profSuccess').style.display = 'block';
   loadMyBookings(payload.id);
+  loadReviewsSummary('professional', payload.id);
+}
+
+async function loadReviewsSummary(providerType, providerId){
+  const mount = document.getElementById('reviewsMount');
+  if(!mount || !providerId) return;
+  try{
+    const sb = await getSupabase();
+    const { data, error } = await sb.from('ratings')
+      .select('stars, review_text, created_at')
+      .eq('provider_type', providerType)
+      .eq('provider_id', providerId)
+      .order('created_at', { ascending: false });
+    if(error || !data || !data.length){
+      mount.innerHTML = `<div class="fb-reviews-stars" style="color:#E5E7EB">★★★★★</div><div class="fb-reviews-note">No Reviews Yet</div>`;
+      return;
+    }
+    const avg = data.reduce((s,r)=>s+r.stars,0) / data.length;
+    const rounded = Math.round(avg);
+    const starsHtml = `<span style="color:#ff8a5c">${'★'.repeat(rounded)}</span><span style="color:#E5E7EB">${'★'.repeat(5-rounded)}</span>`;
+    const recent = data.slice(0,3).filter(r => r.review_text).map(r => `
+      <div style="margin-top:8px;font-size:12.5px;color:#57534E">
+        <span style="color:#ff8a5c">${'★'.repeat(r.stars)}</span><span style="color:#E5E7EB">${'★'.repeat(5-r.stars)}</span>
+        <span style="font-style:italic"> "${escapeHtml(r.review_text)}"</span>
+      </div>
+    `).join('');
+    mount.innerHTML = `
+      <div class="fb-reviews-stars">${starsHtml}</div>
+      <div class="fb-reviews-note">${avg.toFixed(1)} average · ${data.length} review${data.length===1?'':'s'}</div>
+      ${recent}
+    `;
+  }catch(err){
+    console.error('Load reviews summary error:', err);
+    mount.innerHTML = `<div class="fb-reviews-stars" style="color:#E5E7EB">★★★★★</div><div class="fb-reviews-note">Couldn't load reviews.</div>`;
+  }
 }
 
 async function loadMyBookings(providerId){

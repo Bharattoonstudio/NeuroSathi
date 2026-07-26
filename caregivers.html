@@ -116,6 +116,19 @@
       
     </div>
 
+    <div id="accountTypeStep" style="display:none">
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:800;color:#0e1524;margin-bottom:6px">Are you an individual or an agency?</h2>
+      <p style="font-size:13px;color:#7b8194;margin-bottom:20px">This decides what your profile looks like — you can't switch later, so pick the one that fits.</p>
+      <button onclick="chooseAccountType('individual')" style="width:100%;text-align:left;background:#fffaf5;border:2px solid #E5E7EB;border-radius:14px;padding:16px 18px;margin-bottom:12px;cursor:pointer;font-family:inherit">
+        <div style="font-weight:800;font-size:15px;color:#0e1524;margin-bottom:3px">👤 Individual Caregiver</div>
+        <div style="font-size:12.5px;color:#7b8194">I offer babysitting, tutoring, or special needs caregiving myself.</div>
+      </button>
+      <button onclick="chooseAccountType('agency')" style="width:100%;text-align:left;background:#fffaf5;border:2px solid #E5E7EB;border-radius:14px;padding:16px 18px;cursor:pointer;font-family:inherit">
+        <div style="font-weight:800;font-size:15px;color:#0e1524;margin-bottom:3px">🏢 Agency</div>
+        <div style="font-size:12.5px;color:#7b8194">I run an organization with multiple caregivers working under it.</div>
+      </button>
+    </div>
+
     <form id="profFormStep2" style="display:none" onsubmit="submitCaregiverRegistration(event)">
       <h2 style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:800;color:#0e1524;margin-bottom:20px">Your caregiver profile</h2>
 
@@ -262,6 +275,124 @@
       <div style="text-align:center;margin-top:12px;font-size:12.5px;color:#7b8194">Your profile becomes visible to parents searching in your city once submitted.</div>
     </form>
 
+    <form id="agencyFormStep2" style="display:none" onsubmit="submitAgencyRegistration(event)">
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:800;color:#0e1524;margin-bottom:20px">Your agency profile</h2>
+
+      <div class="prof-field">
+        <label>Agency name *</label>
+        <input type="text" id="agencyName" required placeholder="e.g. Little Sprouts Care Collective">
+      </div>
+
+      <div class="prof-field">
+        <label>Registration body / license (optional)</label>
+        <input type="text" id="agencyRegBody" placeholder="e.g. Shop & Establishment license number, if any">
+      </div>
+
+      <div class="prof-field">
+        <label>Agency logo / photo (optional)</label>
+        <div style="display:flex;align-items:center;gap:14px">
+          <div id="agencyPhotoPreviewWrap" style="width:64px;height:64px;border-radius:50%;background:#F1F5F9;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;border:2px solid #E5E7EB">
+            <span id="agencyPhotoPreviewIcon" style="font-size:22px;color:#A8A29E">🏢</span>
+            <img id="agencyPhotoPreviewImg" alt="Preview of your uploaded logo" style="display:none;width:100%;height:100%;object-fit:cover" loading="lazy">
+          </div>
+          <input type="file" id="agencyPhotoFile" accept="image/*" onchange="previewAgencyPhoto(event)" style="font-size:13px">
+        </div>
+        <div id="agencyPhotoUploadStatus" style="font-size:11.5px;color:#7b8194;margin-top:6px"></div>
+      </div>
+
+      <div class="prof-field">
+        <label>State *</label>
+        <select id="agencyState" required>
+          <option value="">Select state</option>
+          <option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option>
+          <option>Bihar</option><option>Chhattisgarh</option><option>Goa</option><option>Gujarat</option>
+          <option>Haryana</option><option>Himachal Pradesh</option><option>Jharkhand</option>
+          <option>Karnataka</option><option>Kerala</option><option>Madhya Pradesh</option>
+          <option>Maharashtra</option><option>Manipur</option><option>Meghalaya</option><option>Mizoram</option>
+          <option>Nagaland</option><option>Odisha</option><option>Punjab</option><option>Rajasthan</option>
+          <option>Sikkim</option><option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option>
+          <option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option>
+          <option>Delhi</option><option>Jammu and Kashmir</option><option>Ladakh</option>
+          <option>Chandigarh</option><option>Puducherry</option>
+        </select>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="prof-field">
+          <label>City *</label>
+          <input type="text" id="agencyCity" required list="cityList" placeholder="e.g. Mumbai">
+        </div>
+        <div class="prof-field">
+          <label>Area / Locality</label>
+          <input type="text" id="agencyArea" placeholder="e.g. Andheri West">
+        </div>
+      </div>
+
+      <div class="prof-field">
+        <label>PIN Code *</label>
+        <input type="text" id="agencyPincode" required inputmode="numeric" pattern="[1-9][0-9]{5}" maxlength="6" placeholder="e.g. 400058">
+      </div>
+
+      <div class="prof-field">
+        <label>Languages your caregivers speak (comma separated)</label>
+        <input type="text" id="agencyLanguages" placeholder="e.g. English, Hindi, Marathi">
+      </div>
+
+      <div class="prof-field">
+        <label>Conditions your caregivers support</label>
+        <div class="cond-chip-grid" id="agencyConditionsGrid"></div>
+        <label style="margin-top:10px;font-weight:600;">Other (comma separated, optional)</label>
+        <input type="text" id="agencyConditionsOther" placeholder="e.g. Dyspraxia, Selective Mutism">
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="prof-field">
+          <label>Typical hourly rate — from (₹)</label>
+          <input type="number" id="agencyFeeMin" placeholder="e.g. 150">
+        </div>
+        <div class="prof-field">
+          <label>Typical hourly rate — up to (₹)</label>
+          <input type="number" id="agencyFeeMax" placeholder="e.g. 400">
+        </div>
+      </div>
+
+      <div class="prof-field">
+        <label>About your agency</label>
+        <textarea id="agencyBio" rows="3" placeholder="A few lines about your agency, how long you've operated, and your approach"></textarea>
+      </div>
+
+      <div class="prof-field">
+        <label>UPI ID (for receiving payouts)</label>
+        <input type="text" id="agencyUpiId" placeholder="e.g. agencyname@okhdfcbank">
+        <div style="font-size:12px;color:#7b8194;margin-top:4px">Used only to pay you your share after a paid engagement. Not shown publicly.</div>
+      </div>
+
+      <div class="prof-field">
+        <label>Phone / WhatsApp number</label>
+        <input type="tel" id="agencyPhone" placeholder="e.g. 9876543210">
+        <div style="font-size:12px;color:#7b8194;margin-top:4px">Shared with a parent only after they've booked and paid.</div>
+      </div>
+
+      <div class="prof-field">
+        <label>Registration / license document (optional)</label>
+        <input type="file" id="agencyCredentialFile" accept=".pdf,image/*" onchange="handleAgencyCredentialFileSelect(event)" style="font-size:13px">
+        <div id="agencyCredentialFileStatus" style="font-size:12px;color:#7b8194;margin-top:4px">PDF or photo of a relevant registration/license document. Kept private — only our verification team can view it.</div>
+      </div>
+
+      <div class="prof-field">
+        <label>Video introduction (optional)</label>
+        <input type="text" id="agencyIntroVideo" placeholder="Paste a YouTube link introducing your agency">
+      </div>
+
+      <div class="prof-field" style="display:flex;align-items:flex-start;gap:10px;background:#fffaf5;border-radius:10px;padding:12px 14px">
+        <input type="checkbox" id="agencyDisclaimerAck" required style="width:auto;margin-top:3px">
+        <label for="agencyDisclaimerAck" style="font-size:12.5px;font-weight:600;color:#57534E;margin:0">I understand that meeting a family in person (or having them visit our premises) is entirely our own choice and responsibility, and that I am responsible for vetting the caregivers I list under my agency. *</label>
+      </div>
+
+      <button type="submit" id="agencySubmitBtn" style="width:100%;background:linear-gradient(135deg,#ff8a5c,#ffb083);color:#fff;border:none;border-radius:50px;padding:14px;font-family:inherit;font-size:15px;font-weight:900;cursor:pointer">Submit Agency Profile →</button>
+      <div style="text-align:center;margin-top:12px;font-size:12.5px;color:#7b8194">Your profile becomes visible to parents searching in your city once submitted.</div>
+    </form>
+
     <div id="profSuccess" style="display:none">
       <div id="profileCardMount"></div>
     </div>
@@ -330,6 +461,50 @@
   </div>
 </div>
 
+<!-- Roster entry modal — agency owners add/edit individual caregivers here.
+     No separate login per staff member; the agency account manages the
+     whole roster. -->
+<div id="rosterModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(20,20,20,.75);align-items:center;justify-content:center;padding:20px">
+  <div style="max-width:480px;width:100%;background:#fff;border-radius:24px;overflow:hidden;max-height:88vh;display:flex;flex-direction:column">
+    <div style="padding:28px 28px 0">
+      <h2 id="rosterModalTitle" style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:800;color:#0e1524;margin-bottom:16px">Add a caregiver</h2>
+    </div>
+    <div style="padding:0 28px;overflow-y:auto;flex:1">
+      <input type="hidden" id="rosterEntryId" value="">
+      <div class="prof-field">
+        <label>Name *</label>
+        <input type="text" id="rosterName" required placeholder="e.g. Anita Desai">
+      </div>
+      <div class="prof-field">
+        <label>Years of experience</label>
+        <input type="number" id="rosterExperience" min="0" placeholder="e.g. 4">
+      </div>
+      <div class="prof-field">
+        <label>Specializations</label>
+        <div class="cond-chip-grid" id="rosterConditionsGrid"></div>
+        <label style="margin-top:10px;font-weight:600;">Other (comma separated, optional)</label>
+        <input type="text" id="rosterConditionsOther" placeholder="e.g. Dyspraxia, Selective Mutism">
+      </div>
+      <div class="prof-field">
+        <label>Languages spoken (comma separated)</label>
+        <input type="text" id="rosterLanguages" placeholder="e.g. English, Hindi, Marathi">
+      </div>
+      <div class="prof-field">
+        <label>Short bio</label>
+        <textarea id="rosterBio" rows="3" placeholder="A few lines about their experience and approach with children"></textarea>
+      </div>
+      <div class="prof-field" style="display:flex;align-items:center;gap:10px">
+        <input type="checkbox" id="rosterActive" checked style="width:auto">
+        <label for="rosterActive" style="margin:0">Visible to parents</label>
+      </div>
+    </div>
+    <div style="padding:20px 28px;border-top:1px solid #E5E7EB">
+      <button onclick="saveRosterEntry()" id="rosterSaveBtn" style="width:100%;background:linear-gradient(135deg,#ff8a5c,#ffb083);color:#fff;border:none;border-radius:50px;padding:14px;font-family:'Inter',sans-serif;font-size:15px;font-weight:900;cursor:pointer;margin-bottom:10px">Save Caregiver</button>
+      <button onclick="closeRosterModal()" style="width:100%;background:transparent;color:#7b8194;border:1.5px solid #E5E7EB;border-radius:50px;padding:12px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 const NS_URL = 'https://qvuenvngwgcknawfsnxl.supabase.co';
@@ -341,20 +516,31 @@ async function getSupabase(){
   return _sb;
 }
 
-async function checkTermsAndProceed(){
+async function checkTermsAndProceed(type){
   try{
     const sb = await getSupabase();
     const { data: userData } = await sb.auth.getUser();
     const accepted = userData?.user?.user_metadata?.terms_accepted === true;
     if(accepted){
-      document.getElementById('profFormStep2').style.display = 'block';
+      showRegistrationForm(type);
     } else {
+      window._pendingRole = type;
       document.getElementById('termsModal').style.display = 'flex';
     }
   }catch(e){
     console.error(e);
     alert('Something went wrong checking your account. Please try again.');
   }
+}
+
+function showRegistrationForm(type){
+  document.getElementById('accountTypeStep').style.display = 'none';
+  document.getElementById('profFormStep2').style.display = type === 'agency' ? 'none' : 'block';
+  document.getElementById('agencyFormStep2').style.display = type === 'agency' ? 'block' : 'none';
+}
+
+function chooseAccountType(type){
+  checkTermsAndProceed(type);
 }
 
 function validateTermsGate(){
@@ -376,10 +562,11 @@ async function acceptTerms(){
   btn.textContent = 'Saving...'; btn.disabled = true;
   try{
     const sb = await getSupabase();
-    const { error } = await sb.auth.updateUser({ data: { terms_accepted: true, terms_accepted_at: new Date().toISOString(), terms_role: 'caregiver' } });
+    const type = window._pendingRole || 'individual';
+    const { error } = await sb.auth.updateUser({ data: { terms_accepted: true, terms_accepted_at: new Date().toISOString(), terms_role: type === 'agency' ? 'agency' : 'caregiver' } });
     if(error){ alert('Could not save your acceptance: ' + error.message); btn.textContent = origText; btn.disabled = false; return; }
     document.getElementById('termsModal').style.display = 'none';
-    document.getElementById('profFormStep2').style.display = 'block';
+    showRegistrationForm(type);
   }catch(e){
     alert('Something went wrong. Please try again.');
     console.error(e);
@@ -413,10 +600,36 @@ async function profSignupOrLogin(){
       if(signupError){ alert('Could not create account: ' + signupError.message); return; }
     }
     document.getElementById('profFormStep1').style.display = 'none';
-    await checkTermsAndProceed();
+    await afterAuthRoute();
   }catch(e){
     alert('Something went wrong. Please try again.');
     console.error(e);
+  }
+}
+
+// After login/signup, check whether this account already has an individual
+// caregiver profile or an agency profile, and show the right one. If
+// neither exists yet, show the account-type chooser.
+async function afterAuthRoute(){
+  try{
+    const sb = await getSupabase();
+    const { data: userData } = await sb.auth.getUser();
+    const userId = userData?.user?.id;
+    if(!userId) return;
+    const [{ data: cgData }, { data: agData }] = await Promise.all([
+      sb.from('caregivers').select('*').eq('user_id', userId).maybeSingle(),
+      sb.from('agencies').select('*').eq('user_id', userId).maybeSingle(),
+    ]);
+    if(cgData){
+      showProfileCard(cgData);
+    } else if(agData){
+      showAgencyCard(agData);
+    } else {
+      document.getElementById('accountTypeStep').style.display = 'block';
+    }
+  }catch(e){
+    console.error(e);
+    document.getElementById('accountTypeStep').style.display = 'block';
   }
 }
 
@@ -446,8 +659,9 @@ const CONDITION_OPTIONS = [
   'Cerebral Palsy'
 ];
 
-function renderConditionChips(){
-  const grid = document.getElementById('profConditionsGrid');
+function renderConditionChips(gridId){
+  gridId = gridId || 'profConditionsGrid';
+  const grid = document.getElementById(gridId);
   if(!grid) return;
   grid.innerHTML = CONDITION_OPTIONS.map(c => `<div class="cond-chip" data-cond="${c}" onclick="toggleCondChip(this)">${c}</div>`).join('');
 }
@@ -456,14 +670,36 @@ function toggleCondChip(el){
   el.classList.toggle('selected');
 }
 
-function getSelectedConditions(){
-  const chipValues = Array.from(document.querySelectorAll('#profConditionsGrid .cond-chip.selected')).map(c => c.dataset.cond);
-  const otherEl = document.getElementById('profConditionsOther');
+function getSelectedConditions(gridId, otherId){
+  gridId = gridId || 'profConditionsGrid';
+  otherId = otherId || 'profConditionsOther';
+  const chipValues = Array.from(document.querySelectorAll('#' + gridId + ' .cond-chip.selected')).map(c => c.dataset.cond);
+  const otherEl = document.getElementById(otherId);
   const otherValues = otherEl ? otherEl.value.split(',').map(s => s.trim()).filter(Boolean) : [];
   return [...chipValues, ...otherValues];
 }
 
-window.addEventListener('DOMContentLoaded', renderConditionChips);
+function setSelectedConditions(gridId, otherId, savedValues){
+  const savedConditions = Array.isArray(savedValues) ? savedValues : (savedValues ? String(savedValues).split(',').map(s=>s.trim()).filter(Boolean) : []);
+  const matched = [];
+  const unmatched = [];
+  savedConditions.forEach(val => {
+    const hit = CONDITION_OPTIONS.find(opt => opt.toLowerCase() === String(val).toLowerCase());
+    if(hit) matched.push(hit); else unmatched.push(val);
+  });
+  document.querySelectorAll('#' + gridId + ' .cond-chip').forEach(chip => {
+    if(matched.includes(chip.dataset.cond)) chip.classList.add('selected');
+    else chip.classList.remove('selected');
+  });
+  const otherEl = document.getElementById(otherId);
+  if(otherEl) otherEl.value = unmatched.join(', ');
+}
+
+window.addEventListener('DOMContentLoaded', function(){
+  renderConditionChips('profConditionsGrid');
+  renderConditionChips('agencyConditionsGrid');
+  renderConditionChips('rosterConditionsGrid');
+});
 
 const VERIFICATION_BADGES = {
   submitted:    { cls: 'pending', label: '🕐 Submitted — Awaiting Review' },
@@ -543,6 +779,70 @@ function renderProfileCard(p){
     </div>`;
 }
 
+function renderAgencyCard(p){
+  const initial = (p.agency_name || '?').trim().charAt(0).toUpperCase();
+  const locParts = [p.area, p.city, p.state].filter(Boolean).join(', ');
+  const location = locParts + (p.pincode ? (locParts ? ' - ' : '') + p.pincode : '');
+  const rateText = (p.hourly_rate_min || p.hourly_rate_max)
+    ? `₹${p.hourly_rate_min ?? '—'}–₹${p.hourly_rate_max ?? '—'} /hr`
+    : 'Not specified';
+  const conditionsChips = (p.conditions_supported || []).map(c => `<span class="fb-chip">${escapeHtml(c)}</span>`).join('') || '<span style="font-size:12.5px;color:#A8A29E">Not specified yet</span>';
+  const languagesText = (p.languages_spoken || []).join(', ') || 'Not specified';
+  const badge = VERIFICATION_BADGES[p.verification_status] || VERIFICATION_BADGES.submitted;
+  const avatarHtml = p.photo_url
+    ? `<img src="${escapeHtml(p.photo_url)}" alt="${escapeHtml(p.agency_name || '')}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" loading="lazy">`
+    : escapeHtml(initial);
+
+  const completionFields = ['agency_name','city','state','pincode','languages_spoken','conditions_supported','hourly_rate_min','bio','registration_body','photo_url'];
+  const completion = calcProfileCompletion(p, completionFields);
+
+  return `
+    <div class="fb-profile">
+      <div class="fb-cover">
+        <div class="fb-avatar">${avatarHtml}</div>
+      </div>
+      <div class="fb-card-body">
+        <div class="fb-name">${escapeHtml(p.agency_name || '')}</div>
+        <div class="fb-subtitle">Agency${location ? ' · ' + escapeHtml(location) : ''}</div>
+        <div class="fb-badge ${badge.cls}">${badge.label}</div>
+
+        <div class="fb-completion">
+          <div class="fb-completion-head"><span>Profile Completion</span><span>${completion}%</span></div>
+          <div class="fb-completion-track"><div class="fb-completion-fill" style="width:${completion}%"></div></div>
+          ${completion < 100 ? '<div class="fb-completion-note">Complete your profile to improve visibility and parent trust.</div>' : ''}
+        </div>
+
+        <div class="fb-stats">
+          <div class="fb-stat"><div class="fb-stat-label">Typical Hourly Rate</div><div class="fb-stat-value">${rateText}</div></div>
+          <div class="fb-stat"><div class="fb-stat-label">Languages</div><div class="fb-stat-value">${escapeHtml(languagesText)}</div></div>
+        </div>
+        <div class="fb-chips">${conditionsChips}</div>
+        ${p.registration_body ? `<div style="font-size:13px;color:#57534E;margin:8px 0"><strong>Registration:</strong> ${escapeHtml(p.registration_body)}</div>` : ''}
+        <div class="fb-bio">${p.bio ? escapeHtml(p.bio) : '<span style="color:#A8A29E">No bio added yet.</span>'}</div>
+        ${p.intro_video_url ? renderVideoEmbed(p.intro_video_url) : ''}
+
+        <div class="fb-actions">
+          <button class="fb-btn-edit" onclick="editAgencyProfile()">✏️ Edit Profile</button>
+        </div>
+
+        <div class="fb-roster" style="margin-top:24px;padding-top:20px;border-top:1px solid #f2e4d6">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1.05rem">Your Caregivers</div>
+            <button onclick="openAddRosterModal()" style="background:linear-gradient(135deg,#ff8a5c,#ffb083);color:#fff;border:none;border-radius:50px;padding:8px 16px;font-size:12.5px;font-weight:800;cursor:pointer">+ Add Caregiver</button>
+          </div>
+          <div id="rosterListMount"><div style="font-size:13px;color:#A8A29E">Loading…</div></div>
+        </div>
+
+        <div style="text-align:center;margin-top:16px;font-size:12.5px;color:#7b8194">You'll be notified by email when a family sends you a connection request.</div>
+
+        <div class="fb-mybookings" style="margin-top:24px;padding-top:20px;border-top:1px solid #f2e4d6">
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1.05rem;margin-bottom:12px">My Bookings</div>
+          <div id="myBookingsMount"><div style="font-size:13px;color:#A8A29E">Loading…</div></div>
+        </div>
+      </div>
+    </div>`;
+}
+
 function renderVideoEmbed(url){
   try{
     const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
@@ -568,9 +868,173 @@ function showProfileCard(payload){
   const formCard = document.querySelector('.prof-form');
   if(formCard){ formCard.style.padding = '0'; formCard.style.overflow = 'hidden'; }
   document.getElementById('profFormStep1').style.display = 'none';
+  document.getElementById('accountTypeStep').style.display = 'none';
   document.getElementById('profFormStep2').style.display = 'none';
+  document.getElementById('agencyFormStep2').style.display = 'none';
   document.getElementById('profSuccess').style.display = 'block';
   loadMyBookings(payload.user_id);
+}
+
+function showAgencyCard(payload){
+  window._currentAgencyData = payload;
+  document.getElementById('profileCardMount').innerHTML = renderAgencyCard(payload);
+  const formCard = document.querySelector('.prof-form');
+  if(formCard){ formCard.style.padding = '0'; formCard.style.overflow = 'hidden'; }
+  document.getElementById('profFormStep1').style.display = 'none';
+  document.getElementById('accountTypeStep').style.display = 'none';
+  document.getElementById('profFormStep2').style.display = 'none';
+  document.getElementById('agencyFormStep2').style.display = 'none';
+  document.getElementById('profSuccess').style.display = 'block';
+  loadMyBookings(payload.user_id);
+  loadRoster(payload.id);
+}
+
+// ============================================================
+// ROSTER MANAGEMENT — individual caregivers listed under an
+// agency. No separate login per staff member; the agency
+// account manages the whole roster via agency_caregivers rows.
+// ============================================================
+
+async function loadRoster(agencyId){
+  const mount = document.getElementById('rosterListMount');
+  if(!mount || !agencyId) return;
+  try{
+    const sb = await getSupabase();
+    const { data, error } = await sb.from('agency_caregivers')
+      .select('*')
+      .eq('agency_id', agencyId)
+      .order('sort_order', { ascending: true });
+    if(error){ mount.innerHTML = `<div style="font-size:13px;color:#c0392b">Couldn't load your roster.</div>`; return; }
+    window._currentRoster = data || [];
+    renderRosterList(window._currentRoster);
+  }catch(err){
+    console.error('Load roster error:', err);
+    mount.innerHTML = `<div style="font-size:13px;color:#c0392b">Something went wrong loading your roster.</div>`;
+  }
+}
+
+function renderRosterList(rows){
+  const mount = document.getElementById('rosterListMount');
+  if(!mount) return;
+  if(!rows || !rows.length){
+    mount.innerHTML = `<div style="font-size:13px;color:#A8A29E">No caregivers added yet — use "+ Add Caregiver" above.</div>`;
+    return;
+  }
+  mount.innerHTML = rows.map(r => {
+    const specChips = (r.specializations || []).map(c => `<span class="fb-chip">${escapeHtml(c)}</span>`).join('');
+    const langText = (r.languages_spoken || []).join(', ');
+    return `
+      <div style="background:#FAFAF9;border:1px solid #f2e4d6;border-radius:12px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div style="font-weight:700;font-size:14px">${escapeHtml(r.name)}${!r.active ? ' <span style="font-size:11px;font-weight:700;color:#B45309;background:#FEF3C7;padding:2px 8px;border-radius:10px;margin-left:4px">Hidden</span>' : ''}</div>
+            ${r.years_experience || r.years_experience === 0 ? `<div style="font-size:12.5px;color:#7b8194">${escapeHtml(String(r.years_experience))} yrs experience</div>` : ''}
+            ${langText ? `<div style="font-size:12.5px;color:#7b8194">Speaks: ${escapeHtml(langText)}</div>` : ''}
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            <button onclick="openEditRosterModal('${r.id}')" style="background:#fff;border:1.5px solid #E5E7EB;border-radius:20px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer">Edit</button>
+            <button onclick="deleteRosterEntry('${r.id}')" style="background:#fff;color:#c0392b;border:1.5px solid #F0D0D0;border-radius:20px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer">Delete</button>
+          </div>
+        </div>
+        ${specChips ? `<div class="fb-chips" style="margin-top:8px;margin-bottom:0">${specChips}</div>` : ''}
+        ${r.bio ? `<div style="font-size:12.5px;color:#57534E;margin-top:8px">${escapeHtml(r.bio)}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function openAddRosterModal(){
+  document.getElementById('rosterModalTitle').textContent = 'Add a caregiver';
+  document.getElementById('rosterEntryId').value = '';
+  document.getElementById('rosterName').value = '';
+  document.getElementById('rosterExperience').value = '';
+  document.getElementById('rosterLanguages').value = '';
+  document.getElementById('rosterBio').value = '';
+  document.getElementById('rosterActive').checked = true;
+  setSelectedConditions('rosterConditionsGrid', 'rosterConditionsOther', []);
+  document.getElementById('rosterModal').style.display = 'flex';
+}
+
+function openEditRosterModal(entryId){
+  const entry = (window._currentRoster || []).find(r => r.id === entryId);
+  if(!entry) return;
+  document.getElementById('rosterModalTitle').textContent = 'Edit caregiver';
+  document.getElementById('rosterEntryId').value = entry.id;
+  document.getElementById('rosterName').value = entry.name || '';
+  document.getElementById('rosterExperience').value = entry.years_experience ?? '';
+  document.getElementById('rosterLanguages').value = (entry.languages_spoken || []).join(', ');
+  document.getElementById('rosterBio').value = entry.bio || '';
+  document.getElementById('rosterActive').checked = entry.active !== false;
+  setSelectedConditions('rosterConditionsGrid', 'rosterConditionsOther', entry.specializations || []);
+  document.getElementById('rosterModal').style.display = 'flex';
+}
+
+function closeRosterModal(){
+  document.getElementById('rosterModal').style.display = 'none';
+}
+
+async function saveRosterEntry(){
+  const name = document.getElementById('rosterName').value.trim();
+  if(!name){
+    alert('Please enter the caregiver\'s name.');
+    return;
+  }
+  const agencyId = window._currentAgencyData?.id;
+  if(!agencyId){
+    alert('Could not find your agency profile. Please refresh and try again.');
+    return;
+  }
+  const btn = document.getElementById('rosterSaveBtn');
+  const origText = btn.textContent;
+  btn.textContent = 'Saving...'; btn.disabled = true;
+
+  try{
+    const sb = await getSupabase();
+    const entryId = document.getElementById('rosterEntryId').value;
+    const experienceVal = document.getElementById('rosterExperience').value;
+    const languagesVal = document.getElementById('rosterLanguages').value;
+    const payload = {
+      agency_id: agencyId,
+      name,
+      years_experience: experienceVal ? parseInt(experienceVal) : null,
+      specializations: getSelectedConditions('rosterConditionsGrid', 'rosterConditionsOther'),
+      languages_spoken: languagesVal ? languagesVal.split(',').map(s=>s.trim()).filter(Boolean) : [],
+      bio: document.getElementById('rosterBio').value.trim() || null,
+      active: document.getElementById('rosterActive').checked,
+    };
+
+    let error;
+    if(entryId){
+      ({ error } = await sb.from('agency_caregivers').update(payload).eq('id', entryId));
+    } else {
+      ({ error } = await sb.from('agency_caregivers').insert(payload));
+    }
+    if(error){
+      alert('Could not save: ' + error.message);
+      btn.textContent = origText; btn.disabled = false;
+      return;
+    }
+    closeRosterModal();
+    await loadRoster(agencyId);
+  }catch(e){
+    alert('Something went wrong. Please try again.');
+    console.error(e);
+  }finally{
+    btn.textContent = origText; btn.disabled = false;
+  }
+}
+
+async function deleteRosterEntry(entryId){
+  if(!confirm('Remove this caregiver from your roster? This cannot be undone.')) return;
+  try{
+    const sb = await getSupabase();
+    const { error } = await sb.from('agency_caregivers').delete().eq('id', entryId);
+    if(error){ alert('Could not delete: ' + error.message); return; }
+    await loadRoster(window._currentAgencyData?.id);
+  }catch(e){
+    alert('Something went wrong. Please try again.');
+    console.error(e);
+  }
 }
 
 async function loadMyBookings(providerId){
@@ -616,6 +1080,7 @@ function editProfile(){
   const formCard = document.querySelector('.prof-form');
   if(formCard){ formCard.style.padding = '36px'; formCard.style.overflow = 'visible'; }
   document.getElementById('profSuccess').style.display = 'none';
+  document.getElementById('agencyFormStep2').style.display = 'none';
   document.getElementById('profFormStep2').style.display = 'block';
   if(window._currentProfileData) fillProfileForm(window._currentProfileData);
 }
@@ -631,19 +1096,7 @@ function fillProfileForm(data){
   setVal('profArea', data.area);
   setVal('profPincode', data.pincode);
   setVal('profLanguages', Array.isArray(data.languages_spoken) ? data.languages_spoken.join(', ') : data.languages_spoken);
-  const savedConditions = Array.isArray(data.conditions_supported) ? data.conditions_supported : (data.conditions_supported ? data.conditions_supported.split(',').map(s=>s.trim()).filter(Boolean) : []);
-  const matched = [];
-  const unmatched = [];
-  savedConditions.forEach(val => {
-    const hit = CONDITION_OPTIONS.find(opt => opt.toLowerCase() === String(val).toLowerCase());
-    if(hit) matched.push(hit); else unmatched.push(val);
-  });
-  document.querySelectorAll('#profConditionsGrid .cond-chip').forEach(chip => {
-    if(matched.includes(chip.dataset.cond)) chip.classList.add('selected');
-    else chip.classList.remove('selected');
-  });
-  const otherEl = document.getElementById('profConditionsOther');
-  if(otherEl) otherEl.value = unmatched.join(', ');
+  setSelectedConditions('profConditionsGrid', 'profConditionsOther', data.conditions_supported);
   setVal('profFeeMin', data.hourly_rate_min);
   setVal('profFeeMax', data.hourly_rate_max);
   setVal('profBio', data.bio);
@@ -658,15 +1111,56 @@ function fillProfileForm(data){
   }
 }
 
+function editAgencyProfile(){
+  const formCard = document.querySelector('.prof-form');
+  if(formCard){ formCard.style.padding = '36px'; formCard.style.overflow = 'visible'; }
+  document.getElementById('profSuccess').style.display = 'none';
+  document.getElementById('profFormStep2').style.display = 'none';
+  document.getElementById('agencyFormStep2').style.display = 'block';
+  if(window._currentAgencyData) fillAgencyForm(window._currentAgencyData);
+}
+
+function fillAgencyForm(data){
+  const setVal = (id, val) => { const el = document.getElementById(id); if(el && val != null) el.value = val; };
+  setVal('agencyName', data.agency_name);
+  setVal('agencyRegBody', data.registration_body);
+  setVal('agencyState', data.state);
+  setVal('agencyCity', data.city);
+  setVal('agencyArea', data.area);
+  setVal('agencyPincode', data.pincode);
+  setVal('agencyLanguages', Array.isArray(data.languages_spoken) ? data.languages_spoken.join(', ') : data.languages_spoken);
+  setSelectedConditions('agencyConditionsGrid', 'agencyConditionsOther', data.conditions_supported);
+  setVal('agencyFeeMin', data.hourly_rate_min);
+  setVal('agencyFeeMax', data.hourly_rate_max);
+  setVal('agencyBio', data.bio);
+  setVal('agencyUpiId', data.upi_id);
+  setVal('agencyPhone', data.phone_number);
+  setVal('agencyIntroVideo', data.intro_video_url);
+  if(data.photo_url){
+    const img = document.getElementById('agencyPhotoPreviewImg');
+    const icon = document.getElementById('agencyPhotoPreviewIcon');
+    if(img && icon){ img.src = data.photo_url; img.style.display = 'block'; icon.style.display = 'none'; }
+  }
+}
+
 async function loadExistingProfile(){
   try{
     const sb = await getSupabase();
     const { data: userData } = await sb.auth.getUser();
     const userId = userData?.user?.id;
     if(!userId) return;
-    const { data, error } = await sb.from('caregivers').select('*').eq('user_id', userId).maybeSingle();
-    if(error || !data) return;
-    showProfileCard(data);
+    const [{ data: cgData }, { data: agData }] = await Promise.all([
+      sb.from('caregivers').select('*').eq('user_id', userId).maybeSingle(),
+      sb.from('agencies').select('*').eq('user_id', userId).maybeSingle(),
+    ]);
+    if(cgData){
+      showProfileCard(cgData);
+    } else if(agData){
+      showAgencyCard(agData);
+    }
+    // If neither exists, leave Step1 visible as-is — the person hasn't
+    // logged in yet in this session, or hasn't chosen a type. Either way
+    // profSignupOrLogin() -> afterAuthRoute() handles it once they do.
   }catch(e){
     console.error(e);
   }
@@ -709,6 +1203,73 @@ async function uploadProfilePhotoIfSelected(sb, userId){
   const { data } = sb.storage.from('profile-photos').getPublicUrl(path);
   statusEl.textContent = 'Photo uploaded ✓';
   return data?.publicUrl || null;
+}
+
+let selectedAgencyPhotoFile = null;
+
+function previewAgencyPhoto(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  if(file.size > 3 * 1024 * 1024){
+    alert('Please choose an image smaller than 3MB.');
+    event.target.value = '';
+    return;
+  }
+  selectedAgencyPhotoFile = file;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById('agencyPhotoPreviewImg').src = e.target.result;
+    document.getElementById('agencyPhotoPreviewImg').style.display = 'block';
+    document.getElementById('agencyPhotoPreviewIcon').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function uploadAgencyPhotoIfSelected(sb, userId){
+  if(!selectedAgencyPhotoFile) return null;
+  const statusEl = document.getElementById('agencyPhotoUploadStatus');
+  statusEl.textContent = 'Uploading photo...';
+  const ext = selectedAgencyPhotoFile.name.split('.').pop();
+  const path = `${userId}/agency-photo.${ext}`;
+  const { error: uploadError } = await sb.storage.from('profile-photos').upload(path, selectedAgencyPhotoFile, { upsert: true });
+  if(uploadError){
+    statusEl.textContent = 'Photo upload failed — you can add it later from Edit Profile.';
+    console.error(uploadError);
+    return null;
+  }
+  const { data } = sb.storage.from('profile-photos').getPublicUrl(path);
+  statusEl.textContent = 'Photo uploaded ✓';
+  return data?.publicUrl || null;
+}
+
+let selectedAgencyCredentialFile = null;
+
+function handleAgencyCredentialFileSelect(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  if(file.size > 8 * 1024 * 1024){
+    alert('Please choose a file smaller than 8MB.');
+    event.target.value = '';
+    return;
+  }
+  selectedAgencyCredentialFile = file;
+  document.getElementById('agencyCredentialFileStatus').textContent = `Selected: ${file.name}`;
+}
+
+async function uploadAgencyCredentialFileIfSelected(sb, userId){
+  if(!selectedAgencyCredentialFile) return null;
+  const statusEl = document.getElementById('agencyCredentialFileStatus');
+  statusEl.textContent = 'Uploading document...';
+  const ext = selectedAgencyCredentialFile.name.split('.').pop();
+  const path = `${userId}/agency-credential.${ext}`;
+  const { error: uploadError } = await sb.storage.from('credentials').upload(path, selectedAgencyCredentialFile, { upsert: true });
+  if(uploadError){
+    statusEl.textContent = 'Document upload failed — you can add it later from Edit Profile.';
+    console.error(uploadError);
+    return null;
+  }
+  statusEl.textContent = 'Document uploaded ✓ (private — visible only to our verification team)';
+  return path;
 }
 
 let selectedCredentialFile = null;
@@ -818,6 +1379,87 @@ async function submitCaregiverRegistration(event){
 
     document.getElementById('profFormStep2').style.display = 'none';
     showProfileCard(payload);
+  }catch(e){
+    alert('Something went wrong. Please try again.');
+    console.error(e);
+    btn.textContent = origText; btn.disabled = false;
+  }
+}
+
+async function submitAgencyRegistration(event){
+  event.preventDefault();
+  const btn = document.getElementById('agencySubmitBtn');
+  const origText = btn.textContent;
+
+  if(!document.getElementById('agencyDisclaimerAck').checked){
+    alert('Please confirm you understand the disclaimer above before submitting.');
+    return;
+  }
+
+  btn.textContent = 'Submitting...';
+  btn.disabled = true;
+
+  try{
+    const sb = await getSupabase();
+    const { data: userData } = await sb.auth.getUser();
+    const userId = userData?.user?.id;
+    if(!userId){ alert('Please sign in again.'); btn.textContent = origText; btn.disabled = false; return; }
+
+    const toArray = (val) => val.split(',').map(s => s.trim()).filter(Boolean);
+
+    const photoUrl = await uploadAgencyPhotoIfSelected(sb, userId);
+    const credentialPath = await uploadAgencyCredentialFileIfSelected(sb, userId);
+
+    const pincode = document.getElementById('agencyPincode').value.trim();
+    if(pincode && !/^[1-9][0-9]{5}$/.test(pincode)){
+      alert('Please enter a valid 6-digit PIN code.');
+      btn.textContent = origText; btn.disabled = false;
+      return;
+    }
+
+    const upiId = document.getElementById('agencyUpiId').value.trim();
+    if(upiId && !/^[\w.\-]{2,256}@[a-zA-Z]{2,64}$/.test(upiId)){
+      alert('Please enter a valid UPI ID (e.g. yourname@okhdfcbank).');
+      btn.textContent = origText; btn.disabled = false;
+      return;
+    }
+
+    const payload = {
+      user_id: userId,
+      agency_name: document.getElementById('agencyName').value.trim(),
+      registration_body: document.getElementById('agencyRegBody').value.trim() || null,
+      city: document.getElementById('agencyCity').value.trim(),
+      state: document.getElementById('agencyState').value.trim() || null,
+      area: document.getElementById('agencyArea').value.trim() || null,
+      pincode: pincode || null,
+      languages_spoken: toArray(document.getElementById('agencyLanguages').value),
+      conditions_supported: getSelectedConditions('agencyConditionsGrid', 'agencyConditionsOther'),
+      hourly_rate_min: document.getElementById('agencyFeeMin').value ? parseInt(document.getElementById('agencyFeeMin').value) : null,
+      hourly_rate_max: document.getElementById('agencyFeeMax').value ? parseInt(document.getElementById('agencyFeeMax').value) : null,
+      bio: document.getElementById('agencyBio').value.trim() || null,
+      upi_id: upiId || null,
+      phone_number: document.getElementById('agencyPhone').value.trim() || null,
+      intro_video_url: document.getElementById('agencyIntroVideo').value.trim() || null,
+    };
+    if(photoUrl) payload.photo_url = photoUrl;
+    if(credentialPath) payload.credential_doc_path = credentialPath;
+
+    if(!payload.agency_name || !payload.city){
+      alert('Please fill in all required fields (marked *).');
+      btn.textContent = origText; btn.disabled = false;
+      return;
+    }
+
+    const { data: savedRows, error } = await sb.from('agencies').upsert(payload, { onConflict: 'user_id' }).select();
+    if(error){
+      alert('Could not submit your profile: ' + error.message);
+      btn.textContent = origText; btn.disabled = false;
+      return;
+    }
+
+    const savedAgency = (savedRows && savedRows[0]) || payload;
+    document.getElementById('agencyFormStep2').style.display = 'none';
+    showAgencyCard(savedAgency);
   }catch(e){
     alert('Something went wrong. Please try again.');
     console.error(e);

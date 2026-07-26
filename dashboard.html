@@ -53,7 +53,7 @@
     50%{transform:translate(20px,-24px);}
   }
 
-  .wrap{max-width:640px;margin:0 auto;padding:0 16px 90px;position:relative;z-index:1;}
+  .wrap{max-width:640px;margin:0 auto;padding:0 16px 100px;position:relative;z-index:1;}
 
   /* Sticky top bar */
   .topbar{position:sticky;top:0;z-index:900;display:flex;justify-content:space-between;align-items:center;
@@ -142,6 +142,44 @@
     box-shadow:0 8px 16px -6px rgba(14,21,36,0.2);}
   .card-icon.terracotta{background:linear-gradient(150deg,#ff8a5c,var(--terracotta));}
   .card-icon.gold{background:linear-gradient(150deg,var(--gold),var(--primary-dark));}
+
+  .more-menu-grid{display:flex;flex-direction:column;gap:10px;}
+  .more-menu-item{display:flex;align-items:center;gap:14px;padding:14px;border-radius:16px;
+    background:var(--background);border:1px solid var(--border);cursor:pointer;transition:transform .15s var(--ease);}
+  .more-menu-item:active{transform:scale(0.98);}
+  .more-menu-icon{font-size:1.5rem;flex-shrink:0;width:42px;text-align:center;}
+  .more-menu-text{flex:1;min-width:0;}
+  .more-menu-label{font-weight:700;font-size:.95rem;color:var(--ink);}
+  .more-menu-desc{font-size:.78rem;color:var(--muted-foreground);margin-top:2px;}
+  .more-menu-arrow{color:var(--muted-foreground);font-size:1.1rem;flex-shrink:0;}
+
+  .lc-search{width:100%;padding:12px 16px;border-radius:14px;border:1px solid var(--border);
+    font-family:inherit;font-size:.92rem;background:var(--card);color:var(--ink);margin-bottom:14px;box-sizing:border-box;}
+  .lc-search:focus{outline:none;border-color:var(--terracotta);}
+  .lc-cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:8px 0 18px;}
+  .lc-cat-item{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 6px;
+    border-radius:16px;background:var(--card);border:1px solid var(--border);cursor:pointer;text-align:center;
+    transition:transform .15s var(--ease);}
+  .lc-cat-item:active{transform:scale(0.95);}
+  .lc-cat-item.selected{border-color:var(--terracotta);background:var(--sage-soft);}
+  .lc-cat-icon{font-size:1.4rem;}
+  .lc-cat-label{font-size:10.5px;font-weight:700;color:var(--ink-soft);line-height:1.2;}
+  .lc-section-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;margin:20px 0 10px;color:var(--ink);}
+  .lc-article-row{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;scrollbar-width:none;}
+  .lc-article-row::-webkit-scrollbar{display:none;}
+  .lc-article-card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+    padding:14px;margin-bottom:10px;box-shadow:var(--shadow-soft);}
+  .lc-article-row .lc-article-card{flex-shrink:0;width:230px;margin-bottom:0;}
+  .lc-article-thumb{width:100%;height:100px;border-radius:12px;background:linear-gradient(135deg,var(--sage-soft),var(--gold));
+    display:flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:10px;}
+  .lc-article-cat{font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--terracotta);margin-bottom:4px;}
+  .lc-article-title{font-weight:700;font-size:.92rem;color:var(--ink);line-height:1.3;margin-bottom:4px;}
+  .lc-article-desc{font-size:.8rem;color:var(--muted-foreground);line-height:1.4;margin-bottom:8px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .lc-article-meta{display:flex;justify-content:space-between;align-items:center;font-size:.72rem;color:var(--muted-foreground);}
+  .lc-article-actions{display:flex;gap:10px;align-items:center;}
+  .lc-bookmark-btn{background:none;border:none;font-size:1.1rem;cursor:pointer;padding:0;line-height:1;}
+  .lc-article-detail-content p{line-height:1.7;font-size:.95rem;color:var(--ink);margin-bottom:14px;}
 
   /* Facebook-style post header: avatar + name + timestamp */
   .post-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
@@ -234,7 +272,17 @@
   .timeline-note{font-size:.9rem;color:var(--ink);margin:2px 0;}
   .timeline-date{font-size:11.5px;color:var(--muted-foreground);}
 
-  .avatar-fab{position:fixed;bottom:20px;right:20px;width:60px;height:60px;border-radius:50%;
+  .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:950;display:flex;justify-content:space-around;
+    background:rgba(255,250,245,0.92);backdrop-filter:blur(14px);border-top:1px solid rgba(224,99,47,0.14);
+    padding:8px 4px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(14,21,36,0.06);}
+  .bottom-nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;cursor:pointer;
+    padding:4px 2px;border-radius:12px;color:var(--muted-foreground);transition:color .15s var(--ease);}
+  .bottom-nav-item .bn-icon{font-size:1.25rem;line-height:1;}
+  .bottom-nav-item .bn-label{font-size:10.5px;font-weight:700;}
+  .bottom-nav-item.active{color:var(--terracotta);}
+  .bottom-nav-item:active{transform:scale(0.94);}
+
+  .avatar-fab{position:fixed;bottom:84px;right:20px;width:60px;height:60px;border-radius:50%;
     box-shadow:var(--shadow-lift);cursor:pointer;z-index:1000;
     border:3px solid var(--card);background:linear-gradient(150deg,var(--primary),var(--primary-dark));overflow:hidden;display:none;
     animation:fabPulse 2.4s ease-in-out infinite;}
@@ -521,6 +569,24 @@
   </div>
 
   <div id="app"><div class="loading">Loading your dashboard…</div></div>
+</div>
+
+<div class="bottom-nav" id="bottomNav">
+  <div class="bottom-nav-item active" data-tab="home" onclick="switchBottomTab('home')">
+    <span class="bn-icon">🏠</span><span class="bn-label">Home</span>
+  </div>
+  <div class="bottom-nav-item" data-tab="learning" onclick="switchBottomTab('learning')">
+    <span class="bn-icon">📚</span><span class="bn-label">Learning</span>
+  </div>
+  <div class="bottom-nav-item" data-tab="support" onclick="switchBottomTab('support')">
+    <span class="bn-icon">🤝</span><span class="bn-label">Support</span>
+  </div>
+  <div class="bottom-nav-item" data-tab="progress" onclick="switchBottomTab('progress')">
+    <span class="bn-icon">📊</span><span class="bn-label">Progress</span>
+  </div>
+  <div class="bottom-nav-item" data-tab="more" onclick="switchBottomTab('more')">
+    <span class="bn-icon">☰</span><span class="bn-label">More</span>
+  </div>
 </div>
 
 <div class="avatar-fab" id="avatarFab" title="Talk to Sarathi Avatar">
@@ -829,6 +895,12 @@ async function saveChild(existingId){
   }
 
   await loadChildren(savedChild.id);
+
+  if(!existingId){
+    // Brand-new child — take the parent straight into the free
+    // Developmental Check-in instead of the general feed, as promised.
+    renderScreening(savedChild);
+  }
 }
 
 async function getChildPhotoUrl(child){
@@ -844,7 +916,305 @@ function initials(name){
   return (name || "?").trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
 }
 
+function setActiveBottomTab(tab){
+  document.querySelectorAll(".bottom-nav-item").forEach(el=>{
+    el.classList.toggle("active", el.dataset.tab === tab);
+  });
+}
+
+function switchBottomTab(tab){
+  if(!currentChild){ return; }
+  if(tab === "home") renderFeed(currentChild);
+  else if(tab === "learning") renderLearningCentre(currentChild);
+  else if(tab === "support") renderProfessionals(currentChild);
+  else if(tab === "progress") renderProgressReport(currentChild);
+  else if(tab === "more") renderMoreMenu(currentChild);
+}
+
+function renderMoreMenu(child){
+  setActiveBottomTab("more");
+  const items = [
+    { icon:"📅", label:"Routine Builder", desc:"Build a daily routine that works for your child.", action:"renderRoutineBuilder" },
+    { icon:"🎯", label:"Activities", desc:"Browse activities matched to focus areas.", action:"renderActivityLibrary" },
+    { icon:"🧠", label:"Developmental Check-in", desc:"A free, educational observation check-in.", action:"renderScreening" },
+    { icon:"🏫", label:"School Support", desc:"Guidance for school conversations and IEPs.", action:"renderSchoolSupport" },
+    { icon:"🏛️", label:"Government Schemes", desc:"Schemes and benefits you may be eligible for.", action:"renderGovtSchemes" },
+    { icon:"🍽️", label:"Food & Nutrition", desc:"Meal ideas tailored to your child.", action:"renderFoodLibrary" },
+    { icon:"📖", label:"Trusted Learning Library", desc:"Curated external resources by category.", action:"renderLearningLibrary" },
+  ];
+  app.innerHTML = `
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon">☰</div>
+        <h1 style="margin:0;">More</h1>
+      </div>
+      <div class="more-menu-grid">
+        ${items.map(it => `
+          <div class="more-menu-item" data-action="${it.action}">
+            <div class="more-menu-icon">${it.icon}</div>
+            <div class="more-menu-text">
+              <div class="more-menu-label">${it.label}</div>
+              <div class="more-menu-desc">${it.desc}</div>
+            </div>
+            <div class="more-menu-arrow">→</div>
+          </div>
+        `).join("")}
+      </div>
+      <button class="btn small" id="moreBillingBtn" style="margin-top:16px;width:100%;">💳 Sarathi Plans & Billing</button>
+    </div>
+  `;
+  document.querySelectorAll(".more-menu-item").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      const fnName = el.dataset.action;
+      if(typeof window[fnName] === "function") window[fnName](child);
+    });
+  });
+  document.getElementById("moreBillingBtn").addEventListener("click", ()=>{
+    window.location.href = "/sarathi-billing.html";
+  });
+}
+
+// ─── Learning Centre ───
+const learningCentreState = {
+  child: null,
+  categoryFilter: "",
+  searchQuery: "",
+  categories: [],
+  articles: [],
+  bookmarkIds: new Set(),
+  continueReading: [],
+  recentlyViewed: [],
+};
+
+async function renderLearningCentre(child){
+  setActiveBottomTab("learning");
+  learningCentreState.child = child;
+  learningCentreState.categoryFilter = "";
+  learningCentreState.searchQuery = "";
+
+  app.innerHTML = `
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon terracotta">📚</div>
+        <h1 style="margin:0;">Learning Centre</h1>
+      </div>
+      <input type="text" class="lc-search" id="lcSearchInput" placeholder="Search articles, topics, or tips…">
+      <div id="lcBody"><div class="loading">Loading the Learning Centre…</div></div>
+      <button class="btn small secondary" id="lcBackBtn" style="margin-top:16px;">Back to dashboard</button>
+    </div>
+  `;
+  document.getElementById("lcBackBtn").addEventListener("click", ()=> renderFeed(child));
+  document.getElementById("lcSearchInput").addEventListener("input", (e)=>{
+    learningCentreState.searchQuery = e.target.value.toLowerCase();
+    renderLearningCentreBody();
+  });
+
+  await loadLearningCentreData(child);
+  renderLearningCentreBody();
+}
+
+async function loadLearningCentreData(child){
+  try{
+    const [{ data: cats }, { data: articles }, { data: bookmarks }, { data: progress }, { data: history }] = await Promise.all([
+      dash2Client.from("learning_categories").select("*").order("sort_order", { ascending: true }),
+      dash2Client.from("learning_articles").select("*").eq("published", true).order("published_at", { ascending: false }),
+      dash2Client.from("learning_bookmarks").select("article_id"),
+      dash2Client.from("learning_progress").select("article_id, percent_complete, completed, last_read_at").eq("completed", false).order("last_read_at", { ascending: false }).limit(5),
+      dash2Client.from("reading_history").select("article_id, viewed_at").order("viewed_at", { ascending: false }).limit(10),
+    ]);
+    learningCentreState.categories = cats || [];
+    learningCentreState.articles = articles || [];
+    learningCentreState.bookmarkIds = new Set((bookmarks || []).map(b => b.article_id));
+    learningCentreState.continueReading = progress || [];
+
+    // De-duplicate reading history by article, keep most recent
+    const seen = new Set();
+    learningCentreState.recentlyViewed = (history || []).filter(h => {
+      if(seen.has(h.article_id)) return false;
+      seen.add(h.article_id);
+      return true;
+    }).slice(0, 5);
+  }catch(err){
+    console.error("Load learning centre data error:", err);
+  }
+}
+
+function renderLearningCentreBody(){
+  const body = document.getElementById("lcBody");
+  if(!body) return;
+  const state = learningCentreState;
+  const catById = Object.fromEntries(state.categories.map(c => [c.id, c]));
+
+  let filtered = state.articles;
+  if(state.categoryFilter){
+    filtered = filtered.filter(a => a.category_id === state.categoryFilter);
+  }
+  if(state.searchQuery){
+    filtered = filtered.filter(a =>
+      (a.title || "").toLowerCase().includes(state.searchQuery) ||
+      (a.short_description || "").toLowerCase().includes(state.searchQuery)
+    );
+  }
+
+  const featured = state.articles.filter(a => a.is_featured);
+  const continueArticles = state.continueReading
+    .map(p => ({ ...state.articles.find(a => a.id === p.article_id), _percent: p.percent_complete }))
+    .filter(a => a.id);
+  const recentArticles = state.recentlyViewed
+    .map(h => state.articles.find(a => a.id === h.article_id))
+    .filter(Boolean);
+
+  const showBrowseSections = !state.searchQuery && !state.categoryFilter;
+
+  body.innerHTML = `
+    <div class="lc-cat-grid">
+      ${state.categories.map(c => `
+        <div class="lc-cat-item ${state.categoryFilter === c.id ? 'selected' : ''}" data-cat="${c.id}">
+          <div class="lc-cat-icon">${c.icon || "📘"}</div>
+          <div class="lc-cat-label">${escapeHtml(c.name)}</div>
+        </div>
+      `).join("")}
+    </div>
+
+    ${showBrowseSections && continueArticles.length ? `
+      <div class="lc-section-title">Continue Reading</div>
+      <div class="lc-article-row">${continueArticles.map(a => renderLearningArticleCard(a, catById, true)).join("")}</div>
+    ` : ""}
+
+    ${showBrowseSections && featured.length ? `
+      <div class="lc-section-title">Featured</div>
+      <div class="lc-article-row">${featured.map(a => renderLearningArticleCard(a, catById, true)).join("")}</div>
+    ` : ""}
+
+    ${showBrowseSections && recentArticles.length ? `
+      <div class="lc-section-title">Recently Viewed</div>
+      <div class="lc-article-row">${recentArticles.map(a => renderLearningArticleCard(a, catById, true)).join("")}</div>
+    ` : ""}
+
+    <div class="lc-section-title">${state.categoryFilter ? escapeHtml(catById[state.categoryFilter]?.name || "Articles") : (state.searchQuery ? "Search Results" : "All Articles")}</div>
+    ${filtered.length ? filtered.map(a => renderLearningArticleCard(a, catById, false)).join("") : `<div style="color:var(--muted-foreground);font-size:.88rem;padding:12px 0;">No articles found yet — check back soon as we add more.</div>`}
+  `;
+
+  body.querySelectorAll(".lc-cat-item").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      const catId = el.dataset.cat;
+      learningCentreState.categoryFilter = learningCentreState.categoryFilter === catId ? "" : catId;
+      renderLearningCentreBody();
+    });
+  });
+  body.querySelectorAll(".lc-article-card").forEach(el=>{
+    el.addEventListener("click", (e)=>{
+      if(e.target.closest(".lc-bookmark-btn")) return;
+      openLearningArticle(el.dataset.id);
+    });
+  });
+  body.querySelectorAll(".lc-bookmark-btn").forEach(el=>{
+    el.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      toggleLearningBookmark(el.dataset.id);
+    });
+  });
+}
+
+function renderLearningArticleCard(a, catById, compact){
+  const cat = catById[a.category_id];
+  const isBookmarked = learningCentreState.bookmarkIds.has(a.id);
+  return `
+    <div class="lc-article-card" data-id="${a.id}">
+      <div class="lc-article-thumb">${cat?.icon || "📘"}</div>
+      <div class="lc-article-cat">${cat ? escapeHtml(cat.name) : ""}</div>
+      <div class="lc-article-title">${escapeHtml(a.title)}</div>
+      ${!compact ? `<div class="lc-article-desc">${escapeHtml(a.short_description || "")}</div>` : ""}
+      <div class="lc-article-meta">
+        <span>${a.reading_time_minutes ? a.reading_time_minutes + " min read" : ""}${a.difficulty ? " · " + a.difficulty.charAt(0).toUpperCase()+a.difficulty.slice(1) : ""}</span>
+        <span class="lc-article-actions">
+          <button class="lc-bookmark-btn" data-id="${a.id}" title="${isBookmarked ? 'Remove bookmark' : 'Bookmark'}">${isBookmarked ? "🔖" : "📑"}</button>
+        </span>
+      </div>
+    </div>
+  `;
+}
+
+async function toggleLearningBookmark(articleId){
+  const isBookmarked = learningCentreState.bookmarkIds.has(articleId);
+  try{
+    const { data: userData } = await dash2Client.auth.getUser();
+    const userId = userData?.user?.id;
+    if(!userId) return;
+    if(isBookmarked){
+      await dash2Client.from("learning_bookmarks").delete().eq("user_id", userId).eq("article_id", articleId);
+      learningCentreState.bookmarkIds.delete(articleId);
+    }else{
+      await dash2Client.from("learning_bookmarks").insert({ user_id: userId, article_id: articleId });
+      learningCentreState.bookmarkIds.add(articleId);
+    }
+    renderLearningCentreBody();
+  }catch(err){
+    console.error("Toggle bookmark error:", err);
+  }
+}
+
+async function openLearningArticle(articleId){
+  const article = learningCentreState.articles.find(a => a.id === articleId);
+  if(!article) return;
+  const catById = Object.fromEntries(learningCentreState.categories.map(c => [c.id, c]));
+  const cat = catById[article.category_id];
+  const isBookmarked = learningCentreState.bookmarkIds.has(article.id);
+  const related = learningCentreState.articles.filter(a => a.category_id === article.category_id && a.id !== article.id).slice(0, 3);
+
+  const paragraphs = (article.content || "").split("\n\n").filter(Boolean);
+
+  app.innerHTML = `
+    <div class="card">
+      <div class="lc-article-thumb" style="height:150px;font-size:3rem;">${cat?.icon || "📘"}</div>
+      <div class="lc-article-cat" style="margin-top:12px;">${cat ? escapeHtml(cat.name) : ""}</div>
+      <h1 style="margin:4px 0 8px;">${escapeHtml(article.title)}</h1>
+      <div class="lc-article-meta" style="margin-bottom:16px;">
+        <span>${article.author_name ? escapeHtml(article.author_name) + " · " : ""}${article.reading_time_minutes ? article.reading_time_minutes + " min read" : ""}</span>
+        <button class="lc-bookmark-btn" id="lcDetailBookmarkBtn" style="font-size:1.3rem;">${isBookmarked ? "🔖" : "📑"}</button>
+      </div>
+      <div class="lc-article-detail-content">
+        ${paragraphs.map(p => `<p>${escapeHtml(p)}</p>`).join("")}
+      </div>
+      ${related.length ? `
+        <div class="lc-section-title">Related Articles</div>
+        <div class="lc-article-row">${related.map(a => renderLearningArticleCard(a, catById, true)).join("")}</div>
+      ` : ""}
+      <button class="btn small secondary" id="lcArticleBackBtn" style="margin-top:16px;">← Back to Learning Centre</button>
+    </div>
+  `;
+
+  document.getElementById("lcArticleBackBtn").addEventListener("click", ()=> renderLearningCentre(learningCentreState.child));
+  document.getElementById("lcDetailBookmarkBtn").addEventListener("click", ()=> toggleLearningBookmark(article.id).then(()=>{
+    document.getElementById("lcDetailBookmarkBtn").textContent = learningCentreState.bookmarkIds.has(article.id) ? "🔖" : "📑";
+  }));
+  app.querySelectorAll(".lc-article-card").forEach(el=>{
+    el.addEventListener("click", ()=> openLearningArticle(el.dataset.id));
+  });
+
+  recordLearningView(article.id);
+}
+
+async function recordLearningView(articleId){
+  try{
+    const { data: userData } = await dash2Client.auth.getUser();
+    const userId = userData?.user?.id;
+    if(!userId) return;
+    await dash2Client.from("reading_history").insert({ user_id: userId, article_id: articleId });
+    await dash2Client.from("learning_progress").upsert({
+      user_id: userId,
+      article_id: articleId,
+      percent_complete: 100,
+      completed: true,
+      last_read_at: new Date().toISOString(),
+    }, { onConflict: "user_id,article_id" });
+  }catch(err){
+    console.error("Record learning view error:", err);
+  }
+}
+
 function renderFeed(child){
+  setActiveBottomTab("home");
   const focusLabels = (child.focus_areas || []).map(k=>{
     const found = FOCUS_OPTIONS.find(o=>o.key===k);
     return found ? found.label : k;
@@ -2586,6 +2956,7 @@ function haversineKm(lat1, lng1, lat2, lng2){
 }
 
 async function renderProfessionals(child){
+  setActiveBottomTab("support");
   professionalsState.child = child;
   professionalsState.pincode = "";
   professionalsState.userLat = null;
@@ -2996,6 +3367,7 @@ async function renderGovtSchemes(child){
 }
 
 async function renderProgressReport(child){
+  setActiveBottomTab("progress");
   progressReportState.child = child;
   progressReportState.range = "week";
 

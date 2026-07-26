@@ -484,13 +484,6 @@
   .chat-footer-actions{padding:8px 12px 14px; background:var(--card); flex-shrink:0;}
   .chat-footer-actions .btn{margin-top:0;}
 
-  /* ============ UNLIMITED CHAT PROMO ============ */
-  .unlimited-promo-card{
-    background:linear-gradient(155deg, rgba(255,138,92,0.08), rgba(255,176,131,0.14));
-    border:1px solid rgba(224,99,47,0.25);
-  }
-  .unlimited-promo-card p{margin-bottom:14px;}
-  .unlimited-promo-card .btn{width:auto; margin-top:0; padding:11px 20px; font-size:.9rem;}
   .acad-source{font-size:10px; color:var(--muted-foreground); text-align:center; margin-top:12px; font-family:'IBM Plex Mono',monospace;}
 
   /* ============ NGO DIRECTORY ============ */
@@ -1265,14 +1258,6 @@ function renderFeed(child){
 
     <div id="sarathiPlanMount"></div>
 
-    <div class="card unlimited-promo-card" id="unlimitedPromoCard" style="cursor:pointer;">
-      <div class="card-head">
-        <div class="card-icon terracotta">💬</div>
-        <h2 style="margin:0;">Want to chat with Sarathi, unlimited?</h2>
-      </div>
-      <p>No daily message caps, no waiting — just Sarathi, whenever you need. Explore plans starting at ₹50.</p>
-      <button class="btn" id="unlimitedPromoBtn">Explore plans →</button>
-    </div>
     <div id="parentTipMount"></div>
     <div id="routineChecklistMount"></div>
     <div id="milestoneFramesMount"></div>
@@ -1325,104 +1310,14 @@ function renderFeed(child){
       </div>
       <div id="progressPanel"></div>
     </div>
-
-    <div class="card" id="routineBuilderCard" style="cursor:pointer;">
-      <div class="card-head">
-        <div class="card-icon gold">🗓️</div>
-        <h2>Routine Builder</h2>
-      </div>
-      <p>Build a daily schedule tailored to ${escapeHtml(child.display_name)}.</p>
-    </div>
-
-    <div class="card" id="activityLibraryCard" style="cursor:pointer;">
-      <div class="card-head">
-        <div class="card-icon">📚</div>
-        <h2>Activity Library</h2>
-      </div>
-      <p>Browse activities by focus area, age, time available, and materials.</p>
-    </div>
-
-    <div class="card" id="professionalsCard" style="cursor:pointer;">
-      <div class="card-head">
-        <div class="card-icon terracotta">🗺️</div>
-        <h2>Find Professionals</h2>
-      </div>
-      <p>A directory of professionals near you.</p>
-    </div>
-
-    <div class="card" id="screeningCard" style="cursor:pointer;">
-      <div class="card-head">
-        <div class="card-icon terracotta">🌱</div>
-        <h2>Developmental Check-in</h2>
-      </div>
-      <p>A gentle awareness checklist for ${escapeHtml(child.display_name)} — not a diagnosis, just clarity on what to discuss with a professional.</p>
-    </div>
-
-    <div class="card" id="progressReportCard" style="cursor:pointer;">
-      <div class="card-head">
-        <div class="card-icon">📊</div>
-        <h2>Progress Report</h2>
-      </div>
-      <p>A weekly or monthly view of ${escapeHtml(child.display_name)}'s milestones, routine, and activities.</p>
-    </div>
-
-    <div class="card" id="schoolSupportCard" style="cursor:pointer;">
-      <div class="card-head">
-        <div class="card-icon terracotta">🏫</div>
-        <h2>School Support</h2>
-      </div>
-      <p>Real rights and templates for working with ${escapeHtml(child.display_name)}'s school or teachers.</p>
-    </div>
-
-    <div class="card" id="govtSchemesCard" style="cursor:pointer;">
-      <div class="card-head">
-        <div class="card-icon gold">🤝</div>
-        <h2>Government Schemes</h2>
-      </div>
-      <p>Real schemes and benefits your family may be eligible for, sourced from official portals.</p>
-    </div>
-
-    <div class="card" id="foodLibraryCard" style="cursor:pointer;">
-      <div class="card-head">
-        <div class="card-icon">🍎</div>
-        <h2>Food & Nutrition</h2>
-      </div>
-      <p>Simple, culturally familiar meal ideas for ${escapeHtml(child.display_name)}.</p>
-    </div>
-
-    <div class="card" id="learningLibraryCard" style="cursor:pointer;">
-      <div class="card-head">
-        <div class="card-icon terracotta">📖</div>
-        <h2>Trusted Learning Library</h2>
-      </div>
-      <p>Curated, vetted articles and resources you can trust.</p>
-    </div>
   `;
 
   document.getElementById("editChildBtn").addEventListener("click", ()=> renderAddChildForm(child));
-  document.getElementById("activityLibraryCard").addEventListener("click", ()=> renderActivityLibrary(child));
-  document.getElementById("routineBuilderCard").addEventListener("click", ()=> renderRoutineBuilder(child));
-  document.getElementById("professionalsCard").addEventListener("click", ()=> renderProfessionals(child));
-  document.getElementById("foodLibraryCard").addEventListener("click", ()=> renderFoodLibrary(child));
-  document.getElementById("learningLibraryCard").addEventListener("click", ()=> renderLearningLibrary(child));
-  document.getElementById("progressReportCard").addEventListener("click", ()=> renderProgressReport(child));
-  document.getElementById("screeningCard").addEventListener("click", ()=> renderScreening(child));
-  document.getElementById("schoolSupportCard").addEventListener("click", ()=> renderSchoolSupport(child));
-  document.getElementById("govtSchemesCard").addEventListener("click", ()=> renderGovtSchemes(child));
   document.getElementById("addMilestoneBtn").addEventListener("click", ()=> showMilestoneForm(child));
   document.getElementById("progressBtn").addEventListener("click", ()=> showProgress(child));
   document.getElementById("addAnotherChip").addEventListener("click", ()=> renderAddChildForm());
   document.getElementById("talkToSarathiBtn").addEventListener("click", ()=> startAvatarIntake(child));
   document.getElementById("upsellBannerBtn").addEventListener("click", ()=>{
-    window.location.href = "/sarathi-billing.html";
-  });
-  const unlimitedPromoBtn = document.getElementById("unlimitedPromoBtn");
-  if(unlimitedPromoBtn) unlimitedPromoBtn.addEventListener("click", (e)=>{
-    e.stopPropagation();
-    window.location.href = "/sarathi-billing.html";
-  });
-  const unlimitedPromoCard = document.getElementById("unlimitedPromoCard");
-  if(unlimitedPromoCard) unlimitedPromoCard.addEventListener("click", ()=>{
     window.location.href = "/sarathi-billing.html";
   });
   document.getElementById("composerBar").addEventListener("click", ()=> showMilestoneForm(child));

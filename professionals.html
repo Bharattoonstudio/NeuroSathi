@@ -570,6 +570,7 @@ function renderProfileCard(p){
       <div class="fb-card-body">
         <div class="fb-name">${escapeHtml(p.display_name || '')}</div>
         <div class="fb-subtitle">${escapeHtml(typeLabel)}${location ? ' · ' + escapeHtml(location) : ''}</div>
+        <div class="fb-badge ${badge.cls}">${badge.label}</div>
 
         <div class="fb-completion">
           <div class="fb-completion-head"><span>Profile Completion</span><span>${completion}%</span></div>

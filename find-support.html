@@ -26,6 +26,7 @@
   .search-box{width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid #E5E7EB;margin-bottom:16px;font-family:inherit;font-size:.9rem;box-sizing:border-box}
   .card{background:#fff;border:1px solid #f2e4d6;border-radius:16px;padding:16px;margin-bottom:12px}
   .card .type-tag{display:inline-block;font-size:.68rem;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#ff8a5c;margin-bottom:4px}
+  .verified-tag{display:inline-flex;align-items:center;gap:3px;font-size:.68rem;font-weight:800;color:#065F46;background:#D1FAE5;padding:3px 9px;border-radius:20px;margin-left:6px;vertical-align:middle}
   .card .name{font-size:1.05rem;font-weight:700}
   .card .meta{font-size:.83rem;color:#7b8194;margin:4px 0 10px}
   .card .fee{font-size:.9rem;font-weight:700;color:#0e1524;margin-bottom:10px}
@@ -67,7 +68,7 @@
   </div>
 
   <div id="findView">
-  <input class="search-box" id="searchBox" placeholder="Search by name or city…" oninput="renderList()">
+  <input class="search-box" id="searchBox" placeholder="Search by name, city, or language…" oninput="renderList()">
   <div class="filters" id="filterRow">
     <button class="active" data-f="all" onclick="setFilter('all')">All</button>
     <button data-f="professional" onclick="setFilter('professional')">Doctors & Therapists</button>
@@ -163,10 +164,10 @@ async function loadProviders(){
   try{
     const [{ data: pros, error: proErr }, { data: cgs, error: cgErr }] = await Promise.all([
       sb.from('professionals')
-        .select('id, user_id, professional_type, display_name, city, state, area, bio, consultation_fee_min, consultation_fee_max, verification_status, qualifications, years_of_experience, intro_video_url')
+        .select('id, user_id, professional_type, display_name, city, state, area, bio, consultation_fee_min, consultation_fee_max, verification_status, qualifications, years_of_experience, intro_video_url, languages_spoken')
         .eq('verification_status', 'verified'),
       sb.from('caregivers')
-        .select('user_id, caregiver_type, display_name, city, state, area, bio, hourly_rate_min, hourly_rate_max, verification_status, qualifications, years_experience, intro_video_url')
+        .select('user_id, caregiver_type, display_name, city, state, area, bio, hourly_rate_min, hourly_rate_max, verification_status, qualifications, years_experience, intro_video_url, languages_spoken')
         .eq('verification_status', 'verified'),
     ]);
     if (proErr) console.error(proErr);
@@ -181,6 +182,7 @@ async function loadProviders(){
       bio: p.bio,
       feeMin: p.consultation_fee_min, feeMax: p.consultation_fee_max,
       qualifications: p.qualifications, yearsExp: p.years_of_experience, videoUrl: p.intro_video_url,
+      languages: p.languages_spoken || [],
     }));
     const cgList = (cgs || []).map(c => ({
       kind: 'caregiver',
@@ -191,6 +193,7 @@ async function loadProviders(){
       bio: c.bio,
       feeMin: c.hourly_rate_min, feeMax: c.hourly_rate_max,
       qualifications: c.qualifications, yearsExp: c.years_experience, videoUrl: c.intro_video_url,
+      languages: c.languages_spoken || [],
     }));
 
     allProviders = [...proList, ...cgList];
@@ -229,7 +232,7 @@ function renderList(){
   const q = (document.getElementById('searchBox').value || '').toLowerCase();
   const filtered = allProviders.filter(p =>
     (activeFilter === 'all' || p.kind === activeFilter) &&
-    ((p.name || '').toLowerCase().includes(q) || (p.city || '').toLowerCase().includes(q))
+    ((p.name || '').toLowerCase().includes(q) || (p.city || '').toLowerCase().includes(q) || (p.languages || []).some(l => l.toLowerCase().includes(q)))
   );
   if (!filtered.length){
     mount.innerHTML = `<div class="empty-note">${allProviders.length ? 'No matches. Try a different search.' : 'No verified providers listed yet — check back soon.'}</div>`;
@@ -244,10 +247,11 @@ function renderList(){
     const expLabel = p.yearsExp ? ` · ${p.yearsExp} yrs experience` : '';
     return `
       <div class="card">
-        <div class="type-tag">${escapeHtml(kindLabel(p.kind))}</div>
+        <div class="type-tag">${escapeHtml(kindLabel(p.kind))}<span class="verified-tag">✓ Verified</span></div>
         <div class="name">${escapeHtml(p.name)}</div>
         <div class="meta">${escapeHtml(p.typeLabel)}${loc ? ' · ' + escapeHtml(loc) : ''}${expLabel} · ${escapeHtml(ratingLabel)}</div>
         ${p.qualifications ? `<div style="font-size:.82rem;color:#57534E;margin-bottom:6px"><strong>Qualifications:</strong> ${escapeHtml(p.qualifications)}</div>` : ''}
+        ${p.languages && p.languages.length ? `<div style="font-size:.82rem;color:#57534E;margin-bottom:6px"><strong>Speaks:</strong> ${escapeHtml(p.languages.join(', '))}</div>` : ''}
         ${p.bio ? `<div class="bio">${escapeHtml(p.bio)}</div>` : ''}
         ${p.videoUrl ? renderVideoEmbed(p.videoUrl) : ''}
         <div class="fee">${feeLabel}</div>

@@ -465,6 +465,12 @@ function getSelectedConditions(){
 
 window.addEventListener('DOMContentLoaded', renderConditionChips);
 
+const VERIFICATION_BADGES = {
+  submitted:    { cls: 'pending', label: '🕐 Submitted — Awaiting Review' },
+  under_review: { cls: 'pending', label: '🔍 Under Review' },
+  verified:     { cls: 'live',    label: '✅ Verified' },
+};
+
 function calcProfileCompletion(p, fields){
   const filled = fields.filter(f => {
     const v = p[f];
@@ -485,6 +491,7 @@ function renderProfileCard(p){
   const experienceText = (p.years_experience || p.years_experience === 0) ? `${p.years_experience} yrs` : 'Not specified';
   const conditionsChips = (p.conditions_supported || []).map(c => `<span class="fb-chip">${escapeHtml(c)}</span>`).join('') || '<span style="font-size:12.5px;color:#A8A29E">Not specified yet</span>';
   const languagesText = (p.languages_spoken || []).join(', ') || 'Not specified';
+  const badge = VERIFICATION_BADGES[p.verification_status] || VERIFICATION_BADGES.submitted;
   const avatarHtml = p.photo_url
     ? `<img src="${escapeHtml(p.photo_url)}" alt="${escapeHtml(p.display_name || '')}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" loading="lazy">`
     : escapeHtml(initial);
@@ -500,7 +507,7 @@ function renderProfileCard(p){
       <div class="fb-card-body">
         <div class="fb-name">${escapeHtml(p.display_name || '')}</div>
         <div class="fb-subtitle">${escapeHtml(typeLabel)}${location ? ' · ' + escapeHtml(location) : ''}</div>
-        <div class="fb-badge live">✅ Live — Visible to Parents</div>
+        <div class="fb-badge ${badge.cls}">${badge.label}</div>
 
         <div class="fb-completion">
           <div class="fb-completion-head"><span>Profile Completion</span><span>${completion}%</span></div>

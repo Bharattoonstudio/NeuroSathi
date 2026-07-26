@@ -85,6 +85,7 @@
     <div class="tab active" data-panel="panelOverview" onclick="switchTab('panelOverview')">Overview</div>
     <div class="tab" data-panel="panelProfessionals" onclick="switchTab('panelProfessionals')">Professionals</div>
     <div class="tab" data-panel="panelCaregivers" onclick="switchTab('panelCaregivers')">Caregivers</div>
+    <div class="tab" data-panel="panelAgencies" onclick="switchTab('panelAgencies')">Agencies</div>
     <div class="tab" data-panel="panelBookings" onclick="switchTab('panelBookings')">Bookings</div>
     <div class="tab" data-panel="panelPayouts" onclick="switchTab('panelPayouts')">Payouts</div>
     <div class="tab" data-panel="panelUsers" onclick="switchTab('panelUsers')">Users</div>
@@ -113,6 +114,12 @@
       <p class="sub">Review and approve caregiver registrations.</p>
       <input class="search-box" id="caregiverSearch" placeholder="Search by name or city…" oninput="renderCaregivers()">
       <div id="caregiverList"><div class="empty-note">Loading…</div></div>
+    </div>
+    <div class="panel" id="panelAgencies">
+      <h2>Agency Verification</h2>
+      <p class="sub">Review and approve agency registrations. Each agency may list multiple individual caregivers under its roster.</p>
+      <input class="search-box" id="agencySearch" placeholder="Search by name or city…" oninput="renderAgencies()">
+      <div id="agencyList"><div class="empty-note">Loading…</div></div>
     </div>
     <div class="panel" id="panelBookings">
       <h2>Bookings</h2>
@@ -265,6 +272,7 @@ function showDashboard() {
   loadOverview();
   loadProfessionals();
   loadCaregivers();
+  loadAgencies();
   loadBookings();
   loadPayouts();
   loadUsers();
@@ -435,6 +443,89 @@ async function setCaregiverVerification(userId, status) {
     await loadCaregivers();
   } catch (err) {
     console.error('Set caregiver verification error:', err);
+    alert('Error updating verification status.');
+  }
+}
+
+let agenciesCache = [];
+
+async function loadAgencies() {
+  const el = document.getElementById('agencyList');
+  try {
+    const { data, error } = await sbAdmin
+      .from('agencies')
+      .select('id, user_id, agency_name, city, state, verification_status, created_at, credential_doc_path')
+      .order('created_at', { ascending: false });
+    if (error) {
+      el.innerHTML = `<div class="empty-note">Couldn't load: ${escapeHtml(error.message)}</div>`;
+      return;
+    }
+    agenciesCache = data || [];
+    await loadAgencyRosterCounts();
+    renderAgencies();
+  } catch (err) {
+    console.error('Load agencies error:', err);
+    el.innerHTML = `<div class="empty-note">Error loading agencies.</div>`;
+  }
+}
+
+async function loadAgencyRosterCounts() {
+  if (!agenciesCache.length) return;
+  try {
+    const { data, error } = await sbAdmin
+      .from('agency_caregivers')
+      .select('agency_id');
+    if (error) { console.error('Load roster counts error:', error); return; }
+    const counts = {};
+    (data || []).forEach(r => { counts[r.agency_id] = (counts[r.agency_id] || 0) + 1; });
+    agenciesCache.forEach(a => { a._rosterCount = counts[a.id] || 0; });
+  } catch (err) {
+    console.error('Load roster counts error:', err);
+  }
+}
+
+function renderAgencies() {
+  const el = document.getElementById('agencyList');
+  const q = (document.getElementById('agencySearch').value || '').toLowerCase();
+  const filtered = agenciesCache.filter(a =>
+    (a.agency_name || '').toLowerCase().includes(q) || (a.city || '').toLowerCase().includes(q)
+  );
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty-note">${agenciesCache.length ? 'No matches.' : 'No agencies registered yet.'}</div>`;
+    return;
+  }
+  el.innerHTML = filtered.map(a => `
+    <div class="item-card">
+      <div class="name">${escapeHtml(a.agency_name)}</div>
+      <div class="meta">${a._rosterCount || 0} caregiver${a._rosterCount === 1 ? '' : 's'} on roster · ${escapeHtml(a.city || '')}${a.state ? ', ' + escapeHtml(a.state) : ''}
+        &nbsp;<span class="status-badge status-${escapeHtml(a.verification_status || 'submitted')}">${escapeHtml((a.verification_status || 'submitted').replace('_',' '))}</span>
+      </div>
+      <div class="action-row">
+        <button class="btn-verify" onclick="setAgencyVerification('${a.user_id}','verified')">✓ Verify</button>
+        <button class="btn-review" onclick="setAgencyVerification('${a.user_id}','under_review')">Under Review</button>
+        <button class="btn-reject" onclick="setAgencyVerification('${a.user_id}','rejected')">✕ Reject</button>
+        ${a.credential_doc_path ? `<button class="btn-review" onclick="viewCredentialDoc('${escapeHtml(a.credential_doc_path)}')">📄 View Document</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+async function setAgencyVerification(userId, status) {
+  try {
+    const { data: { session } } = await sbAdmin.auth.getSession();
+    if (!session || !session.user || !ADMIN_EMAILS.includes(session.user.email)) {
+      alert('Your admin session has expired. Please log in again.');
+      doAdminLogout();
+      return;
+    }
+    const { error } = await sbAdmin
+      .from('agencies')
+      .update({ verification_status: status })
+      .eq('user_id', userId);
+    if (error) { alert('Update failed: ' + error.message); return; }
+    await loadAgencies();
+  } catch (err) {
+    console.error('Set agency verification error:', err);
     alert('Error updating verification status.');
   }
 }

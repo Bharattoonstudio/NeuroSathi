@@ -1041,7 +1041,7 @@ async function loadMyBookings(providerId){
   try{
     const sb = await getSupabase();
     const { data, error } = await sb.from('bookings')
-      .select('id, parent_name, parent_phone, amount, preferred_date, notes, status, created_at')
+      .select('id, parent_name, parent_phone, amount, preferred_date, notes, status, created_at, requested_caregiver_name')
       .eq('provider_id', providerId)
       .order('created_at', { ascending: false });
     if(error){ mount.innerHTML = `<div style="font-size:13px;color:#c0392b">Couldn't load bookings.</div>`; return; }
@@ -1049,6 +1049,7 @@ async function loadMyBookings(providerId){
     mount.innerHTML = data.map(b => `
       <div style="background:#FAFAF9;border:1px solid #f2e4d6;border-radius:12px;padding:12px 14px;margin-bottom:10px">
         <div style="font-weight:700;font-size:14px">₹${escapeHtml(String(b.amount))} · ${escapeHtml(b.status)}</div>
+        ${b.requested_caregiver_name ? `<div style="font-size:12.5px;color:#9A3412;font-weight:700">Requested: ${escapeHtml(b.requested_caregiver_name)}</div>` : ''}
         ${b.preferred_date ? `<div style="font-size:12.5px;color:#7b8194">Preferred date: ${escapeHtml(b.preferred_date)}</div>` : ''}
         ${b.notes ? `<div style="font-size:12.5px;color:#7b8194">Note: ${escapeHtml(b.notes)}</div>` : ''}
         ${(b.status === 'confirmed' || b.status === 'completed') && b.parent_phone ? `<div style="font-size:13px;font-weight:700;color:#2a7b47;margin-top:6px">Parent contact: ${escapeHtml(b.parent_phone)}</div>` : ''}

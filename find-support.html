@@ -27,6 +27,11 @@
   .card{background:#fff;border:1px solid #f2e4d6;border-radius:16px;padding:16px;margin-bottom:12px}
   .card .type-tag{display:inline-block;font-size:.68rem;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#ff8a5c;margin-bottom:4px}
   .verified-tag{display:inline-flex;align-items:center;gap:3px;font-size:.68rem;font-weight:800;color:#065F46;background:#D1FAE5;padding:3px 9px;border-radius:20px;margin-left:6px;vertical-align:middle}
+  .roster-item{background:#fffaf5;border:1px solid #f2e4d6;border-radius:12px;padding:12px 14px;margin-bottom:10px}
+  .roster-item .rname{font-weight:700;font-size:.95rem}
+  .roster-item .rmeta{font-size:.8rem;color:#7b8194;margin:2px 0 6px}
+  .roster-item .rbio{font-size:.82rem;color:#57534E;margin-bottom:8px}
+  .roster-chip{display:inline-block;background:#FFF7ED;color:#9A3412;border:1px solid #FED7AA;border-radius:20px;padding:3px 10px;font-size:.72rem;font-weight:700;margin:0 4px 4px 0}
   .card .name{font-size:1.05rem;font-weight:700}
   .card .meta{font-size:.83rem;color:#7b8194;margin:4px 0 10px}
   .card .fee{font-size:.9rem;font-weight:700;color:#0e1524;margin-bottom:10px}
@@ -72,8 +77,9 @@
   <div class="filters" id="filterRow">
     <button class="active" data-f="all" onclick="setFilter('all')">All</button>
     <button data-f="professional" onclick="setFilter('professional')">Doctors & Therapists</button>
-    <button data-f="educator" onclick="setFilter('educator')">Special Educators</button>
+    <button data-f="educator" onclick="setFilter('educator')">Educators & Tutors</button>
     <button data-f="caregiver" onclick="setFilter('caregiver')">Caregivers</button>
+    <button data-f="agency" onclick="setFilter('agency')">Agencies</button>
   </div>
   <div id="listMount"><div class="empty-note">Loading…</div></div>
   </div>
@@ -121,6 +127,17 @@
   </div>
 </div>
 
+<div class="modal-bg" id="rosterModalBg">
+  <div class="modal">
+    <h3 id="rosterModalName">Agency caregivers</h3>
+    <div class="sub" id="rosterModalMeta"></div>
+    <div id="rosterModalList"></div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn-cancel" style="flex:1" onclick="closeRosterViewModal()">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const NS_URL = 'https://qvuenvngwgcknawfsnxl.supabase.co';
 const NS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2dWVudm5nd2dja25hd2ZzbnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MzI1OTksImV4cCI6MjA5ODMwODU5OX0.MZgac469tvi9Xq9gyaRbHDc9t88Ww9dN8ldZ8JvKGVI';
@@ -162,19 +179,23 @@ const CAREGIVER_TYPE_LABELS = {
 async function loadProviders(){
   const mount = document.getElementById('listMount');
   try{
-    const [{ data: pros, error: proErr }, { data: cgs, error: cgErr }] = await Promise.all([
+    const [{ data: pros, error: proErr }, { data: cgs, error: cgErr }, { data: agcs, error: agcErr }] = await Promise.all([
       sb.from('professionals')
         .select('id, user_id, professional_type, display_name, city, state, area, bio, consultation_fee_min, consultation_fee_max, verification_status, qualifications, years_of_experience, intro_video_url, languages_spoken')
         .eq('verification_status', 'verified'),
       sb.from('caregivers')
         .select('user_id, caregiver_type, display_name, city, state, area, bio, hourly_rate_min, hourly_rate_max, verification_status, qualifications, years_experience, intro_video_url, languages_spoken')
         .eq('verification_status', 'verified'),
+      sb.from('agencies')
+        .select('id, user_id, agency_name, city, state, area, bio, hourly_rate_min, hourly_rate_max, verification_status, languages_spoken, intro_video_url')
+        .eq('verification_status', 'verified'),
     ]);
     if (proErr) console.error(proErr);
     if (cgErr) console.error(cgErr);
+    if (agcErr) console.error(agcErr);
 
     const proList = (pros || []).map(p => ({
-      kind: p.professional_type === 'special_educator' ? 'educator' : 'professional',
+      kind: (p.professional_type === 'special_educator' || p.professional_type === 'home_tutor') ? 'educator' : 'professional',
       providerId: p.id,
       name: p.display_name,
       typeLabel: PROF_TYPE_LABELS[p.professional_type] || p.professional_type,
@@ -196,7 +217,34 @@ async function loadProviders(){
       languages: c.languages_spoken || [],
     }));
 
-    allProviders = [...proList, ...cgList];
+    let rosterByAgency = {};
+    if (agcs && agcs.length){
+      const agencyIds = agcs.map(a => a.id);
+      const { data: rosterRows, error: rosterErr } = await sb.from('agency_caregivers')
+        .select('id, agency_id, name, years_experience, specializations, languages_spoken, bio')
+        .in('agency_id', agencyIds)
+        .eq('active', true);
+      if (rosterErr) console.error(rosterErr);
+      (rosterRows || []).forEach(r => {
+        if (!rosterByAgency[r.agency_id]) rosterByAgency[r.agency_id] = [];
+        rosterByAgency[r.agency_id].push(r);
+      });
+    }
+    const agencyList = (agcs || []).map(a => ({
+      kind: 'agency',
+      providerId: a.user_id,
+      agencyId: a.id,
+      name: a.agency_name,
+      typeLabel: 'Agency',
+      city: a.city, state: a.state, area: a.area,
+      bio: a.bio,
+      feeMin: a.hourly_rate_min, feeMax: a.hourly_rate_max,
+      videoUrl: a.intro_video_url,
+      languages: a.languages_spoken || [],
+      roster: rosterByAgency[a.id] || [],
+    }));
+
+    allProviders = [...proList, ...cgList, ...agencyList];
     await loadRatingsSummary();
     renderList();
   }catch(err){
@@ -245,6 +293,23 @@ function renderList(){
     const rs = ratingsSummary[ratingKey];
     const ratingLabel = rs ? `★ ${(rs.sum / rs.count).toFixed(1)} (${rs.count})` : 'No ratings yet';
     const expLabel = p.yearsExp ? ` · ${p.yearsExp} yrs experience` : '';
+
+    if (p.kind === 'agency'){
+      const rosterCount = (p.roster || []).length;
+      return `
+        <div class="card">
+          <div class="type-tag">${escapeHtml(kindLabel(p.kind))}<span class="verified-tag">✓ Verified</span></div>
+          <div class="name">${escapeHtml(p.name)}</div>
+          <div class="meta">${loc ? escapeHtml(loc) : ''} · ${escapeHtml(ratingLabel)}</div>
+          ${p.languages && p.languages.length ? `<div style="font-size:.82rem;color:#57534E;margin-bottom:6px"><strong>Speaks:</strong> ${escapeHtml(p.languages.join(', '))}</div>` : ''}
+          ${p.bio ? `<div class="bio">${escapeHtml(p.bio)}</div>` : ''}
+          ${p.videoUrl ? renderVideoEmbed(p.videoUrl) : ''}
+          <div class="fee">${feeLabel}</div>
+          <button class="book-btn" ${rosterCount ? '' : 'disabled'} onclick='openRosterViewModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'>${rosterCount ? `View Caregivers (${rosterCount}) →` : 'No caregivers listed yet'}</button>
+        </div>
+      `;
+    }
+
     return `
       <div class="card">
         <div class="type-tag">${escapeHtml(kindLabel(p.kind))}<span class="verified-tag">✓ Verified</span></div>
@@ -262,7 +327,10 @@ function renderList(){
 }
 
 function kindLabel(k){
-  return k === 'professional' ? 'Doctor / Therapist' : k === 'educator' ? 'Special Educator' : 'Caregiver';
+  if (k === 'professional') return 'Doctor / Therapist';
+  if (k === 'educator') return 'Educator / Tutor';
+  if (k === 'agency') return 'Agency';
+  return 'Caregiver';
 }
 function feeRangeLabel(p){
   if (!p.feeMin && !p.feeMax) return 'Fee not listed';
@@ -270,10 +338,14 @@ function feeRangeLabel(p){
   return `₹${p.feeMin || p.feeMax}`;
 }
 
-function openBookModal(p){
+let requestedCaregiverName = null;
+
+function openBookModal(p, caregiverName){
   selectedProvider = p;
-  document.getElementById('bookModalName').textContent = 'Book ' + p.name;
-  document.getElementById('bookModalMeta').textContent = p.typeLabel + ([p.area,p.city].filter(Boolean).join(', ') ? ' · ' + [p.area,p.city].filter(Boolean).join(', ') : '');
+  requestedCaregiverName = caregiverName || null;
+  document.getElementById('bookModalName').textContent = caregiverName ? 'Book ' + caregiverName : 'Book ' + p.name;
+  const metaBits = [p.typeLabel, [p.area,p.city].filter(Boolean).join(', ')].filter(Boolean);
+  document.getElementById('bookModalMeta').textContent = (caregiverName ? 'via ' + p.name + (metaBits.length ? ' · ' + metaBits.join(' · ') : '') : metaBits.join(' · '));
   document.getElementById('bookAmountDisplay').textContent = '₹' + (p.feeMin || p.feeMax);
   document.getElementById('bookParentName').value = '';
   document.getElementById('bookParentPhone').value = '';
@@ -287,6 +359,41 @@ function openBookModal(p){
 function closeBookModal(){
   document.getElementById('bookModalBg').classList.remove('active');
   selectedProvider = null;
+  requestedCaregiverName = null;
+}
+
+function openRosterViewModal(agency){
+  document.getElementById('rosterModalName').textContent = agency.name;
+  const loc = [agency.area, agency.city, agency.state].filter(Boolean).join(', ');
+  document.getElementById('rosterModalMeta').textContent = loc || '';
+  const roster = agency.roster || [];
+  const listEl = document.getElementById('rosterModalList');
+  if (!roster.length){
+    listEl.innerHTML = '<div class="empty-note">No caregivers listed yet.</div>';
+  } else {
+    listEl.innerHTML = roster.map(r => {
+      const specChips = (r.specializations || []).map(s => `<span class="roster-chip">${escapeHtml(s)}</span>`).join('');
+      const langText = (r.languages_spoken || []).join(', ');
+      const expLabel = (r.years_experience || r.years_experience === 0) ? `${r.years_experience} yrs experience` : '';
+      return `
+        <div class="roster-item">
+          <div class="rname">${escapeHtml(r.name)}</div>
+          <div class="rmeta">${[expLabel, langText ? 'Speaks: ' + langText : ''].filter(Boolean).join(' · ')}</div>
+          ${specChips ? `<div style="margin-bottom:6px">${specChips}</div>` : ''}
+          ${r.bio ? `<div class="rbio">${escapeHtml(r.bio)}</div>` : ''}
+          <button class="book-btn" ${agency.feeMin ? '' : 'disabled'} onclick='bookRosterCaregiver(${JSON.stringify(agency).replace(/'/g, "&#39;")}, ${JSON.stringify(r.name).replace(/'/g, "&#39;")})'>${agency.feeMin ? 'Book ' + escapeHtml(r.name) + ' →' : 'Fee not listed yet'}</button>
+        </div>
+      `;
+    }).join('');
+  }
+  document.getElementById('rosterModalBg').classList.add('active');
+}
+function closeRosterViewModal(){
+  document.getElementById('rosterModalBg').classList.remove('active');
+}
+function bookRosterCaregiver(agency, caregiverName){
+  closeRosterViewModal();
+  openBookModal(agency, caregiverName);
 }
 
 async function startPayment(){
@@ -313,6 +420,7 @@ async function startPayment(){
       notes: document.getElementById('bookNotes').value.trim() || null,
       parent_name: parentName || null,
       parent_phone: parentPhone,
+      requested_caregiver_name: requestedCaregiverName || null,
     };
 
     const { data: { session } } = await sb.auth.getSession();
@@ -408,24 +516,27 @@ async function loadMyBookings(){
   const mount = document.getElementById('myBookingsListMount');
   try{
     const { data, error } = await sb.from('bookings')
-      .select('id, provider_type, provider_name, amount, preferred_date, notes, status, created_at')
+      .select('id, provider_type, provider_id, provider_name, amount, preferred_date, notes, status, created_at, requested_caregiver_name')
       .eq('parent_user_id', currentUserId)
       .order('created_at', { ascending: false });
     if (error) { mount.innerHTML = `<div class="empty-note">Couldn't load your bookings.</div>`; return; }
     if (!data || !data.length) { mount.innerHTML = `<div class="empty-note">No bookings yet — find a provider above to get started.</div>`; return; }
 
     // fetch provider phone numbers + existing ratings in parallel
-    const proIds = data.filter(b => b.provider_type !== 'caregiver').map(b => b.provider_id);
+    const proIds = data.filter(b => b.provider_type === 'professional' || b.provider_type === 'educator').map(b => b.provider_id);
     const cgIds = data.filter(b => b.provider_type === 'caregiver').map(b => b.provider_id);
+    const agcIds = data.filter(b => b.provider_type === 'agency').map(b => b.provider_id);
     const bookingIds = data.map(b => b.id);
-    const [{ data: pros }, { data: cgs }, { data: ratings }] = await Promise.all([
+    const [{ data: pros }, { data: cgs }, { data: agcs }, { data: ratings }] = await Promise.all([
       proIds.length ? sb.from('professionals').select('id, phone_number').in('id', proIds) : Promise.resolve({ data: [] }),
       cgIds.length ? sb.from('caregivers').select('user_id, phone_number').in('user_id', cgIds) : Promise.resolve({ data: [] }),
+      agcIds.length ? sb.from('agencies').select('user_id, phone_number').in('user_id', agcIds) : Promise.resolve({ data: [] }),
       sb.from('ratings').select('booking_id, stars').in('booking_id', bookingIds),
     ]);
     const phoneByProId = {};
     (pros || []).forEach(p => phoneByProId[p.id] = p.phone_number);
     (cgs || []).forEach(c => phoneByProId[c.user_id] = c.phone_number);
+    (agcs || []).forEach(a => phoneByProId[a.user_id] = a.phone_number);
     const ratingByBooking = {};
     (ratings || []).forEach(r => ratingByBooking[r.booking_id] = r.stars);
 
@@ -436,6 +547,7 @@ async function loadMyBookings(){
       <div class="card">
         <div class="type-tag">${escapeHtml(kindLabel(b.provider_type))}</div>
         <div class="name">${escapeHtml(b.provider_name || 'Provider')}</div>
+        ${b.requested_caregiver_name ? `<div style="font-size:.82rem;color:#9A3412;font-weight:700;margin-top:2px">Requested: ${escapeHtml(b.requested_caregiver_name)}</div>` : ''}
         <div class="meta">₹${escapeHtml(String(b.amount))}${b.preferred_date ? ' · ' + escapeHtml(b.preferred_date) : ''} · ${escapeHtml(b.status)}</div>
         ${(b.status === 'confirmed' || b.status === 'completed') && phone ? `<div style="font-size:.85rem;font-weight:700;color:#2a7b47;margin-bottom:10px">Provider contact: ${escapeHtml(phone)}</div>` : ''}
         <div style="display:flex;gap:8px;flex-wrap:wrap">

@@ -1085,9 +1085,16 @@ function renderLearningCentreBody(){
     ` : ""}
 
     <div class="lc-section-title">${state.categoryFilter ? escapeHtml(catById[state.categoryFilter]?.name || "Articles") : (state.searchQuery ? "Search Results" : "All Articles")}</div>
-    ${filtered.length ? filtered.map(a => renderLearningArticleCard(a, catById, false)).join("") : `<div style="color:var(--muted-foreground);font-size:.88rem;padding:12px 0;">No articles found yet — check back soon as we add more.</div>`}
+    ${filtered.length ? filtered.map(a => renderLearningArticleCard(a, catById, false)).join("") : `
+      <div style="color:var(--muted-foreground);font-size:.88rem;padding:12px 0;">No articles found yet — check back soon as we add more.</div>
+      ${state.categoryFilter && catById[state.categoryFilter]?.slug === 'government-schemes' ? `
+        <button class="btn small" id="lcGovtSchemesBridgeBtn" style="width:100%;margin-top:4px;">🤝 See the actual list of Government Schemes →</button>
+      ` : ""}
+    `}
   `;
 
+  const govtBridgeBtn = document.getElementById("lcGovtSchemesBridgeBtn");
+  if(govtBridgeBtn) govtBridgeBtn.addEventListener("click", ()=> renderGovtSchemes(learningCentreState.child));
   body.querySelectorAll(".lc-cat-item").forEach(el=>{
     el.addEventListener("click", ()=>{
       const catId = el.dataset.cat;

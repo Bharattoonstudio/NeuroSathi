@@ -39,6 +39,10 @@
   .prof-field label{display:block;font-size:13px;font-weight:800;color:#0e1524;margin-bottom:6px}
   .prof-field input,.prof-field select,.prof-field textarea{width:100%;border:2px solid #E5E7EB;border-radius:10px;padding:11px 14px;font-family:inherit;font-size:14px;outline:none;box-sizing:border-box}
   .prof-field input:focus,.prof-field select:focus,.prof-field textarea:focus{border-color:#ff8a5c}
+  .cond-chip-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .cond-chip{background:#fffaf5;color:#0e1524;border:1.5px solid #E5E7EB;border-radius:20px;padding:7px 14px;font-size:12.5px;font-weight:700;cursor:pointer;user-select:none;transition:background .15s,border-color .15s,color .15s}
+  .cond-chip:hover{border-color:#ff8a5c}
+  .cond-chip.selected{background:#FFF7ED;color:#9A3412;border-color:#ff8a5c}
   .disclaimer-box{background:#FFFBEB;border:2px solid #FDE68A;border-radius:16px;padding:20px 22px;margin-bottom:24px}
   .disclaimer-box h3{font-size:14px;font-weight:800;color:#92400E;margin-bottom:8px;display:flex;align-items:center;gap:8px}
   .disclaimer-box p{font-size:13px;color:#78350F;line-height:1.6;margin-bottom:0}
@@ -197,8 +201,10 @@
       </div>
 
       <div class="prof-field">
-        <label>Conditions you specialise in (comma separated)</label>
-        <input type="text" id="profConditions" placeholder="e.g. Autism, ADHD, Speech Delay">
+        <label>Conditions you specialise in</label>
+        <div class="cond-chip-grid" id="profConditionsGrid"></div>
+        <label style="margin-top:10px;font-weight:600;">Other (comma separated, optional)</label>
+        <input type="text" id="profConditionsOther" placeholder="e.g. Dyspraxia, Selective Mutism">
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
@@ -407,6 +413,44 @@ const PROF_TYPE_LABELS = {
   special_educator: 'Special Educator',
 };
 
+// Fixed condition/specialization tags — the first 5 use labels that match
+// the parent-facing "specific concerns" tags exactly (dashboard.html
+// FOCUS_OPTIONS) so parent concerns and educator specializations use the
+// same vocabulary for future search/filter matching. Anything not listed
+// here can still be added via the free-text "Other" field.
+const CONDITION_OPTIONS = [
+  'Speech Delay',
+  'Sensory Processing',
+  'Fine Motor Delay',
+  'Gross Motor Delay',
+  'Feeding Difficulties',
+  'Autism',
+  'ADHD',
+  'Down Syndrome',
+  'Learning Disability',
+  'Global Developmental Delay',
+  'Cerebral Palsy'
+];
+
+function renderConditionChips(){
+  const grid = document.getElementById('profConditionsGrid');
+  if(!grid) return;
+  grid.innerHTML = CONDITION_OPTIONS.map(c => `<div class="cond-chip" data-cond="${c}" onclick="toggleCondChip(this)">${c}</div>`).join('');
+}
+
+function toggleCondChip(el){
+  el.classList.toggle('selected');
+}
+
+function getSelectedConditions(){
+  const chipValues = Array.from(document.querySelectorAll('#profConditionsGrid .cond-chip.selected')).map(c => c.dataset.cond);
+  const otherEl = document.getElementById('profConditionsOther');
+  const otherValues = otherEl ? otherEl.value.split(',').map(s => s.trim()).filter(Boolean) : [];
+  return [...chipValues, ...otherValues];
+}
+
+window.addEventListener('DOMContentLoaded', renderConditionChips);
+
 function calcProfileCompletion(p, fields){
   const filled = fields.filter(f => {
     const v = p[f];
@@ -504,6 +548,7 @@ function escapeHtml(str){
 }
 
 function showProfileCard(payload){
+  window._currentProfileData = payload;
   document.getElementById('profileCardMount').innerHTML = renderProfileCard(payload);
   const formCard = document.querySelector('.prof-form');
   if(formCard){ formCard.style.padding = '0'; formCard.style.overflow = 'hidden'; }
@@ -565,6 +610,44 @@ function editProfile(){
   if(formCard){ formCard.style.padding = '36px'; formCard.style.overflow = 'visible'; }
   document.getElementById('profSuccess').style.display = 'none';
   document.getElementById('profFormStep2').style.display = 'block';
+  if(window._currentProfileData) fillProfileForm(window._currentProfileData);
+}
+
+function fillProfileForm(data){
+  const setVal = (id, val) => { const el = document.getElementById(id); if(el && val != null) el.value = val; };
+  setVal('profDisplayName', data.display_name);
+  setVal('profRegBody', data.registration_body);
+  setVal('profQualifications', data.qualifications);
+  setVal('profYearsExp', data.years_of_experience);
+  setVal('profState', data.state);
+  setVal('profCity', data.city);
+  setVal('profArea', data.area);
+  setVal('profPincode', data.pincode);
+  setVal('profLanguages', Array.isArray(data.languages_spoken) ? data.languages_spoken.join(', ') : data.languages_spoken);
+  const savedConditions = Array.isArray(data.conditions_specialised) ? data.conditions_specialised : (data.conditions_specialised ? data.conditions_specialised.split(',').map(s=>s.trim()).filter(Boolean) : []);
+  const matched = [];
+  const unmatched = [];
+  savedConditions.forEach(val => {
+    const hit = CONDITION_OPTIONS.find(opt => opt.toLowerCase() === String(val).toLowerCase());
+    if(hit) matched.push(hit); else unmatched.push(val);
+  });
+  document.querySelectorAll('#profConditionsGrid .cond-chip').forEach(chip => {
+    if(matched.includes(chip.dataset.cond)) chip.classList.add('selected');
+    else chip.classList.remove('selected');
+  });
+  const otherEl = document.getElementById('profConditionsOther');
+  if(otherEl) otherEl.value = unmatched.join(', ');
+  setVal('profFeeMin', data.consultation_fee_min);
+  setVal('profFeeMax', data.consultation_fee_max);
+  setVal('profBio', data.bio);
+  setVal('profUpiId', data.upi_id);
+  setVal('profPhone', data.phone_number);
+  setVal('profIntroVideo', data.intro_video_url);
+  if(data.photo_url){
+    const img = document.getElementById('photoPreviewImg');
+    const icon = document.getElementById('photoPreviewIcon');
+    if(img && icon){ img.src = data.photo_url; img.style.display = 'block'; icon.style.display = 'none'; }
+  }
 }
 
 async function loadExistingProfile(){
@@ -692,7 +775,7 @@ async function submitProfessionalRegistration(event){
       area: document.getElementById('profArea').value.trim() || null,
       pincode: pincode || null,
       languages_spoken: toArray(document.getElementById('profLanguages').value),
-      conditions_specialised: toArray(document.getElementById('profConditions').value),
+      conditions_specialised: getSelectedConditions(),
       consultation_fee_min: document.getElementById('profFeeMin').value ? parseInt(document.getElementById('profFeeMin').value) : null,
       consultation_fee_max: document.getElementById('profFeeMax').value ? parseInt(document.getElementById('profFeeMax').value) : null,
       bio: document.getElementById('profBio').value.trim() || null,

@@ -928,12 +928,9 @@ function renderMoreMenu(child){
   setActiveBottomTab("more");
   const items = [
     { icon:"📅", label:"Routine Builder", desc:"Build a daily routine that works for your child.", action:"renderRoutineBuilder" },
-    { icon:"🎯", label:"Activities", desc:"Browse activities matched to focus areas.", action:"renderActivityLibrary" },
     { icon:"🧠", label:"Developmental Check-in", desc:"A free, educational observation check-in.", action:"renderScreening" },
-    { icon:"🏫", label:"School Support", desc:"Guidance for school conversations and IEPs.", action:"renderSchoolSupport" },
-    { icon:"🏛️", label:"Government Schemes", desc:"Schemes and benefits you may be eligible for.", action:"renderGovtSchemes" },
-    { icon:"🍽️", label:"Food & Nutrition", desc:"Meal ideas tailored to your child.", action:"renderFoodLibrary" },
-    { icon:"📖", label:"Trusted Learning Library", desc:"Curated external resources by category.", action:"renderLearningLibrary" },
+    { icon:"📞", label:"Connect with NeuroSarathi Founder", desc:"Reach out directly via WhatsApp or email.", action:"connectFounder" },
+    { icon:"📣", label:"Refer NeuroSarathi", desc:"Know a parent who could use this? Share it with them.", action:"referApp" },
   ];
   app.innerHTML = `
     <div class="card">
@@ -959,6 +956,8 @@ function renderMoreMenu(child){
   document.querySelectorAll(".more-menu-item").forEach(el=>{
     el.addEventListener("click", ()=>{
       const fnName = el.dataset.action;
+      if(fnName === "connectFounder"){ openConnectFounderSheet(); return; }
+      if(fnName === "referApp"){ openReferSheet(child); return; }
       if(typeof window[fnName] === "function") window[fnName](child);
     });
   });
@@ -967,7 +966,83 @@ function renderMoreMenu(child){
   });
 }
 
+function openConnectFounderSheet(){
+  const existing = document.getElementById("connectFounderModal");
+  if(existing) existing.remove();
+  const modal = document.createElement("div");
+  modal.id = "connectFounderModal";
+  modal.style.cssText = "position:fixed;inset:0;z-index:999;background:rgba(20,20,20,.55);display:flex;align-items:flex-end;justify-content:center;";
+  modal.innerHTML = `
+    <div style="background:var(--card, #fff);border-radius:22px 22px 0 0;max-width:480px;width:100%;padding:24px 20px calc(20px + env(safe-area-inset-bottom));">
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:4px;">Connect with the NeuroSarathi Founder</div>
+      <div style="font-size:.85rem;color:var(--muted-foreground, #7b8194);margin-bottom:18px;">Reach out directly — choose whichever's easiest for you.</div>
+      <a href="https://wa.me/919023023454" target="_blank" rel="noopener" class="btn" style="text-decoration:none;display:block;text-align:center;margin-bottom:10px;">💬 WhatsApp</a>
+      <a href="mailto:info@neurosarathi.com" class="btn secondary" style="text-decoration:none;display:block;text-align:center;margin-bottom:10px;">📧 Email</a>
+      <button class="btn small secondary" id="connectFounderCloseBtn" style="width:100%;">Cancel</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  document.getElementById("connectFounderCloseBtn").addEventListener("click", ()=> modal.remove());
+  modal.addEventListener("click", (e)=>{ if(e.target === modal) modal.remove(); });
+}
+
+async function openReferSheet(child){
+  const shareUrl = "https://neurosarathi.com";
+  const shareText = `I've been using NeuroSarathi for ${child?.display_name ? child.display_name + "'s" : "my child's"} development journey — thought it might help you too. Take a look: ${shareUrl}`;
+
+  // Try the native share sheet first (works well on most mobile browsers).
+  if(navigator.share){
+    try{
+      await navigator.share({ title: "NeuroSarathi", text: shareText, url: shareUrl });
+      return;
+    }catch(err){
+      // User cancelled the native share sheet, or it failed — fall through
+      // to the manual options below rather than showing an error.
+      if(err && err.name === "AbortError") return;
+    }
+  }
+
+  const existing = document.getElementById("referAppModal");
+  if(existing) existing.remove();
+  const modal = document.createElement("div");
+  modal.id = "referAppModal";
+  modal.style.cssText = "position:fixed;inset:0;z-index:999;background:rgba(20,20,20,.55);display:flex;align-items:flex-end;justify-content:center;";
+  modal.innerHTML = `
+    <div style="background:var(--card, #fff);border-radius:22px 22px 0 0;max-width:480px;width:100%;padding:24px 20px calc(20px + env(safe-area-inset-bottom));">
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:4px;">Refer NeuroSarathi</div>
+      <div style="font-size:.85rem;color:var(--muted-foreground, #7b8194);margin-bottom:18px;">Share it with a parent who might find it helpful.</div>
+      <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" target="_blank" rel="noopener" class="btn" style="text-decoration:none;display:block;text-align:center;margin-bottom:10px;">💬 Share via WhatsApp</a>
+      <a href="mailto:?subject=${encodeURIComponent('Thought you might find NeuroSarathi helpful')}&body=${encodeURIComponent(shareText)}" class="btn secondary" style="text-decoration:none;display:block;text-align:center;margin-bottom:10px;">📧 Share via Email</a>
+      <button class="btn small secondary" id="referAppCopyBtn" style="width:100%;margin-bottom:10px;">🔗 Copy Link</button>
+      <button class="btn small secondary" id="referAppCloseBtn" style="width:100%;">Cancel</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  document.getElementById("referAppCloseBtn").addEventListener("click", ()=> modal.remove());
+  document.getElementById("referAppCopyBtn").addEventListener("click", async ()=>{
+    try{
+      await navigator.clipboard.writeText(shareUrl);
+      const btn = document.getElementById("referAppCopyBtn");
+      btn.textContent = "✓ Copied!";
+      setTimeout(()=>{ if(document.getElementById("referAppCopyBtn")) btn.textContent = "🔗 Copy Link"; }, 1500);
+    }catch(err){
+      alert("Couldn't copy the link — you can share it manually: " + shareUrl);
+    }
+  });
+  modal.addEventListener("click", (e)=>{ if(e.target === modal) modal.remove(); });
+}
+
 // ─── Learning Centre ───
+// Categories in this list already have a real, fully-built feature
+// elsewhere in the app. Tapping them goes straight there instead of
+// showing an (empty) article list, so there's only one place for each.
+const LC_CATEGORY_DIRECT_LINKS = {
+  "government-schemes": "renderGovtSchemes",
+  "school-support": "renderSchoolSupport",
+  "nutrition": "renderFoodLibrary",
+  "therapy-activities": "renderActivityLibrary",
+};
+
 const learningCentreState = {
   child: null,
   categoryFilter: "",
@@ -992,10 +1067,19 @@ async function renderLearningCentre(child){
         <h1 style="margin:0;">Learning Centre</h1>
       </div>
       <input type="text" class="lc-search" id="lcSearchInput" placeholder="Search articles, topics, or tips…">
+      <div class="more-menu-item" id="lcTrustedLibraryBtn" style="margin-bottom:6px;">
+        <div class="more-menu-icon">📖</div>
+        <div class="more-menu-text">
+          <div class="more-menu-label">Trusted Learning Library</div>
+          <div class="more-menu-desc">Curated, vetted external resources you can trust.</div>
+        </div>
+        <div class="more-menu-arrow">→</div>
+      </div>
       <div id="lcBody"><div class="loading">Loading the Learning Centre…</div></div>
       <button class="btn small secondary" id="lcBackBtn" style="margin-top:16px;">Back to dashboard</button>
     </div>
   `;
+  document.getElementById("lcTrustedLibraryBtn").addEventListener("click", ()=> renderLearningLibrary(child));
   document.getElementById("lcBackBtn").addEventListener("click", ()=> renderFeed(child));
   document.getElementById("lcSearchInput").addEventListener("input", (e)=>{
     learningCentreState.searchQuery = e.target.value.toLowerCase();
@@ -1085,19 +1169,18 @@ function renderLearningCentreBody(){
     ` : ""}
 
     <div class="lc-section-title">${state.categoryFilter ? escapeHtml(catById[state.categoryFilter]?.name || "Articles") : (state.searchQuery ? "Search Results" : "All Articles")}</div>
-    ${filtered.length ? filtered.map(a => renderLearningArticleCard(a, catById, false)).join("") : `
-      <div style="color:var(--muted-foreground);font-size:.88rem;padding:12px 0;">No articles found yet — check back soon as we add more.</div>
-      ${state.categoryFilter && catById[state.categoryFilter]?.slug === 'government-schemes' ? `
-        <button class="btn small" id="lcGovtSchemesBridgeBtn" style="width:100%;margin-top:4px;">🤝 See the actual list of Government Schemes →</button>
-      ` : ""}
-    `}
+    ${filtered.length ? filtered.map(a => renderLearningArticleCard(a, catById, false)).join("") : `<div style="color:var(--muted-foreground);font-size:.88rem;padding:12px 0;">No articles found yet — check back soon as we add more.</div>`}
   `;
 
-  const govtBridgeBtn = document.getElementById("lcGovtSchemesBridgeBtn");
-  if(govtBridgeBtn) govtBridgeBtn.addEventListener("click", ()=> renderGovtSchemes(learningCentreState.child));
   body.querySelectorAll(".lc-cat-item").forEach(el=>{
     el.addEventListener("click", ()=>{
       const catId = el.dataset.cat;
+      const cat = state.categories.find(c => c.id === catId);
+      const directFn = LC_CATEGORY_DIRECT_LINKS[cat?.slug];
+      if(directFn && typeof window[directFn] === "function"){
+        window[directFn](learningCentreState.child);
+        return;
+      }
       learningCentreState.categoryFilter = learningCentreState.categoryFilter === catId ? "" : catId;
       renderLearningCentreBody();
     });

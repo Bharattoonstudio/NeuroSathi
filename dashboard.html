@@ -2545,7 +2545,12 @@ async function renderActivityLibrary(child){
         <h1 style="margin:0;">Activities for ${escapeHtml(child.display_name)}</h1>
       </div>
 
-      <label>Focus area</label>
+      <div id="todaysActivitiesMount">
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:8px;">✨ Today's Activities</div>
+        <div class="loading">Sarathi Avatar is picking today's activities…</div>
+      </div>
+
+      <label style="margin-top:16px;display:block;">Focus area</label>
       <div class="chip-grid" id="libFocusFilter">
         <div class="chip selected" data-val="">All</div>
         ${FOCUS_OPTIONS.map(o=>`<div class="chip" data-val="${o.key}">${o.label}</div>`).join("")}
@@ -2596,7 +2601,46 @@ async function renderActivityLibrary(child){
     });
   });
 
+  await loadFavoriteIds();
+  loadTodaysActivities(child);
   await loadLibraryResults();
+}
+
+function renderActivityCardHtml(a){
+  const imgMeta = activityImageMap[a.title];
+  const thumbSrc = imgMeta ? `/${imgMeta.slug}-step1.png` : null;
+  const isFav = favoriteActivityIds.has(a.id);
+  return `
+    <div class="card activity-card" data-id="${a.id}" style="cursor:pointer;position:relative;">
+      <button class="fav-star-btn ${isFav ? 'is-fav' : ''}" data-fav-id="${a.id}" aria-label="Favorite">${isFav ? '⭐' : '☆'}</button>
+      ${thumbSrc ? `<img src="${thumbSrc}" alt="" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;margin-bottom:10px;background:#f4f1de;" loading="lazy">` : `<div class="activity-icon-badge activity-badge-${(a.focus_areas&&a.focus_areas[0])||'default'}">${activityEmoji(a)}</div>`}
+      <div class="card-head">
+        <div class="card-icon ${a.source==='ai' ? 'gold' : ''}">${a.source==='ai' ? '✨' : '🧩'}</div>
+        <h2 style="margin:0;">${escapeHtml(a.title)}</h2>
+      </div>
+      <p>${escapeHtml(a.objective)}</p>
+      <div class="chip-grid">
+        <span class="chip" style="cursor:default;">${a.time_minutes} min</span>
+        <span class="chip" style="cursor:default;">${a.materials_level === 'none' ? 'No materials' : a.materials_level === 'household' ? 'Household items' : 'Special items'}</span>
+        ${(a.focus_areas||[]).map(f=>`<span class="chip" style="cursor:default;">${focusLabel(f)}</span>`).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function wireActivityCardClicks(containerEl, activities){
+  containerEl.querySelectorAll(".fav-star-btn").forEach(btn=>{
+    btn.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      toggleFavorite(btn.dataset.favId, btn);
+    });
+  });
+  containerEl.querySelectorAll(".activity-card").forEach(card=>{
+    card.addEventListener("click", ()=>{
+      const activity = activities.find(a=>a.id===card.dataset.id);
+      if(activity) renderActivityDetail(activity);
+    });
+  });
 }
 
 async function loadLibraryResults(){
@@ -2637,41 +2681,8 @@ async function loadLibraryResults(){
     return;
   }
 
-  resultsEl.innerHTML = activities.map(a => {
-    const imgMeta = activityImageMap[a.title];
-    const thumbSrc = imgMeta ? `/${imgMeta.slug}-step1.png` : null;
-    const isFav = favoriteActivityIds.has(a.id);
-    return `
-    <div class="card activity-card" data-id="${a.id}" style="cursor:pointer;position:relative;">
-      <button class="fav-star-btn ${isFav ? 'is-fav' : ''}" data-fav-id="${a.id}" aria-label="Favorite">${isFav ? '⭐' : '☆'}</button>
-      ${thumbSrc ? `<img src="${thumbSrc}" alt="" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;margin-bottom:10px;background:#f4f1de;" loading="lazy">` : `<div class="activity-icon-badge activity-badge-${(a.focus_areas&&a.focus_areas[0])||'default'}">${activityEmoji(a)}</div>`}
-      <div class="card-head">
-        <div class="card-icon ${a.source==='ai' ? 'gold' : ''}">${a.source==='ai' ? '✨' : '🧩'}</div>
-        <h2 style="margin:0;">${escapeHtml(a.title)}</h2>
-      </div>
-      <p>${escapeHtml(a.objective)}</p>
-      <div class="chip-grid">
-        <span class="chip" style="cursor:default;">${a.time_minutes} min</span>
-        <span class="chip" style="cursor:default;">${a.materials_level === 'none' ? 'No materials' : a.materials_level === 'household' ? 'Household items' : 'Special items'}</span>
-        ${(a.focus_areas||[]).map(f=>`<span class="chip" style="cursor:default;">${focusLabel(f)}</span>`).join("")}
-      </div>
-    </div>
-  `;
-  }).join("");
-
-  resultsEl.querySelectorAll(".fav-star-btn").forEach(btn=>{
-    btn.addEventListener("click", (e)=>{
-      e.stopPropagation();
-      toggleFavorite(btn.dataset.favId, btn);
-    });
-  });
-
-  resultsEl.querySelectorAll(".activity-card").forEach(card=>{
-    card.addEventListener("click", ()=>{
-      const activity = activities.find(a=>a.id===card.dataset.id);
-      if(activity) renderActivityDetail(activity);
-    });
-  });
+  resultsEl.innerHTML = activities.map(a => renderActivityCardHtml(a)).join("");
+  wireActivityCardClicks(resultsEl, activities);
 }
 
 let favoriteActivityIds = new Set();
@@ -2803,6 +2814,129 @@ function renderActivityDetail(activity){
       btn.textContent = "✅ Logged for today";
     }
   });
+}
+
+async function loadTodaysActivities(child){
+  const mount = document.getElementById("todaysActivitiesMount");
+  if(!mount) return;
+
+  try{
+    const todayStart = new Date();
+    todayStart.setHours(0,0,0,0);
+
+    // Anything already generated today for this child — reuse it rather
+    // than generating fresh ones on every visit.
+    const { data: todaysRows, error: todaysErr } = await dash2Client
+      .from("activities")
+      .select("*")
+      .eq("child_id", child.id)
+      .eq("source", "ai")
+      .gte("created_at", todayStart.toISOString())
+      .order("created_at", { ascending: true })
+      .limit(2);
+    if(todaysErr) throw todaysErr;
+
+    let todaysActivities = todaysRows || [];
+
+    if(todaysActivities.length < 2){
+      const needed = 2 - todaysActivities.length;
+
+      // Every activity title this child has ever been given (any source),
+      // so Sarathi avoids repeating something already suggested before.
+      const { data: pastRows } = await dash2Client
+        .from("activities")
+        .select("title")
+        .eq("child_id", child.id);
+      const excludeTitles = [...new Set((pastRows || []).map(r => r.title).filter(Boolean))];
+
+      const freshOnes = await generateDailyActivities(child, needed, excludeTitles);
+      todaysActivities = [...todaysActivities, ...freshOnes];
+    }
+
+    if(!todaysActivities.length){
+      mount.innerHTML = `
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:8px;">✨ Today's Activities</div>
+        <p style="font-size:.85rem;color:var(--muted-foreground, #7b8194);">Couldn't generate today's activities — you can still browse the full library below, or try again shortly.</p>
+      `;
+      return;
+    }
+
+    mount.innerHTML = `
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:2px;">✨ Today's Activities</div>
+      <p style="font-size:.8rem;color:var(--muted-foreground, #7b8194);margin-bottom:10px;">Picked by Sarathi Avatar for ${escapeHtml(child.display_name)}, fresh each day.</p>
+      ${todaysActivities.map(a => renderActivityCardHtml(a)).join("")}
+    `;
+    wireActivityCardClicks(mount, todaysActivities);
+  }catch(err){
+    console.error("Load today's activities error:", err);
+    mount.innerHTML = `
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:8px;">✨ Today's Activities</div>
+      <p style="font-size:.85rem;color:#c0392b;">Couldn't load today's activities right now.</p>
+    `;
+  }
+}
+
+async function generateDailyActivities(child, count, excludeTitles){
+  const { data: { session } } = await dash2Client.auth.getSession();
+  if(!session){
+    window.location.href = "/enterportal.html";
+    return [];
+  }
+
+  const combinedFocusAreas = [
+    ...(child.focus_areas || []).map(k=>focusLabel(k)),
+    ...(child.ai_focus_areas || [])
+  ];
+
+  try{
+    const resp = await fetch(SARATHI_CHAT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + session.access_token
+      },
+      body: JSON.stringify({
+        mode: "generate_activities",
+        childId: child.id,
+        focusAreas: combinedFocusAreas,
+        age: child.age,
+        count: count,
+        excludeTitles: excludeTitles
+      })
+    });
+
+    const data = await resp.json();
+    if(!resp.ok) throw new Error(data.error || "Something went wrong generating activities.");
+
+    const cleaned = data.reply.trim().replace(/^```json/i, "").replace(/^```/, "").replace(/```$/, "").trim();
+    const parsed = JSON.parse(cleaned);
+
+    const rows = (parsed.activities || []).slice(0, count).map(a => ({
+      title: a.title,
+      objective: a.objective,
+      steps: a.steps || [],
+      materials: a.materials || [],
+      materials_level: a.materials_level || "none",
+      safety_tip: a.safety_tip || null,
+      focus_areas: (a.focus_areas || []).filter(f => FOCUS_OPTIONS.some(o=>o.key===f)),
+      min_age: a.min_age || null,
+      max_age: a.max_age || null,
+      time_minutes: a.time_minutes || 15,
+      source: "ai",
+      parent_id: currentUser.id,
+      child_id: child.id,
+      is_public: false
+    }));
+
+    if(!rows.length) return [];
+
+    const { data: inserted, error: insertErr } = await dash2Client.from("activities").insert(rows).select();
+    if(insertErr) throw insertErr;
+    return inserted || [];
+  }catch(err){
+    console.error("Generate daily activities error:", err);
+    return [];
+  }
 }
 
 async function generateAiActivities(child){

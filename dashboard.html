@@ -2916,7 +2916,7 @@ async function generateDailyActivities(child, count, excludeTitles){
       objective: a.objective,
       steps: a.steps || [],
       materials: a.materials || [],
-      materials_level: a.materials_level || "none",
+      materials_level: (a.materials_level === "none" || a.materials_level === "household") ? a.materials_level : "household",
       safety_tip: a.safety_tip || null,
       focus_areas: (a.focus_areas || []).filter(f => FOCUS_OPTIONS.some(o=>o.key===f)),
       min_age: a.min_age || null,
@@ -2985,7 +2985,7 @@ async function generateAiActivities(child){
       objective: a.objective,
       steps: a.steps || [],
       materials: a.materials || [],
-      materials_level: a.materials_level || "none",
+      materials_level: (a.materials_level === "none" || a.materials_level === "household") ? a.materials_level : "household",
       safety_tip: a.safety_tip || null,
       focus_areas: (a.focus_areas || []).filter(f => FOCUS_OPTIONS.some(o=>o.key===f)),
       min_age: a.min_age || null,
@@ -3000,6 +3000,21 @@ async function generateAiActivities(child){
     if(rows.length > 0){
       await dash2Client.from("activities").insert(rows);
     }
+
+    // Reset filters so the newly generated activities are guaranteed to
+    // be visible — otherwise a narrow filter left on from before (e.g.
+    // "Under 5 min") can silently hide Sarathi's new suggestions.
+    libraryState.focusFilter = null;
+    libraryState.timeFilter = null;
+    libraryState.materialsFilter = null;
+    libraryState.favFilter = null;
+    ["libFocusFilter","libTimeFilter","libMaterialsFilter","libFavFilter"].forEach(id=>{
+      const container = document.getElementById(id);
+      if(!container) return;
+      container.querySelectorAll(".chip").forEach(c=>c.classList.remove("selected"));
+      const allChip = container.querySelector(".chip");
+      if(allChip) allChip.classList.add("selected");
+    });
 
     await loadLibraryResults();
   } catch(err){

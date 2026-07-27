@@ -459,6 +459,22 @@
   .chat-bubble-user{background:var(--primary); color:var(--primary-foreground); border-bottom-right-radius:3px;}
   .chat-bubble-bot{background:#fff; color:var(--ink); border-bottom-left-radius:3px;}
   .chat-bubble-img{width:100%; max-width:220px; border-radius:10px; margin-bottom:6px; display:block;}
+  .scene-illustration-loading{
+    font-size:12.5px; color:var(--muted-foreground,#7b8194); font-style:italic;
+    margin-top:8px; padding:8px 10px; background:var(--background,#fffaf5); border-radius:10px;
+  }
+  .scene-illustration-img{
+    width:100%; max-width:280px; border-radius:14px; margin-top:8px; display:block;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .chat-bubble-formatted p{margin:0 0 8px;}
+  .chat-bubble-formatted p:last-child{margin-bottom:0;}
+  .chat-bubble-formatted ol,.chat-bubble-formatted ul{margin:0 0 8px; padding-left:20px;}
+  .chat-bubble-formatted ol:last-child,.chat-bubble-formatted ul:last-child{margin-bottom:0;}
+  .chat-bubble-formatted li{margin-bottom:6px;}
+  .chat-bubble-formatted li:last-child{margin-bottom:0;}
+  .chat-bubble-formatted strong{font-weight:700; color:var(--terracotta,#e0632f);}
 
   #attachPreviewWrap:empty{display:none;}
   .attach-preview{
@@ -4525,6 +4541,44 @@ function escapeHtml(str){
   return d.innerHTML;
 }
 
+// Lightweight, SAFE markdown renderer for Sarathi's chat replies.
+// Escapes everything first, then applies a small set of formatting
+// transforms — never trusts raw HTML from the AI response.
+function formatChatMessage(text){
+  if(!text) return "";
+  const escaped = escapeHtml(text);
+
+  // Split into blocks on blank lines (paragraph breaks)
+  const blocks = escaped.split(/\n\s*\n/);
+
+  const htmlBlocks = blocks.map(block => {
+    const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
+    if(!lines.length) return "";
+
+    const isNumbered = lines.every(l => /^\d+[\.\)]\s+/.test(l));
+    const isBulleted = lines.every(l => /^[-*•]\s+/.test(l));
+
+    if(isNumbered && lines.length > 1){
+      const items = lines.map(l => `<li>${inlineFormat(l.replace(/^\d+[\.\)]\s+/, ""))}</li>`).join("");
+      return `<ol>${items}</ol>`;
+    }
+    if(isBulleted && lines.length > 1){
+      const items = lines.map(l => `<li>${inlineFormat(l.replace(/^[-*•]\s+/, ""))}</li>`).join("");
+      return `<ul>${items}</ul>`;
+    }
+    // Otherwise treat each line as its own paragraph line, joined with <br>
+    return `<p>${lines.map(inlineFormat).join("<br>")}</p>`;
+  });
+
+  return htmlBlocks.join("");
+}
+
+// Inline formatting within a single line: **bold** only (kept
+// deliberately minimal — anything else passes through as plain text).
+function inlineFormat(line){
+  return line.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+}
+
 const routineState = { child: null, view: "checklist", items: [], completions: new Set() };
 const DAY_LABELS = { MO:"Mon", TU:"Tue", WE:"Wed", TH:"Thu", FR:"Fri", SA:"Sat", SU:"Sun" };
 const DAY_ORDER = ["MO","TU","WE","TH","FR","SA","SU"];
@@ -5090,9 +5144,16 @@ async function fetchAvatarReply(finalize){
     if(finalize){
       handleFinalizeReply(data.reply);
     } else {
-      avatarState.messages.push({ role: "assistant", content: data.reply });
+      const imageMatch = data.reply.match(/\n?\[IMAGE:\s*(.+?)\]\s*$/i);
+      const cleanText = imageMatch ? data.reply.slice(0, imageMatch.index).trim() : data.reply;
+      const newMsg = { role: "assistant", content: cleanText };
+      if(imageMatch) newMsg.imageLoading = true;
+      avatarState.messages.push(newMsg);
       avatarState.lastWarning = data.warning || null;
       renderAvatarChatTurn();
+      if(imageMatch){
+        generateSceneImageForMessage(avatarState.messages.length - 1, imageMatch[1].trim());
+      }
     }
   } catch(err){
     clearInterval(capTimer);
@@ -5104,6 +5165,39 @@ async function fetchAvatarReply(finalize){
       </div>
     `;
     document.getElementById("avatarBackBtn").addEventListener("click", ()=> history.back());
+  }
+}
+
+// Fires automatically after a reply that describes one clear, concrete
+// activity — generates a warm cartoon-style illustration of that moment
+// and attaches it to the message once ready.
+async function generateSceneImageForMessage(msgIndex, description){
+  try{
+    const { data: { session } } = await dash2Client.auth.getSession();
+    if(!session) return;
+    const resp = await fetch(SARATHI_CHAT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + session.access_token
+      },
+      body: JSON.stringify({ mode: "generate_scene_image", sceneDescription: description })
+    });
+    const data = await resp.json();
+    const msg = avatarState.messages[msgIndex];
+    if(!msg) return; // conversation may have moved on already
+    msg.imageLoading = false;
+    if(resp.ok && data.image){
+      msg.imageUrl = data.image;
+    } else {
+      msg.imageFailed = true;
+    }
+    if(document.getElementById("chatScroll")) renderAvatarChatTurn();
+  }catch(err){
+    console.error("Generate scene image error:", err);
+    const msg = avatarState.messages[msgIndex];
+    if(msg){ msg.imageLoading = false; msg.imageFailed = true; }
+    if(document.getElementById("chatScroll")) renderAvatarChatTurn();
   }
 }
 
@@ -5218,7 +5312,9 @@ function renderAvatarChatTurn(){
         ${!isUser ? `<img src="/images/sarathi-avatar.png" alt="" class="chat-avatar-sm" loading="lazy">` : ''}
         <div class="chat-bubble ${isUser ? 'chat-bubble-user' : 'chat-bubble-bot'}">
           ${imagePart ? `<img src="${imagePart.image_url.url}" class="chat-bubble-img" alt="Attached image" loading="lazy">` : ''}
-          ${textContent ? `<span>${escapeHtml(textContent)}</span>` : ''}
+          ${textContent ? (isUser ? `<span>${escapeHtml(textContent)}</span>` : `<div class="chat-bubble-formatted">${formatChatMessage(textContent)}</div>`) : ''}
+          ${m.imageLoading ? `<div class="scene-illustration-loading">🎨 Sketching a little picture for you…</div>` : ''}
+          ${m.imageUrl ? `<img src="${m.imageUrl}" class="scene-illustration-img" alt="Illustration of the activity" loading="lazy">` : ''}
           ${(!isUser && textContent) ? `<button class="speak-btn" data-msg-index="${i}" title="Listen">🔊</button>` : ''}
         </div>
       </div>

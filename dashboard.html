@@ -153,6 +153,13 @@
   .more-menu-desc{font-size:.78rem;color:var(--muted-foreground);margin-top:2px;}
   .more-menu-arrow{color:var(--muted-foreground);font-size:1.1rem;flex-shrink:0;}
 
+  .screening-infographic-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+  .screening-domain-card{background:var(--background);border:1px solid var(--border);border-radius:14px;padding:12px;}
+  .screening-domain-label{font-weight:700;font-size:.82rem;color:var(--ink);margin-bottom:8px;}
+  .screening-domain-bar-track{width:100%;height:8px;border-radius:4px;background:var(--border);overflow:hidden;margin-bottom:8px;}
+  .screening-domain-bar-fill{height:100%;border-radius:4px;transition:width .3s ease;}
+  .screening-domain-note{font-size:.76rem;font-weight:600;line-height:1.3;}
+
   .lc-search{width:100%;padding:12px 16px;border-radius:14px;border:1px solid var(--border);
     font-family:inherit;font-size:.92rem;background:var(--card);color:var(--ink);margin-bottom:14px;box-sizing:border-box;}
   .lc-search:focus{outline:none;border-color:var(--terracotta);}
@@ -3524,44 +3531,76 @@ let prBarChart = null;
 // gives risk scores or clinical classifications, per NeuroSarathi's
 // Trust Charter. Purely surfaces "worth discussing with a professional".
 // ============================================================
-const SCREENING_DOMAINS = ["communication", "motor", "social", "learning"];
+const SCREENING_DOMAINS = ["communication", "motor", "social", "learning", "daily_living", "play"];
 const SCREENING_DOMAIN_LABELS = {
   communication: "Communication",
   motor: "Movement & Coordination",
   social: "Social & Emotional",
-  learning: "Learning & Adapting"
+  learning: "Learning & Adapting",
+  daily_living: "Daily Living Skills",
+  play: "Play Skills"
 };
 const SCREENING_QUESTIONS = {
   under_3: {
-    communication: ["Does your child respond when you call their name?", "Does your child point to show you something interesting?"],
-    motor: ["Does your child sit, crawl, or walk in a way that feels steady for their age?", "Does your child use their hands to explore objects — grasping, banging, passing between hands?"],
-    social: ["Does your child smile back when you smile at them?", "Does your child enjoy simple back-and-forth games like peekaboo?"],
-    learning: ["Does your child explore new objects with curiosity?", "Does your child settle after being comforted when upset?"]
+    communication: ["Does your child respond when you call their name?", "Does your child point to show you something interesting?", "Does your child use gestures (like waving or reaching) to communicate?", "Is your child beginning to say a few words or word-like sounds?"],
+    motor: ["Does your child sit, crawl, or walk in a way that feels steady for their age?", "Does your child use their hands to explore objects — grasping, banging, passing between hands?", "Does your child reach for and pick up small objects?", "Does your child move their arms and legs evenly on both sides?"],
+    social: ["Does your child smile back when you smile at them?", "Does your child enjoy simple back-and-forth games like peekaboo?", "Does your child look at your face when you talk to them?", "Does your child seem to notice when a familiar person leaves the room?"],
+    learning: ["Does your child explore new objects with curiosity?", "Does your child settle after being comforted when upset?", "Does your child seem to understand simple cause-and-effect, like shaking a rattle to make a sound?", "Does your child notice and react to changes in their surroundings?"],
+    daily_living: ["Does your child open their mouth or reach for the spoon during feeding?", "Does your child help a little when being dressed, like pushing an arm through a sleeve?", "Does your child settle into a simple daily rhythm of feeding and sleep most days?"],
+    play: ["Does your child enjoy simple toys like rattles, blocks, or soft toys?", "Does your child bang, shake, or explore toys in different ways?", "Does your child enjoy being read to or shown picture books?"]
   },
   "3_to_5": {
-    communication: ["Can your child follow simple two-step instructions?", "Does your child use short sentences to express what they want?"],
-    motor: ["Can your child run, climb, or use stairs with reasonable balance?", "Can your child hold a crayon or spoon comfortably?"],
-    social: ["Does your child show interest in playing alongside or with other children?", "Does your child show a range of emotions that feel right for the moment?"],
-    learning: ["Does your child stay engaged in an activity for a few minutes at a time?", "Does your child cope with small changes in routine without major distress?"]
+    communication: ["Can your child follow simple two-step instructions?", "Does your child use short sentences to express what they want?", "Does your child ask simple questions, like \"what's that?\"?", "Can unfamiliar adults understand most of what your child says?"],
+    motor: ["Can your child run, climb, or use stairs with reasonable balance?", "Can your child hold a crayon or spoon comfortably?", "Can your child string a few beads or stack several blocks?", "Can your child kick or throw a ball with some control?"],
+    social: ["Does your child show interest in playing alongside or with other children?", "Does your child show a range of emotions that feel right for the moment?", "Does your child make eye contact during conversation or play?", "Does your child take turns some of the time during play?"],
+    learning: ["Does your child stay engaged in an activity for a few minutes at a time?", "Does your child cope with small changes in routine without major distress?", "Does your child solve simple problems, like fitting shapes into a puzzle?", "Does your child ask \"why\" questions to understand things around them?"],
+    daily_living: ["Does your child try to dress or undress with some help?", "Does your child use a spoon or fork to eat independently?", "Is your child working toward using the toilet independently, allowing for typical variation?"],
+    play: ["Does your child enjoy pretend play, like feeding a doll or \"cooking\"?", "Does your child share toys some of the time, with reminders?", "Does your child play near or with other children happily?"]
   },
   "6_to_9": {
-    communication: ["Can your child hold a back-and-forth conversation about their day?", "Does your child understand and follow multi-step instructions?"],
-    motor: ["Can your child manage school tasks like writing, cutting, or buttoning clothes?", "Does your child join in physical play or sport comfortably?"],
-    social: ["Does your child form and maintain friendships?", "Does your child manage frustration in age-appropriate ways?"],
-    learning: ["Can your child focus on schoolwork or a task for a reasonable length of time?", "Does your child adapt reasonably well to changes at school or home?"]
+    communication: ["Can your child hold a back-and-forth conversation about their day?", "Does your child understand and follow multi-step instructions?", "Can your child describe an event that happened earlier in some detail?", "Does your child understand simple jokes or wordplay for their age?"],
+    motor: ["Can your child manage school tasks like writing, cutting, or buttoning clothes?", "Does your child join in physical play or sport comfortably?", "Can your child ride a bike or scooter with growing confidence, allowing for individual pace?", "Does your child use both hands together for tasks like tying shoelaces, with age-appropriate practice?"],
+    social: ["Does your child form and maintain friendships?", "Does your child manage frustration in age-appropriate ways?", "Does your child pick up on other children's feelings some of the time?", "Does your child greet familiar people comfortably?"],
+    learning: ["Can your child focus on schoolwork or a task for a reasonable length of time?", "Does your child adapt reasonably well to changes at school or home?", "Does your child retain and use things they've recently learned?", "Does your child attempt to solve problems before asking for help?"],
+    daily_living: ["Does your child manage most personal hygiene tasks, like brushing teeth or washing hands, independently?", "Does your child dress themselves fully, including buttons or zips?", "Does your child pack their school bag or belongings with minimal reminders?"],
+    play: ["Does your child enjoy games with simple rules, like board games?", "Does your child play cooperatively with peers most of the time?", "Can your child entertain themselves independently for a while?"]
   },
   "10_plus": {
-    communication: ["Does your child communicate their needs and feelings clearly?", "Does your child pick up on social cues in conversations?"],
-    motor: ["Does your child manage everyday physical tasks — writing, sports, self-care — comfortably?", "Does your child move through daily activities without discomfort or difficulty?"],
-    social: ["Does your child maintain friendships and handle social situations comfortably?", "Does your child manage stress or disappointment in healthy ways?"],
-    learning: ["Can your child organise and complete schoolwork fairly independently?", "Does your child adapt well to new or unexpected situations?"]
+    communication: ["Does your child communicate their needs and feelings clearly?", "Does your child pick up on social cues in conversations?", "Can your child explain their thinking or reasoning to others?", "Does your child understand more complex instructions or explanations?"],
+    motor: ["Does your child manage everyday physical tasks — writing, sports, self-care — comfortably?", "Does your child move through daily activities without discomfort or difficulty?", "Does your child take part in physical activities they enjoy fairly regularly?", "Does your child manage tasks needing coordination, like typing or crafts?"],
+    social: ["Does your child maintain friendships and handle social situations comfortably?", "Does your child manage stress or disappointment in healthy ways?", "Does your child navigate group settings, like classroom or team activities, reasonably well?", "Does your child show empathy toward others some of the time?"],
+    learning: ["Can your child organise and complete schoolwork fairly independently?", "Does your child adapt well to new or unexpected situations?", "Does your child apply things they've learned to new situations?", "Does your child persist with a challenging task before giving up?"],
+    daily_living: ["Does your child manage their personal hygiene and self-care independently?", "Does your child take responsibility for some daily routines without reminders, like packing a bag or homework?", "Is your child developing age-appropriate independence in daily tasks?"],
+    play: ["Does your child enjoy structured activities or games with peers?", "Does your child pursue hobbies or interests fairly independently?", "Does your child balance solo time and social time comfortably?"]
   }
 };
 const SCREENING_AGE_LABELS = { under_3: "Under 3 years", "3_to_5": "3–5 years", "6_to_9": "6–9 years", "10_plus": "10 years & up" };
 
 let screeningState = { child: null, ageBand: null, answers: {} };
 
-function renderScreening(child){
+async function renderScreening(child){
+  app.innerHTML = `<div class="card"><div class="loading">Loading your Developmental Check-in…</div></div>`;
+  try{
+    const { data, error } = await dash2Client
+      .from("screening_results")
+      .select("*")
+      .eq("child_id", child.id)
+      .order("completed_at", { ascending: false })
+      .limit(1);
+    if(error) throw error;
+    const latest = (data && data[0]) || null;
+    if(latest){
+      renderScreeningDashboard(child, latest);
+    } else {
+      renderScreeningAgeBandPicker(child);
+    }
+  }catch(err){
+    console.error("Load screening results error:", err);
+    renderScreeningAgeBandPicker(child);
+  }
+}
+
+function renderScreeningAgeBandPicker(child){
   screeningState = { child, ageBand: null, answers: {} };
 
   app.innerHTML = `
@@ -3664,45 +3703,123 @@ async function submitScreening(){
   });
 
   try{
-    const { error } = await dash2Client.from("screening_results").insert({
+    const { data, error } = await dash2Client.from("screening_results").insert({
       child_id: child.id,
       age_band: ageBand,
       answers,
       domain_notes: domainNotes,
       completed_at: new Date().toISOString()
-    });
+    }).select();
     if(error) throw error;
-    renderScreeningSummary(domainNotes);
+    renderScreeningDashboard(child, data[0], true);
   }catch(err){
     errEl.textContent = "Could not save: " + err.message;
   }
 }
 
-function renderScreeningSummary(domainNotes){
-  const { child } = screeningState;
+function screeningStatusColor(note){
+  if(note && note.includes("professional")) return "#e0632f";
+  if(note && note.includes("emerging")) return "#d9a441";
+  return "#2a9d6f";
+}
+
+function screeningInfographicHtml(result){
+  const domains = SCREENING_QUESTIONS[result.age_band];
+  if(!domains) return "";
+  return `
+    <div class="screening-infographic-grid">
+      ${SCREENING_DOMAINS.map(domain => {
+        const qids = domains[domain].map((_, i) => `${domain}_${i}`);
+        const values = qids.map(qid => result.answers[qid]).filter(Boolean);
+        const yesCount = values.filter(v => v === "yes").length;
+        const pct = values.length ? Math.round((yesCount / values.length) * 100) : 0;
+        const note = result.domain_notes[domain] || "";
+        const color = screeningStatusColor(note);
+        return `
+          <div class="screening-domain-card">
+            <div class="screening-domain-label">${SCREENING_DOMAIN_LABELS[domain]}</div>
+            <div class="screening-domain-bar-track"><div class="screening-domain-bar-fill" style="width:${pct}%;background:${color};"></div></div>
+            <div class="screening-domain-note" style="color:${color};">${escapeHtml(note)}</div>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderScreeningDashboard(child, result, justCompleted){
+  const completedDate = new Date(result.completed_at);
+  const now = new Date();
+  const daysSince = Math.floor((now - completedDate) / (1000*60*60*24));
+  const cooldownDays = 30;
+  const canRetake = daysSince >= cooldownDays;
+  const nextEligibleDate = new Date(completedDate.getTime() + cooldownDays*24*60*60*1000);
+  const nextEligibleLabel = nextEligibleDate.toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' });
+  const nextFocus = new Set(result.next_focus_areas || []);
 
   app.innerHTML = `
     <div class="card">
       <div class="card-head">
         <div class="card-icon terracotta">🌱</div>
-        <h1 style="margin:0;">${escapeHtml(child.display_name)}'s summary</h1>
+        <h1 style="margin:0;">${justCompleted ? "Thanks! Here's" : "Here's"} ${escapeHtml(child.display_name)}'s summary</h1>
       </div>
       <p>This is an awareness summary, not a diagnosis. Many of these areas are completely typical to still be developing — the goal is simply to help you have a clearer conversation with a professional if you'd like one.</p>
-      ${SCREENING_DOMAINS.map(domain => `
-        <div style="margin:16px 0;padding-top:14px;border-top:1px solid var(--border);">
-          <p style="font-weight:700;font-size:.92rem;margin-bottom:4px;">${SCREENING_DOMAIN_LABELS[domain]}</p>
-          <p style="font-size:.88rem;color:var(--ink-soft);margin:0;">${escapeHtml(domainNotes[domain])}</p>
+      <p style="font-size:.78rem;color:var(--muted-foreground, #7b8194);margin-top:4px;">Completed ${completedDate.toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' })}</p>
+
+      ${screeningInfographicHtml(result)}
+
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+        <label>What would you like to focus on for the next 3 months?</label>
+        <div class="chip-grid" id="screeningFocusGrid">
+          ${PARENT_GOALS_OPTIONS.map(g => `<div class="chip ${nextFocus.has(g)?'selected':''}" data-val="${escapeHtml(g)}">${g}</div>`).join("")}
         </div>
-      `).join("")}
+        <button class="btn small secondary" id="screeningSaveFocusBtn" style="margin-top:10px;">Save focus</button>
+        <span id="screeningFocusSavedMsg" style="font-size:.8rem;color:#2a9d6f;margin-left:8px;"></span>
+      </div>
+
       <div class="row" style="margin-top:20px;">
         <button class="btn" id="screeningFindProBtn">Find a professional to discuss this →</button>
+        <button class="btn secondary" id="screeningRetakeBtn">Retake Check-in</button>
         <button class="btn secondary" id="screeningDoneBtn">Back to dashboard</button>
       </div>
+      ${!canRetake ? `<p style="font-size:.8rem;color:var(--muted-foreground, #7b8194);margin-top:10px;">Your next check-in will be available on ${nextEligibleLabel}.</p>` : ""}
     </div>
   `;
 
+  document.querySelectorAll("#screeningFocusGrid .chip").forEach(chip=>{
+    chip.addEventListener("click", ()=>{
+      const val = chip.dataset.val;
+      if(nextFocus.has(val)){ nextFocus.delete(val); chip.classList.remove("selected"); }
+      else{ nextFocus.add(val); chip.classList.add("selected"); }
+    });
+  });
+
+  document.getElementById("screeningSaveFocusBtn").addEventListener("click", async ()=>{
+    const btn = document.getElementById("screeningSaveFocusBtn");
+    const msg = document.getElementById("screeningFocusSavedMsg");
+    btn.disabled = true; btn.textContent = "Saving...";
+    try{
+      const { error } = await dash2Client.from("screening_results").update({ next_focus_areas: [...nextFocus] }).eq("id", result.id);
+      if(error) throw error;
+      msg.textContent = "✓ Saved";
+      setTimeout(()=>{ if(msg) msg.textContent = ""; }, 2000);
+    }catch(err){
+      msg.style.color = "#c0392b";
+      msg.textContent = "Couldn't save — try again.";
+    }finally{
+      btn.disabled = false; btn.textContent = "Save focus";
+    }
+  });
+
   document.getElementById("screeningFindProBtn").addEventListener("click", ()=> navigateTo("renderProfessionals", child));
   document.getElementById("screeningDoneBtn").addEventListener("click", ()=> history.back());
+  document.getElementById("screeningRetakeBtn").addEventListener("click", ()=>{
+    if(canRetake){
+      renderScreeningAgeBandPicker(child);
+    } else {
+      alert(`You've already completed a check-in recently. Your next one will be available on ${nextEligibleLabel}.`);
+    }
+  });
 }
 
 // ============================================================
@@ -3802,6 +3919,12 @@ async function renderProgressReport(child){
         <span class="chip" data-range="month">Last 30 days</span>
       </div>
       <div id="progressReportResults"><div class="loading">Loading report…</div></div>
+
+      <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:10px;">🌱 Developmental Check-in</div>
+        <div id="progressScreeningMount"><div class="loading">Loading…</div></div>
+      </div>
+
       <button class="btn secondary" id="progressReportBackBtn" style="margin-top:16px;">Back to dashboard</button>
     </div>
   `;
@@ -3817,6 +3940,39 @@ async function renderProgressReport(child){
   });
 
   await loadProgressReport();
+  await loadProgressScreeningSection(child);
+}
+
+async function loadProgressScreeningSection(child){
+  const mount = document.getElementById("progressScreeningMount");
+  if(!mount) return;
+  try{
+    const { data, error } = await dash2Client
+      .from("screening_results")
+      .select("*")
+      .eq("child_id", child.id)
+      .order("completed_at", { ascending: false })
+      .limit(1);
+    if(error) throw error;
+    const latest = (data && data[0]) || null;
+    if(!latest){
+      mount.innerHTML = `
+        <p style="font-size:.88rem;color:var(--muted-foreground, #7b8194);">You haven't done a Developmental Check-in for ${escapeHtml(child.display_name)} yet.</p>
+        <button class="btn small" id="progressStartScreeningBtn" style="margin-top:6px;">Start Check-in</button>
+      `;
+      document.getElementById("progressStartScreeningBtn").addEventListener("click", ()=> navigateTo("renderScreening", child));
+      return;
+    }
+    mount.innerHTML = `
+      <p style="font-size:.78rem;color:var(--muted-foreground, #7b8194);margin-bottom:2px;">Last completed ${new Date(latest.completed_at).toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' })}</p>
+      ${screeningInfographicHtml(latest)}
+      <button class="btn small secondary" id="progressViewScreeningBtn" style="margin-top:12px;">View full summary →</button>
+    `;
+    document.getElementById("progressViewScreeningBtn").addEventListener("click", ()=> navigateTo("renderScreening", child));
+  }catch(err){
+    console.error("Load progress screening section error:", err);
+    mount.innerHTML = `<p style="font-size:.85rem;color:#c0392b;">Couldn't load check-in data.</p>`;
+  }
 }
 
 async function loadProgressReport(){

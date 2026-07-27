@@ -593,18 +593,56 @@ const dash2Client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const SARATHI_CHAT_URL = SUPABASE_URL + "/functions/v1/sarathi-chat";
 
 const FOCUS_OPTIONS = [
+  // Existing keys kept exactly as-is so Activities/Milestones/Progress
+  // Report keep working — only display labels are softened.
   {key:"communication", label:"Communication", category:"skill"},
-  {key:"routines", label:"Routines", category:"skill"},
-  {key:"focus", label:"Focus", category:"skill"},
-  {key:"social_play", label:"Social Play", category:"skill"},
-  {key:"big_emotions", label:"Big Emotions", category:"skill"},
+  {key:"routines", label:"Daily Routines", category:"skill"},
+  {key:"focus", label:"Focus & Attention", category:"skill"},
+  {key:"social_play", label:"Social Skills", category:"skill"},
+  {key:"big_emotions", label:"Emotional Regulation", category:"skill"},
   {key:"school_readiness", label:"School Readiness", category:"skill"},
+  {key:"reading", label:"Reading", category:"skill"},
+  {key:"writing", label:"Writing", category:"skill"},
+  {key:"mathematics", label:"Mathematics", category:"skill"},
+  {key:"independent_living", label:"Independent Living Skills", category:"skill"},
+  {key:"play_skills", label:"Play Skills", category:"skill"},
+  {key:"life_skills", label:"Life Skills", category:"skill"},
+  {key:"confidence_building", label:"Confidence Building", category:"skill"},
+  // These 5 keep their original wording deliberately — they're the
+  // shared vocabulary matched against professional/caregiver
+  // specialization tags in Find Support. Don't rename or remove.
   {key:"speech_delay", label:"Speech Delay", category:"concern"},
   {key:"sensory_processing", label:"Sensory Processing", category:"concern"},
   {key:"fine_motor_delay", label:"Fine Motor Delay", category:"concern"},
   {key:"gross_motor_delay", label:"Gross Motor Delay", category:"concern"},
-  {key:"feeding_difficulties", label:"Feeding Difficulties", category:"concern"}
+  {key:"feeding_difficulties", label:"Feeding Difficulties", category:"concern"},
+  // New, softer-language options sitting alongside the above.
+  {key:"speaking", label:"Speaking", category:"concern"},
+  {key:"understanding_instructions", label:"Understanding Instructions", category:"concern"},
+  {key:"following_routines", label:"Following Routines", category:"concern"},
+  {key:"managing_emotions", label:"Managing Emotions", category:"concern"},
+  {key:"making_friends", label:"Making Friends", category:"concern"},
+  {key:"classroom_learning", label:"Classroom Learning", category:"concern"},
+  {key:"homework_support", label:"Homework", category:"concern"},
+  {key:"fine_motor_skills", label:"Fine Motor Skills", category:"concern"},
+  {key:"gross_motor_skills", label:"Gross Motor Skills", category:"concern"},
+  {key:"self_care_skills", label:"Self-care Skills", category:"concern"},
+  {key:"confidence_support", label:"Confidence", category:"concern"},
+  {key:"attention_support", label:"Attention", category:"concern"},
+  {key:"listening_skills", label:"Listening Skills", category:"concern"},
+  {key:"problem_solving", label:"Problem Solving", category:"concern"}
 ];
+
+// ─── New Child Profile wizard option lists ───
+const LEARNING_JOURNEY_OPTIONS = ["Early Learner","Learns Differently","Needs Extra Support","Autism","ADHD","Dyslexia","Down Syndrome","Intellectual Disability","Not Sure Yet","Prefer Not to Say"];
+const STRENGTHS_OPTIONS = ["Loves Music","Loves Stories","Creative","Curious","Good Memory","Loves Drawing","Enjoys Nature","Enjoys Puzzles","Active","Loves Numbers","Good Observer","Friendly","Loves Building Things"];
+const INTERESTS_OPTIONS = ["Animals","Cars","Dinosaurs","Space","Music","Art","Drawing","Technology","Nature","Cooking","Sports","Dance","Cartoons","Science","Building Blocks","Travel"];
+const LEARNING_PREFERENCES_OPTIONS = ["Picture-based","Videos","Hands-on Activities","Stories","Music","Games","Outdoor Activities","Movement Based Activities","Worksheets","Short Activities (5–10 min)","Longer Activities (15–20 min)"];
+const PARENT_GOALS_OPTIONS = ["Better Communication","Improve Focus","Enjoy Learning","Follow Daily Routine","Become More Independent","Build Confidence","Improve Social Skills","School Readiness","Learn New Skills","Develop Good Habits"];
+const PREFERRED_LANGUAGE_OPTIONS = ["English","Hindi","Tamil","Telugu","Kannada","Bengali","Marathi","Gujarati","Punjabi","Malayalam","Other"];
+const SCHOOL_GRADE_OPTIONS = ["Pre-school","LKG","UKG","Class 1","Class 2","Class 3","Class 4","Class 5","Class 6","Class 7","Class 8","Class 9","Class 10","Class 11","Class 12"];
+const DAILY_LEARNING_TIME_OPTIONS = ["5 minutes","10 minutes","20 minutes","30+ minutes"];
+const REMINDER_TIME_OPTIONS = ["Morning","Afternoon","Evening","No Reminder"];
 
 const app = document.getElementById("app");
 let currentUser = null;
@@ -700,188 +738,361 @@ function updateAvatarFab(){
   fab.style.display = currentChild ? "block" : "none";
 }
 
-function renderAddChildForm(prefill){
+// ─── Child Profile Wizard ───
+let childWizardState = null;
+
+function calcAgeFromDOB(dobStr){
+  if(!dobStr) return null;
+  const dob = new Date(dobStr);
+  if(isNaN(dob.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const m = today.getMonth() - dob.getMonth();
+  if(m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+  return age >= 0 ? age : null;
+}
+
+function initChildWizard(prefill){
   const p = prefill || {};
-  const selected = new Set(p.focus_areas || []);
-  const isFirstEver = !p.id && allChildren.length === 0;
-  const initialFit = p.photo_fit || "cover";
-  const initialZoom = p.photo_zoom || 130;
-  const initialFocusY = (p.photo_focus_y !== undefined && p.photo_focus_y !== null) ? p.photo_focus_y : 30;
+  const allFocus = new Set(p.focus_areas || []);
+  childWizardState = {
+    id: p.id || null,
+    isFirstEver: !p.id && allChildren.length === 0,
+    step: 1,
+    photoFile: null,
+    photoFit: p.photo_fit || "cover",
+    photoZoom: p.photo_zoom || 130,
+    photoFocusY: (p.photo_focus_y !== undefined && p.photo_focus_y !== null) ? p.photo_focus_y : 30,
+    photoPreviewUrl: null,
+    photoPath: p.photo_path || null,
+    name: p.display_name || "",
+    dob: p.date_of_birth || "",
+    ageFallback: p.age != null ? p.age : null,
+    gender: p.biological_sex || "unknown",
+    preferredLanguage: p.preferred_language || "",
+    schoolGrade: p.school_grade || "",
+    learningGoals: new Set(FOCUS_OPTIONS.filter(o=>o.category==="skill" && allFocus.has(o.key)).map(o=>o.key)),
+    learningJourney: new Set(p.learning_journey || []),
+    strengths: new Set(p.strengths || []),
+    interests: new Set(p.interests || []),
+    learningPreferences: new Set(p.learning_preferences || []),
+    supportAreas: new Set(FOCUS_OPTIONS.filter(o=>o.category==="concern" && allFocus.has(o.key)).map(o=>o.key)),
+    foodNotes: p.food_notes || "",
+    dietType: p.diet_type || "veg",
+    parentGoals: new Set(p.parent_goals || []),
+    dailyLearningMinutes: p.daily_learning_minutes || "",
+    reminderTime: p.reminder_time || "",
+  };
+}
 
-  app.innerHTML = `
-    <div class="card">
-      ${isFirstEver ? '<img src="/images/sarathi-avatar.png" alt="Sarathi Avatar" class="empty-illustration" loading="lazy">' : ''}
-      <h1 style="${isFirstEver ? 'text-align:center;' : ''}">${p.id ? "Edit your child's info" : "Let's add your child"}</h1>
-      <p style="${isFirstEver ? 'text-align:center;' : ''}">Just a few details so we can guide you with the right ideas each day.</p>
+function wizChipGridHtml(gridId, options, selectedSet, isKeyValue){
+  return `<div class="chip-grid" id="${gridId}">
+    ${options.map(o => {
+      const key = isKeyValue ? o.key : o;
+      const label = isKeyValue ? o.label : o;
+      return `<div class="chip ${selectedSet.has(key)?'selected':''}" data-val="${escapeHtml(key)}">${escapeHtml(label)}</div>`;
+    }).join("")}
+  </div>`;
+}
 
-      <label for="cPhoto">Photo (used as their banner)</label>
-      <input type="file" id="cPhoto" accept="image/*">
-      <div id="photoCropSection" style="display:none;margin-top:12px;">
-        <div id="photoPreviewBox" style="width:100%;aspect-ratio:3/1.1;border-radius:16px;overflow:hidden;
-          background:oklch(0.3 0.03 265);background-size:cover;background-position:50% 30%;
-          border:1px solid var(--border);"></div>
-
-        <label style="margin-top:12px;">How should it be shown?</label>
-        <div class="chip-grid">
-          <div class="chip crop-fit-chip ${initialFit==='cover'?'selected':''}" data-fit="cover">Zoom to face</div>
-          <div class="chip crop-fit-chip ${initialFit==='contain'?'selected':''}" data-fit="contain">Show full photo</div>
-        </div>
-
-        <div id="zoomControls" style="${initialFit==='contain' ? 'display:none;' : ''}">
-          <label for="cZoom">Zoom</label>
-          <input type="range" id="cZoom" min="100" max="220" value="${initialZoom}" style="width:100%;">
-
-          <label for="cFocusY">Vertical position</label>
-          <input type="range" id="cFocusY" min="0" max="100" value="${initialFocusY}" style="width:100%;">
-        </div>
-      </div>
-
-      <label for="cName">Child's name</label>
-      <input type="text" id="cName" value="${p.display_name ? escapeHtml(p.display_name) : ""}" placeholder="e.g. Aarav">
-
-      <label for="cAge">Age (years)</label>
-      <input type="number" id="cAge" min="0" max="18" value="${p.age !== undefined && p.age !== null ? p.age : ""}" placeholder="e.g. 4">
-
-      <label for="cGender">Gender (optional)</label>
-      <select id="cGender">
-        <option value="unknown" ${!p.biological_sex || p.biological_sex==='unknown' ? 'selected':''}>Prefer not to say</option>
-        <option value="M" ${p.biological_sex==='M' ? 'selected':''}>Male</option>
-        <option value="F" ${p.biological_sex==='F' ? 'selected':''}>Female</option>
-        <option value="I" ${p.biological_sex==='I' ? 'selected':''}>Intersex</option>
-      </select>
-
-      <label>What would you like help nurturing?</label>
-      <div class="chip-grid" id="focusGrid">
-        ${FOCUS_OPTIONS.filter(o=>o.category==='skill').map(o => `<div class="chip ${selected.has(o.key)?'selected':''}" data-key="${o.key}">${o.label}</div>`).join("")}
-      </div>
-      <label style="margin-top:10px;font-size:.85rem;color:var(--muted-foreground, #7b8194);">Any specific concerns? (optional)</label>
-      <div class="chip-grid" id="focusGridConcerns">
-        ${FOCUS_OPTIONS.filter(o=>o.category==='concern').map(o => `<div class="chip ${selected.has(o.key)?'selected':''}" data-key="${o.key}">${o.label}</div>`).join("")}
-      </div>
-
-      <label for="cFoodNotes">Food sensitivities or preferences (optional)</label>
-      <textarea id="cFoodNotes" rows="2" placeholder="e.g. avoids dairy, prefers soft textures, no nuts">${p.food_notes ? escapeHtml(p.food_notes) : ""}</textarea>
-
-      <label>Diet type</label>
-      <div class="chip-grid" id="dietTypeGrid" style="margin-bottom:14px;">
-        <div class="chip ${(p.diet_type||'veg')==='veg'?'selected':''}" data-diet="veg">🥦 Vegetarian</div>
-        <div class="chip ${p.diet_type==='eggetarian'?'selected':''}" data-diet="eggetarian">🥚 Eggetarian</div>
-        <div class="chip ${p.diet_type==='non_veg'?'selected':''}" data-diet="non_veg">🍗 Non-vegetarian</div>
-      </div>
-
-      <div id="formError" class="error"></div>
-      <button class="btn" id="saveChildBtn">${p.id ? "Save changes" : "Add my child"}</button>
-      ${(p.id || (allChildren.length > 0 && currentChild)) ? '<button class="btn secondary" id="cancelEditBtn">Cancel</button>' : ''}
-    </div>
-  `;
-
-  document.querySelectorAll("#focusGrid .chip, #focusGridConcerns .chip").forEach(chip=>{
-    chip.addEventListener("click", ()=> chip.classList.toggle("selected"));
-  });
-  document.querySelectorAll("#dietTypeGrid .chip").forEach(chip=>{
+function wizAttachMultiChip(gridId, selectedSet){
+  document.querySelectorAll(`#${gridId} .chip`).forEach(chip=>{
     chip.addEventListener("click", ()=>{
-      document.querySelectorAll("#dietTypeGrid .chip").forEach(c=>c.classList.remove("selected"));
-      chip.classList.add("selected");
+      const val = chip.dataset.val;
+      if(selectedSet.has(val)){ selectedSet.delete(val); chip.classList.remove("selected"); }
+      else{ selectedSet.add(val); chip.classList.add("selected"); }
     });
   });
+}
 
-  let currentPhotoUrl = null;
+function wizAttachSingleChip(gridId, onSelect){
+  document.querySelectorAll(`#${gridId} .chip`).forEach(chip=>{
+    chip.addEventListener("click", ()=>{
+      document.querySelectorAll(`#${gridId} .chip`).forEach(c=>c.classList.remove("selected"));
+      chip.classList.add("selected");
+      onSelect(chip.dataset.val);
+    });
+  });
+}
 
-  function updateCropPreview(){
-    const box = document.getElementById("photoPreviewBox");
-    if(!box || !currentPhotoUrl) return;
-    const fit = document.querySelector(".crop-fit-chip.selected")?.dataset.fit || "cover";
-    if(fit === "contain"){
-      box.style.backgroundImage = `url('${currentPhotoUrl}')`;
-      box.style.backgroundSize = "contain";
-      box.style.backgroundPosition = "center";
-      box.style.backgroundColor = "oklch(0.3 0.03 265)";
-    } else {
-      const zoom = document.getElementById("cZoom").value;
-      const focusY = document.getElementById("cFocusY").value;
-      box.style.backgroundImage = `url('${currentPhotoUrl}')`;
-      box.style.backgroundSize = zoom + "%";
-      box.style.backgroundPosition = `50% ${focusY}%`;
-      box.style.backgroundColor = "transparent";
-    }
-  }
+function renderChildWizardShell(stepTitle, stepSubtitle, stepBodyHtml, stepNum){
+  const totalSteps = 4;
+  const stepLabels = ["Basic Details","Learning Goals","Strengths & Interests","Personalisation"];
+  const s = childWizardState;
+  app.innerHTML = `
+    <div class="card">
+      ${s.isFirstEver ? '<img src="/images/sarathi-avatar.png" alt="Sarathi Avatar" class="empty-illustration" loading="lazy">' : ''}
+      <div style="display:flex;gap:6px;margin-bottom:14px;">
+        ${[1,2,3,4].map(n => `<div style="flex:1;height:6px;border-radius:3px;background:${n <= stepNum ? 'var(--primary)' : 'var(--border)'};"></div>`).join("")}
+      </div>
+      <div style="font-size:.75rem;font-weight:800;color:var(--muted-foreground, #7b8194);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Step ${stepNum} of ${totalSteps} · ${stepLabels[stepNum-1]}</div>
+      <h1 style="margin-top:2px;">${stepTitle}</h1>
+      ${stepSubtitle ? `<p>${stepSubtitle}</p>` : ""}
+      ${stepBodyHtml}
+      <div id="wizardFormError" class="error"></div>
+      <div style="display:flex;gap:10px;margin-top:18px;">
+        ${stepNum > 1 ? '<button class="btn secondary" id="wizBackBtn" style="flex:1;">← Back</button>' : ((s.id || (allChildren.length > 0 && currentChild)) ? '<button class="btn secondary" id="wizCancelBtn" style="flex:1;">Cancel</button>' : '')}
+        <button class="btn" id="wizNextBtn" style="flex:2;">${stepNum < totalSteps ? "Next →" : (s.id ? "Save changes" : "Add my child")}</button>
+      </div>
+    </div>
+  `;
+  const backBtn = document.getElementById("wizBackBtn");
+  if(backBtn) backBtn.addEventListener("click", ()=> renderChildWizardStep(stepNum - 1));
+  const cancelBtn = document.getElementById("wizCancelBtn");
+  if(cancelBtn) cancelBtn.addEventListener("click", ()=> history.back());
+}
+
+function renderChildWizardStep(step){
+  childWizardState.step = step;
+  if(step === 1) return renderWizardStep1();
+  if(step === 2) return renderWizardStep2();
+  if(step === 3) return renderWizardStep3();
+  return renderWizardStep4();
+}
+
+function renderWizardStep1(){
+  const s = childWizardState;
+  const body = `
+    <label for="cPhoto">Photo (used as their banner)</label>
+    <input type="file" id="cPhoto" accept="image/*">
+    <div id="photoCropSection" style="display:none;margin-top:12px;">
+      <div id="photoPreviewBox" style="width:100%;aspect-ratio:3/1.1;border-radius:16px;overflow:hidden;
+        background:oklch(0.3 0.03 265);background-size:cover;background-position:50% 30%;
+        border:1px solid var(--border);"></div>
+      <label style="margin-top:12px;">How should it be shown?</label>
+      <div class="chip-grid">
+        <div class="chip crop-fit-chip ${s.photoFit==='cover'?'selected':''}" data-fit="cover">Zoom to face</div>
+        <div class="chip crop-fit-chip ${s.photoFit==='contain'?'selected':''}" data-fit="contain">Show full photo</div>
+      </div>
+      <div id="zoomControls" style="${s.photoFit==='contain' ? 'display:none;' : ''}">
+        <label for="cZoom">Zoom</label>
+        <input type="range" id="cZoom" min="100" max="220" value="${s.photoZoom}" style="width:100%;">
+        <label for="cFocusY">Vertical position</label>
+        <input type="range" id="cFocusY" min="0" max="100" value="${s.photoFocusY}" style="width:100%;">
+      </div>
+    </div>
+
+    <label for="cName">Child's name</label>
+    <input type="text" id="cName" value="${escapeHtml(s.name)}" placeholder="e.g. Aarav">
+
+    <label for="cDob">Date of birth</label>
+    <input type="date" id="cDob" value="${s.dob || ""}" max="${new Date().toISOString().split("T")[0]}">
+    <div id="cAgeDisplay" style="font-size:.82rem;color:var(--muted-foreground, #7b8194);margin:4px 0 14px;">${(() => {
+      const a = calcAgeFromDOB(s.dob);
+      return a != null ? `Age: ${a} years` : (s.ageFallback != null ? `Age: ${s.ageFallback} years (add date of birth to auto-update)` : "");
+    })()}</div>
+
+    <label for="cGender">Gender (optional)</label>
+    <select id="cGender">
+      <option value="unknown" ${s.gender==='unknown' ? 'selected':''}>Prefer not to say</option>
+      <option value="M" ${s.gender==='M' ? 'selected':''}>Male</option>
+      <option value="F" ${s.gender==='F' ? 'selected':''}>Female</option>
+      <option value="I" ${s.gender==='I' ? 'selected':''}>Intersex</option>
+    </select>
+
+    <label for="cLanguage">Preferred language</label>
+    <select id="cLanguage">
+      <option value="">Select a language</option>
+      ${PREFERRED_LANGUAGE_OPTIONS.map(l => `<option value="${l}" ${s.preferredLanguage===l?'selected':''}>${l}</option>`).join("")}
+    </select>
+
+    <label for="cGrade">School grade (optional)</label>
+    <select id="cGrade">
+      <option value="">Select a grade</option>
+      ${SCHOOL_GRADE_OPTIONS.map(g => `<option value="${g}" ${s.schoolGrade===g?'selected':''}>${g}</option>`).join("")}
+    </select>
+  `;
+  renderChildWizardShell("Let's start with the basics", "Just a few details so we can guide you with the right ideas each day.", body, 1);
 
   document.querySelectorAll(".crop-fit-chip").forEach(chip=>{
     chip.addEventListener("click", ()=>{
       document.querySelectorAll(".crop-fit-chip").forEach(c=>c.classList.remove("selected"));
       chip.classList.add("selected");
+      s.photoFit = chip.dataset.fit;
       document.getElementById("zoomControls").style.display = chip.dataset.fit === "contain" ? "none" : "block";
-      updateCropPreview();
+      updateWizardCropPreview();
     });
   });
-  document.getElementById("cZoom").addEventListener("input", updateCropPreview);
-  document.getElementById("cFocusY").addEventListener("input", updateCropPreview);
+  document.getElementById("cZoom").addEventListener("input", (e)=>{ s.photoZoom = parseFloat(e.target.value); updateWizardCropPreview(); });
+  document.getElementById("cFocusY").addEventListener("input", (e)=>{ s.photoFocusY = parseFloat(e.target.value); updateWizardCropPreview(); });
 
-  if(p.id && p.photo_path){
-    getChildPhotoUrl(p).then(url=>{
+  if(s.id && s.photoPath){
+    getChildPhotoUrl({ photo_path: s.photoPath }).then(url=>{
       if(url){
-        currentPhotoUrl = url;
+        s.photoPreviewUrl = url;
         document.getElementById("photoCropSection").style.display = "block";
-        updateCropPreview();
+        updateWizardCropPreview();
       }
     });
+  } else if(s.photoPreviewUrl){
+    document.getElementById("photoCropSection").style.display = "block";
+    updateWizardCropPreview();
   }
 
   document.getElementById("cPhoto").addEventListener("change", (e)=>{
     const file = e.target.files[0];
     if(!file) return;
+    s.photoFile = file;
     const reader = new FileReader();
     reader.onload = (ev)=>{
-      currentPhotoUrl = ev.target.result;
+      s.photoPreviewUrl = ev.target.result;
       document.getElementById("photoCropSection").style.display = "block";
-      updateCropPreview();
+      updateWizardCropPreview();
     };
     reader.readAsDataURL(file);
   });
 
-  document.getElementById("saveChildBtn").addEventListener("click", ()=> saveChild(p.id));
-  const cancelBtn = document.getElementById("cancelEditBtn");
-  if(cancelBtn) cancelBtn.addEventListener("click", ()=> history.back());
+  document.getElementById("cDob").addEventListener("input", (e)=>{
+    s.dob = e.target.value;
+    const a = calcAgeFromDOB(s.dob);
+    document.getElementById("cAgeDisplay").textContent = a != null ? `Age: ${a} years` : "";
+  });
+
+  document.getElementById("wizNextBtn").addEventListener("click", ()=>{
+    s.name = document.getElementById("cName").value.trim();
+    s.gender = document.getElementById("cGender").value;
+    s.preferredLanguage = document.getElementById("cLanguage").value;
+    s.schoolGrade = document.getElementById("cGrade").value;
+    const errEl = document.getElementById("wizardFormError");
+    if(!s.name){ errEl.textContent = "Please enter your child's name."; return; }
+    renderChildWizardStep(2);
+  });
 }
 
-async function saveChild(existingId){
-  const name = document.getElementById("cName").value.trim();
-  const ageVal = document.getElementById("cAge").value;
-  const gender = document.getElementById("cGender").value;
-  const focus = Array.from(document.querySelectorAll("#focusGrid .chip.selected, #focusGridConcerns .chip.selected")).map(c=>c.dataset.key);
-  const foodNotes = document.getElementById("cFoodNotes") ? document.getElementById("cFoodNotes").value.trim() : "";
-  const dietTypeEl = document.querySelector("#dietTypeGrid .chip.selected");
-  const dietType = dietTypeEl ? dietTypeEl.dataset.diet : "veg";
-  const photoFile = document.getElementById("cPhoto").files[0];
-  const cropFit = document.querySelector(".crop-fit-chip.selected")?.dataset.fit || "cover";
-  const cropZoom = document.getElementById("cZoom") ? parseFloat(document.getElementById("cZoom").value) : 130;
-  const cropFocusY = document.getElementById("cFocusY") ? parseFloat(document.getElementById("cFocusY").value) : 30;
-  const errEl = document.getElementById("formError");
-
-  if(!name){
-    errEl.textContent = "Please enter your child's name.";
-    return;
+function updateWizardCropPreview(){
+  const box = document.getElementById("photoPreviewBox");
+  const s = childWizardState;
+  if(!box || !s.photoPreviewUrl) return;
+  if(s.photoFit === "contain"){
+    box.style.backgroundImage = `url('${s.photoPreviewUrl}')`;
+    box.style.backgroundSize = "contain";
+    box.style.backgroundPosition = "center";
+    box.style.backgroundColor = "oklch(0.3 0.03 265)";
+  } else {
+    box.style.backgroundImage = `url('${s.photoPreviewUrl}')`;
+    box.style.backgroundSize = s.photoZoom + "%";
+    box.style.backgroundPosition = `50% ${s.photoFocusY}%`;
+    box.style.backgroundColor = "transparent";
   }
+}
 
-  const saveBtn = document.getElementById("saveChildBtn");
+function renderWizardStep2(){
+  const s = childWizardState;
+  const body = `
+    <label>What would you like NeuroSarathi to help with?</label>
+    ${wizChipGridHtml("wizLearningGoals", FOCUS_OPTIONS.filter(o=>o.category==="skill"), s.learningGoals, true)}
+
+    <label style="margin-top:16px;">Tell us about your child's learning journey (optional)</label>
+    ${wizChipGridHtml("wizLearningJourney", LEARNING_JOURNEY_OPTIONS, s.learningJourney, false)}
+    <div style="font-size:.8rem;color:var(--muted-foreground, #7b8194);margin-top:6px;">This helps us personalise learning recommendations. NeuroSarathi does not provide diagnosis or medical advice.</div>
+  `;
+  renderChildWizardShell("What matters most right now?", "", body, 2);
+  wizAttachMultiChip("wizLearningGoals", s.learningGoals);
+  wizAttachMultiChip("wizLearningJourney", s.learningJourney);
+  document.getElementById("wizNextBtn").addEventListener("click", ()=> renderChildWizardStep(3));
+}
+
+function renderWizardStep3(){
+  const s = childWizardState;
+  const body = `
+    <label>😊 My child's strengths</label>
+    ${wizChipGridHtml("wizStrengths", STRENGTHS_OPTIONS, s.strengths, false)}
+
+    <label style="margin-top:16px;">Interests</label>
+    ${wizChipGridHtml("wizInterests", INTERESTS_OPTIONS, s.interests, false)}
+
+    <label style="margin-top:16px;">How does your child enjoy learning?</label>
+    ${wizChipGridHtml("wizLearningPrefs", LEARNING_PREFERENCES_OPTIONS, s.learningPreferences, false)}
+  `;
+  renderChildWizardShell("Every child has a spark", "We use this to personalise activities and content around what your child already loves.", body, 3);
+  wizAttachMultiChip("wizStrengths", s.strengths);
+  wizAttachMultiChip("wizInterests", s.interests);
+  wizAttachMultiChip("wizLearningPrefs", s.learningPreferences);
+  document.getElementById("wizNextBtn").addEventListener("click", ()=> renderChildWizardStep(4));
+}
+
+function renderWizardStep4(){
+  const s = childWizardState;
+  const body = `
+    <label>Areas where you'd like more support (optional)</label>
+    ${wizChipGridHtml("wizSupportAreas", FOCUS_OPTIONS.filter(o=>o.category==="concern"), s.supportAreas, true)}
+
+    <label for="cFoodNotes" style="margin-top:16px;">Food preferences (optional)</label>
+    <textarea id="cFoodNotes" rows="2" placeholder="My child enjoys fruits, dislikes spicy food, prefers soft textures…">${escapeHtml(s.foodNotes)}</textarea>
+
+    <label>Diet type</label>
+    <div class="chip-grid" id="wizDietType" style="margin-bottom:14px;">
+      <div class="chip ${s.dietType==='veg'?'selected':''}" data-val="veg">🥦 Vegetarian</div>
+      <div class="chip ${s.dietType==='eggetarian'?'selected':''}" data-val="eggetarian">🥚 Eggetarian</div>
+      <div class="chip ${s.dietType==='non_veg'?'selected':''}" data-val="non_veg">🍗 Non-vegetarian</div>
+      <div class="chip ${s.dietType==='vegan'?'selected':''}" data-val="vegan">🌱 Vegan</div>
+      <div class="chip ${s.dietType==='jain'?'selected':''}" data-val="jain">🙏 Jain</div>
+    </div>
+
+    <label>What would you like your child to achieve over the next 3 months?</label>
+    ${wizChipGridHtml("wizParentGoals", PARENT_GOALS_OPTIONS, s.parentGoals, false)}
+
+    <label style="margin-top:16px;">How much time can you spend with your child each day?</label>
+    <div class="chip-grid" id="wizDailyTime">
+      ${DAILY_LEARNING_TIME_OPTIONS.map(t => `<div class="chip ${s.dailyLearningMinutes===t?'selected':''}" data-val="${t}">${t}</div>`).join("")}
+    </div>
+
+    <label style="margin-top:14px;">Preferred reminder</label>
+    <div class="chip-grid" id="wizReminder">
+      ${REMINDER_TIME_OPTIONS.map(t => `<div class="chip ${s.reminderTime===t?'selected':''}" data-val="${t}">${t}</div>`).join("")}
+    </div>
+
+    <div style="background:var(--sage-soft, #e2f1ee);border-radius:14px;padding:14px 16px;margin-top:18px;font-size:.82rem;color:var(--ink-soft, #4a5164);">
+      ✨ NeuroSarathi uses the information you share only to personalise educational content, activities and learning recommendations. We do not diagnose, treat or provide medical advice.
+    </div>
+  `;
+  renderChildWizardShell("Almost there", "", body, 4);
+  wizAttachMultiChip("wizSupportAreas", s.supportAreas);
+  wizAttachSingleChip("wizDietType", (val)=>{ s.dietType = val; });
+  wizAttachMultiChip("wizParentGoals", s.parentGoals);
+  wizAttachSingleChip("wizDailyTime", (val)=>{ s.dailyLearningMinutes = val; });
+  wizAttachSingleChip("wizReminder", (val)=>{ s.reminderTime = val; });
+
+  document.getElementById("wizNextBtn").addEventListener("click", ()=>{
+    s.foodNotes = document.getElementById("cFoodNotes").value.trim();
+    saveChildFromWizard();
+  });
+}
+
+async function saveChildFromWizard(){
+  const s = childWizardState;
+  const errEl = document.getElementById("wizardFormError");
+  const saveBtn = document.getElementById("wizNextBtn");
   saveBtn.textContent = "Saving...";
   saveBtn.disabled = true;
 
+  const computedAge = calcAgeFromDOB(s.dob);
+
   const payload = {
-    display_name: name,
-    age: ageVal ? parseInt(ageVal, 10) : null,
-    biological_sex: gender,
-    focus_areas: focus,
-    food_notes: foodNotes || null,
-    diet_type: dietType,
-    photo_fit: cropFit,
-    photo_zoom: cropZoom,
-    photo_focus_y: cropFocusY
+    display_name: s.name,
+    age: computedAge != null ? computedAge : s.ageFallback,
+    date_of_birth: s.dob || null,
+    biological_sex: s.gender,
+    preferred_language: s.preferredLanguage || null,
+    school_grade: s.schoolGrade || null,
+    focus_areas: [...s.learningGoals, ...s.supportAreas],
+    learning_journey: [...s.learningJourney],
+    strengths: [...s.strengths],
+    interests: [...s.interests],
+    learning_preferences: [...s.learningPreferences],
+    food_notes: s.foodNotes || null,
+    diet_type: s.dietType,
+    parent_goals: [...s.parentGoals],
+    daily_learning_minutes: s.dailyLearningMinutes || null,
+    reminder_time: s.reminderTime || null,
+    photo_fit: s.photoFit,
+    photo_zoom: s.photoZoom,
+    photo_focus_y: s.photoFocusY,
   };
 
   let result;
-  if(existingId){
-    result = await dash2Client.from("children").update(payload).eq("id", existingId).select();
+  if(s.id){
+    result = await dash2Client.from("children").update(payload).eq("id", s.id).select();
   } else {
     payload.parent_id = currentUser.id;
     result = await dash2Client.from("children").insert(payload).select();
@@ -889,19 +1100,19 @@ async function saveChild(existingId){
 
   if(result.error){
     errEl.textContent = "Could not save: " + result.error.message;
-    saveBtn.textContent = existingId ? "Save changes" : "Add my child";
+    saveBtn.textContent = s.id ? "Save changes" : "Add my child";
     saveBtn.disabled = false;
     return;
   }
 
   const savedChild = result.data[0];
 
-  if(photoFile){
-    const ext = (photoFile.name.split(".").pop() || "jpg").toLowerCase();
+  if(s.photoFile){
+    const ext = (s.photoFile.name.split(".").pop() || "jpg").toLowerCase();
     const path = `${currentUser.id}/${savedChild.id}.${ext}`;
     const { error: uploadError } = await dash2Client.storage
       .from("child-photos")
-      .upload(path, photoFile, { upsert: true });
+      .upload(path, s.photoFile, { upsert: true });
 
     if(uploadError){
       errEl.textContent = "Saved, but photo upload failed: " + uploadError.message;
@@ -910,14 +1121,21 @@ async function saveChild(existingId){
     }
   }
 
+  const wasNew = !s.id;
   await loadChildren(savedChild.id);
 
-  if(!existingId){
+  if(wasNew){
     // Brand-new child — take the parent straight into the free
     // Developmental Check-in instead of the general feed, as promised.
     renderScreening(savedChild);
   }
 }
+
+function renderAddChildForm(prefill){
+  initChildWizard(prefill);
+  renderChildWizardStep(1);
+}
+
 
 async function getChildPhotoUrl(child){
   if(!child.photo_path) return null;
@@ -1458,6 +1676,59 @@ async function recordLearningView(articleId){
   }
 }
 
+// ─── What's New ───
+// Bump this version string whenever the highlighted list below
+// changes, so returning parents see the update again even if
+// they'd dismissed an earlier version.
+const WHATS_NEW_VERSION = "2026-07-a";
+
+const WHATS_NEW_ITEMS = [
+  { icon:"📚", label:"Learning Centre", desc:"A new home for articles, guides, and topics by category.", action:()=> navigateTo("renderLearningCentre", currentChild) },
+  { icon:"👫", label:"Sibling Support articles", desc:"New content for the siblings who sometimes get overlooked.", action:()=> navigateTo("renderLearningCentre", currentChild) },
+  { icon:"🌟", label:"Share Your Success Story", desc:"Tell other parents what's worked for your family.", action:()=> openSuccessStoryForm() },
+  { icon:"📣", label:"Refer NeuroSarathi", desc:"Know a parent who could use this? Share it with them.", action:()=> openReferSheet(currentChild) },
+  { icon:"📞", label:"Connect with the Founder", desc:"Reach out directly via WhatsApp or email.", action:()=> openConnectFounderSheet() },
+  { icon:"💬", label:"Send Feedback", desc:"Tell us what's working, or what isn't — we read every message.", action:()=> openFeedbackForm() },
+];
+
+function renderWhatsNewCard(){
+  const mount = document.getElementById("whatsNewMount");
+  if(!mount) return;
+  const dismissedVersion = localStorage.getItem("nsWhatsNewDismissed");
+  if(dismissedVersion === WHATS_NEW_VERSION){ mount.innerHTML = ""; return; }
+
+  mount.innerHTML = `
+    <div class="card" id="whatsNewCard">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;">✨ What's New</div>
+        <button id="whatsNewDismissBtn" aria-label="Dismiss" style="background:none;border:none;font-size:1.1rem;color:var(--muted-foreground, #7b8194);cursor:pointer;line-height:1;padding:2px 4px;">✕</button>
+      </div>
+      <div id="whatsNewList">
+        ${WHATS_NEW_ITEMS.map((it, i) => `
+          <div class="more-menu-item" data-idx="${i}" style="margin-bottom:8px;">
+            <div class="more-menu-icon">${it.icon}</div>
+            <div class="more-menu-text">
+              <div class="more-menu-label">${it.label}</div>
+              <div class="more-menu-desc">${it.desc}</div>
+            </div>
+            <div class="more-menu-arrow">→</div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+  document.getElementById("whatsNewDismissBtn").addEventListener("click", ()=>{
+    localStorage.setItem("nsWhatsNewDismissed", WHATS_NEW_VERSION);
+    mount.innerHTML = "";
+  });
+  mount.querySelectorAll("#whatsNewList .more-menu-item").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      localStorage.setItem("nsWhatsNewDismissed", WHATS_NEW_VERSION);
+      WHATS_NEW_ITEMS[parseInt(el.dataset.idx)].action();
+    });
+  });
+}
+
 function renderFeed(child){
   setActiveBottomTab("home");
   const focusLabels = (child.focus_areas || []).map(k=>{
@@ -1509,6 +1780,7 @@ function renderFeed(child){
     </div>
 
     <div id="sarathiPlanMount"></div>
+    <div id="whatsNewMount"></div>
 
     <div id="parentTipMount"></div>
     <div id="routineChecklistMount"></div>
@@ -1608,6 +1880,7 @@ function renderFeed(child){
   loadMilestoneFrames(child);
   loadAcademyProgress(child);
   loadSupportOrganizations();
+  renderWhatsNewCard();
 }
 
 // ============================================================

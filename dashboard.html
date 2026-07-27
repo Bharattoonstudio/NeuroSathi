@@ -159,6 +159,13 @@
   .screening-domain-label{font-weight:700;font-size:.82rem;color:var(--ink);margin-bottom:4px;}
   .screening-domain-note{font-size:.76rem;font-weight:600;line-height:1.3;}
 
+  .faq-item{border-bottom:1px solid var(--border);}
+  .faq-question{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 2px;cursor:pointer;font-weight:700;font-size:.92rem;color:var(--ink);}
+  .faq-caret{color:var(--muted-foreground);transition:transform .2s ease;flex-shrink:0;}
+  .faq-item.open .faq-caret{transform:rotate(180deg);}
+  .faq-answer{max-height:0;overflow:hidden;transition:max-height .25s ease;font-size:.86rem;color:var(--ink-soft);line-height:1.5;}
+  .faq-item.open .faq-answer{max-height:400px;padding-bottom:14px;}
+
   .lc-search{width:100%;padding:12px 16px;border-radius:14px;border:1px solid var(--border);
     font-family:inherit;font-size:.92rem;background:var(--card);color:var(--ink);margin-bottom:14px;box-sizing:border-box;}
   .lc-search:focus{outline:none;border-color:var(--terracotta);}
@@ -910,6 +917,15 @@ function renderWizardStep1(){
   `;
   renderChildWizardShell("Let's start with the basics", "Just a few details so we can guide you with the right ideas each day.", body, 1);
 
+  if(s.id){
+    document.querySelector(".card").insertAdjacentHTML("beforeend", `
+      <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border);text-align:center;">
+        <button id="deleteChildBtn" style="background:none;border:none;color:#c0392b;font-size:.85rem;font-weight:700;cursor:pointer;text-decoration:underline;">Delete ${escapeHtml(s.name || "this child's")} profile</button>
+      </div>
+    `);
+    document.getElementById("deleteChildBtn").addEventListener("click", ()=> openDeleteChildConfirm(s.id, s.name));
+  }
+
   document.querySelectorAll(".crop-fit-chip").forEach(chip=>{
     chip.addEventListener("click", ()=>{
       document.querySelectorAll(".crop-fit-chip").forEach(c=>c.classList.remove("selected"));
@@ -1140,6 +1156,68 @@ async function saveChildFromWizard(){
 function renderAddChildForm(prefill){
   initChildWizard(prefill);
   renderChildWizardStep(1);
+}
+
+function openDeleteChildConfirm(childId, childName){
+  const existing = document.getElementById("deleteChildModal");
+  if(existing) existing.remove();
+  const modal = document.createElement("div");
+  modal.id = "deleteChildModal";
+  modal.style.cssText = "position:fixed;inset:0;z-index:999;background:rgba(20,20,20,.6);display:flex;align-items:flex-end;justify-content:center;";
+  modal.innerHTML = `
+    <div style="background:var(--card, #fff);border-radius:22px 22px 0 0;max-width:480px;width:100%;padding:24px 20px calc(20px + env(safe-area-inset-bottom));">
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:6px;color:#c0392b;">Delete ${escapeHtml(childName || "this child's")} profile?</div>
+      <p style="font-size:.85rem;color:var(--ink-soft, #4a5164);margin-bottom:14px;">This permanently deletes ${escapeHtml(childName || "this child")}'s profile, photo, Developmental Check-in history, and progress data. This cannot be undone.</p>
+      <label style="display:block;font-size:.82rem;font-weight:700;margin-bottom:5px;">Type "${escapeHtml(childName || "")}" to confirm</label>
+      <input type="text" id="deleteChildConfirmInput" placeholder="${escapeHtml(childName || "")}" style="width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--border, #e5e5e5);font-family:inherit;font-size:.9rem;margin-bottom:16px;box-sizing:border-box;">
+      <button class="btn" id="deleteChildConfirmBtn" style="width:100%;margin-bottom:10px;background:#c0392b;">Delete Permanently</button>
+      <button class="btn small secondary" id="deleteChildCancelBtn" style="width:100%;">Cancel</button>
+      <div id="deleteChildErrorMsg" style="font-size:.82rem;margin-top:10px;color:#c0392b;"></div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  document.getElementById("deleteChildCancelBtn").addEventListener("click", ()=> modal.remove());
+  modal.addEventListener("click", (e)=>{ if(e.target === modal) modal.remove(); });
+  document.getElementById("deleteChildConfirmBtn").addEventListener("click", async ()=>{
+    const typed = document.getElementById("deleteChildConfirmInput").value.trim();
+    const errEl = document.getElementById("deleteChildErrorMsg");
+    if(typed !== (childName || "").trim()){
+      errEl.textContent = "The name doesn't match. Please type it exactly to confirm.";
+      return;
+    }
+    const btn = document.getElementById("deleteChildConfirmBtn");
+    btn.disabled = true; btn.textContent = "Deleting...";
+    try{
+      await deleteChildProfile(childId);
+      modal.remove();
+    }catch(err){
+      console.error("Delete child error:", err);
+      if(err && err.code === "23503"){
+        errEl.textContent = "This profile still has related records that need clearing first. Please contact support so we can help remove it safely.";
+      } else {
+        errEl.textContent = "Could not delete: " + (err.message || "please try again.");
+      }
+      btn.disabled = false; btn.textContent = "Delete Permanently";
+    }
+  });
+}
+
+async function deleteChildProfile(childId){
+  // Best-effort photo cleanup — proceed with the row deletion either way.
+  try{
+    const child = allChildren.find(c => c.id === childId);
+    if(child && child.photo_path){
+      await dash2Client.storage.from("child-photos").remove([child.photo_path]);
+    }
+  }catch(photoErr){
+    console.error("Could not remove child photo:", photoErr);
+  }
+
+  const { error } = await dash2Client.from("children").delete().eq("id", childId);
+  if(error) throw error;
+
+  currentChild = null;
+  await loadChildren();
 }
 
 
@@ -1422,11 +1500,61 @@ function openFeedbackForm(){
 // Categories in this list already have a real, fully-built feature
 // elsewhere in the app. Tapping them goes straight there instead of
 // showing an (empty) article list, so there's only one place for each.
+// ─── FAQs ───
+const FAQ_ITEMS = [
+  { q: "Is NeuroSarathi a medical or diagnostic service?", a: "No. NeuroSarathi is an educational platform — it never diagnoses, prescribes, or provides clinical treatment. The Developmental Check-in, Learning Centre, and Sarathi Avatar are all educational tools meant to help you have better-informed conversations with qualified professionals, not to replace them." },
+  { q: "What is the Developmental Check-in, and can it diagnose anything?", a: "It's a gentle, parent-reported awareness checklist across areas like communication, movement, social & emotional development, and learning. It can never diagnose anything — it simply helps surface patterns worth discussing with a doctor, therapist, or educator if you choose to." },
+  { q: "How often can I redo the Developmental Check-in?", a: "Once every 30 days per child, so the results stay meaningful over time. If you try to retake it earlier, you'll see the exact date it becomes available again." },
+  { q: "Who can see my child's information?", a: "Only you. Your child's profile, screening results, and conversations with Sarathi are private to your account and are never shared with professionals, caregivers, or other parents without your explicit action (like booking a consultation)." },
+  { q: "What is Sarathi Avatar, and does it remember my child's details?", a: "Sarathi Avatar is your AI companion inside NeuroSarathi. It automatically has access to your child's profile (strengths, interests, goals) and latest Developmental Check-in results, so you don't need to re-explain things you've already shared elsewhere in the app." },
+  { q: "How many free messages do I get with Sarathi each month?", a: "Every account gets 10 free messages with Sarathi per month. If you'd like more, Sarathi and Sarathi Unlimited plans are available under More → Sarathi Plans & Billing." },
+  { q: "How do I find a doctor, therapist, or caregiver near me?", a: "Tap the Support tab at the bottom of the app. You can browse verified professionals, educators, caregivers, and agencies, filter by what you need, and either message them first or book directly." },
+  { q: "What's the difference between an individual caregiver and an agency?", a: "An individual caregiver is one person offering their own services. An agency is an organisation with multiple caregivers on staff — when you book through an agency, you can browse their specific team members and choose who you'd like." },
+  { q: "How do I edit or update my child's profile?", a: "Go to Home, tap \"Edit info\" on your child's card, and you'll be taken through the same short set of steps used when you first added them. All fields can be updated at any time." },
+  { q: "Can I delete my child's profile?", a: "Yes. From the \"Edit info\" screen, scroll to the bottom and tap \"Delete profile.\" You'll need to type your child's name to confirm, since this permanently removes their data and cannot be undone." },
+  { q: "What languages does Sarathi Avatar support?", a: "Sarathi can reply in English, Hindi, Marathi, Tamil, Telugu, Kannada, Bengali, Gujarati, Punjabi, Malayalam, and Urdu — always in the language's own native script, not romanized text." },
+  { q: "Can I add more than one child to my account?", a: "Yes. Tap \"Add child\" in the story row at the top of Home to add another profile, and switch between children anytime from the same row." },
+  { q: "How does referring NeuroSarathi to other parents work?", a: "Under More → Refer NeuroSarathi, you can share NeuroSarathi directly via WhatsApp, email, or your phone's share sheet with a family who might find it helpful." },
+  { q: "I have feedback or found a bug — how do I tell you?", a: "Under More → Send Feedback, you can share a message and an optional star rating directly with our team. We read every submission." },
+  { q: "Is the information in the Learning Centre reviewed, or written by AI?", a: "Articles are written and reviewed by the NeuroSarathi editorial team, grounded in generally accepted educational and developmental guidance. Parent-submitted Success Stories are reviewed before publishing, and are always personal experiences rather than professional advice." }
+];
+
+function renderFAQCentre(child){
+  app.innerHTML = `
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon terracotta">❓</div>
+        <h1 style="margin:0;">Frequently Asked Questions</h1>
+      </div>
+      <div id="faqAccordion">
+        ${FAQ_ITEMS.map((item, i) => `
+          <div class="faq-item" data-idx="${i}">
+            <div class="faq-question">
+              <span>${escapeHtml(item.q)}</span>
+              <span class="faq-caret">▾</span>
+            </div>
+            <div class="faq-answer">${escapeHtml(item.a)}</div>
+          </div>
+        `).join("")}
+      </div>
+      <button class="btn secondary" id="faqBackBtn" style="margin-top:18px;">Back to dashboard</button>
+    </div>
+  `;
+  document.querySelectorAll(".faq-item").forEach(item=>{
+    item.querySelector(".faq-question").addEventListener("click", ()=>{
+      item.classList.toggle("open");
+    });
+  });
+  document.getElementById("faqBackBtn").addEventListener("click", ()=> history.back());
+}
+
 const LC_CATEGORY_DIRECT_LINKS = {
   "government-schemes": "renderGovtSchemes",
   "school-support": "renderSchoolSupport",
   "nutrition": "renderFoodLibrary",
   "therapy-activities": "renderActivityLibrary",
+  "expert-advice": "renderProfessionals",
+  "faqs": "renderFAQCentre",
 };
 
 const learningCentreState = {

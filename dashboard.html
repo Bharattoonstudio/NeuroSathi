@@ -609,6 +609,28 @@ const FOCUS_OPTIONS = [
 const app = document.getElementById("app");
 let currentUser = null;
 let currentChild = null;
+
+// ─── Screen navigation (History API) ───
+// Every full-screen render (tabs, More menu items, category links,
+// article detail, etc.) goes through navigateTo() instead of being
+// called directly, so the phone's back button/gesture moves between
+// in-app screens rather than leaving the app and forcing a re-login.
+function navigateTo(screenName, arg){
+  history.pushState({ screen: screenName, arg: arg ?? null }, "", "#" + screenName);
+  if(typeof window[screenName] === "function") window[screenName](arg);
+}
+
+window.addEventListener("popstate", (e)=>{
+  const state = e.state;
+  if(state && state.screen && typeof window[state.screen] === "function"){
+    window[state.screen](state.arg ?? currentChild);
+  } else {
+    // No usable state (e.g. the very first load) — fall back to Home
+    // rather than doing nothing or leaving the app.
+    if(currentChild) renderFeed(currentChild);
+  }
+});
+
 let allChildren = [];
 
 async function init(){
@@ -666,6 +688,7 @@ async function loadChildren(selectId){
     } else {
       currentChild = allChildren[0];
     }
+    history.replaceState({ screen: "renderFeed", arg: currentChild }, "", "#home");
     renderFeed(currentChild);
   }
   updateAvatarFab();
@@ -818,7 +841,7 @@ function renderAddChildForm(prefill){
 
   document.getElementById("saveChildBtn").addEventListener("click", ()=> saveChild(p.id));
   const cancelBtn = document.getElementById("cancelEditBtn");
-  if(cancelBtn) cancelBtn.addEventListener("click", ()=> renderFeed(currentChild));
+  if(cancelBtn) cancelBtn.addEventListener("click", ()=> history.back());
 }
 
 async function saveChild(existingId){
@@ -917,11 +940,11 @@ function setActiveBottomTab(tab){
 
 function switchBottomTab(tab){
   if(!currentChild){ return; }
-  if(tab === "home") renderFeed(currentChild);
-  else if(tab === "learning") renderLearningCentre(currentChild);
-  else if(tab === "support") renderProfessionals(currentChild);
-  else if(tab === "progress") renderProgressReport(currentChild);
-  else if(tab === "more") renderMoreMenu(currentChild);
+  if(tab === "home") navigateTo("renderFeed", currentChild);
+  else if(tab === "learning") navigateTo("renderLearningCentre", currentChild);
+  else if(tab === "support") navigateTo("renderProfessionals", currentChild);
+  else if(tab === "progress") navigateTo("renderProgressReport", currentChild);
+  else if(tab === "more") navigateTo("renderMoreMenu", currentChild);
 }
 
 function renderMoreMenu(child){
@@ -931,6 +954,8 @@ function renderMoreMenu(child){
     { icon:"🧠", label:"Developmental Check-in", desc:"A free, educational observation check-in.", action:"renderScreening" },
     { icon:"📞", label:"Connect with NeuroSarathi Founder", desc:"Reach out directly via WhatsApp or email.", action:"connectFounder" },
     { icon:"📣", label:"Refer NeuroSarathi", desc:"Know a parent who could use this? Share it with them.", action:"referApp" },
+    { icon:"🌟", label:"Share Your Success Story", desc:"Tell other parents what's worked for your family.", action:"shareSuccessStory" },
+    { icon:"💬", label:"Send Feedback", desc:"Tell us what's working, or what isn't.", action:"sendFeedback" },
   ];
   app.innerHTML = `
     <div class="card">
@@ -958,7 +983,9 @@ function renderMoreMenu(child){
       const fnName = el.dataset.action;
       if(fnName === "connectFounder"){ openConnectFounderSheet(); return; }
       if(fnName === "referApp"){ openReferSheet(child); return; }
-      if(typeof window[fnName] === "function") window[fnName](child);
+      if(fnName === "shareSuccessStory"){ openSuccessStoryForm(); return; }
+      if(fnName === "sendFeedback"){ openFeedbackForm(); return; }
+      if(typeof window[fnName] === "function") navigateTo(fnName, child);
     });
   });
   document.getElementById("moreBillingBtn").addEventListener("click", ()=>{
@@ -1032,6 +1059,141 @@ async function openReferSheet(child){
   modal.addEventListener("click", (e)=>{ if(e.target === modal) modal.remove(); });
 }
 
+function slugify(text){
+  return text.toLowerCase().trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function openSuccessStoryForm(){
+  const existing = document.getElementById("successStoryModal");
+  if(existing) existing.remove();
+  const modal = document.createElement("div");
+  modal.id = "successStoryModal";
+  modal.style.cssText = "position:fixed;inset:0;z-index:999;background:rgba(20,20,20,.55);display:flex;align-items:flex-end;justify-content:center;";
+  modal.innerHTML = `
+    <div style="background:var(--card, #fff);border-radius:22px 22px 0 0;max-width:480px;width:100%;padding:24px 20px calc(20px + env(safe-area-inset-bottom));max-height:85vh;overflow-y:auto;">
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:4px;">Share Your Success Story</div>
+      <div style="font-size:.85rem;color:var(--muted-foreground, #7b8194);margin-bottom:16px;">Your story is reviewed by our team before it's published, so other parents only see genuine, verified stories.</div>
+      <label style="display:block;font-size:.82rem;font-weight:700;margin-bottom:5px;">Your name (optional — leave blank to stay anonymous)</label>
+      <input type="text" id="storyAuthorName" placeholder="e.g. Priya, mother of a 6-year-old" style="width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--border, #e5e5e5);font-family:inherit;font-size:.9rem;margin-bottom:14px;box-sizing:border-box;">
+      <label style="display:block;font-size:.82rem;font-weight:700;margin-bottom:5px;">Title</label>
+      <input type="text" id="storyTitle" placeholder="e.g. How we found the right routine for our son" style="width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--border, #e5e5e5);font-family:inherit;font-size:.9rem;margin-bottom:14px;box-sizing:border-box;">
+      <label style="display:block;font-size:.82rem;font-weight:700;margin-bottom:5px;">Your story</label>
+      <textarea id="storyContent" rows="6" placeholder="Share what worked for your family — a routine, a breakthrough, advice you'd give another parent…" style="width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--border, #e5e5e5);font-family:inherit;font-size:.9rem;margin-bottom:16px;box-sizing:border-box;"></textarea>
+      <button class="btn" id="submitStoryBtn" style="width:100%;margin-bottom:10px;">Submit for Review</button>
+      <button class="btn small secondary" id="storyCloseBtn" style="width:100%;">Cancel</button>
+      <div id="storyStatusMsg" style="font-size:.82rem;margin-top:10px;color:#c0392b;"></div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  document.getElementById("storyCloseBtn").addEventListener("click", ()=> modal.remove());
+  modal.addEventListener("click", (e)=>{ if(e.target === modal) modal.remove(); });
+  document.getElementById("submitStoryBtn").addEventListener("click", async ()=>{
+    const title = document.getElementById("storyTitle").value.trim();
+    const content = document.getElementById("storyContent").value.trim();
+    const authorName = document.getElementById("storyAuthorName").value.trim();
+    const statusEl = document.getElementById("storyStatusMsg");
+    if(!title || !content){
+      statusEl.textContent = "Please add both a title and your story.";
+      return;
+    }
+    const btn = document.getElementById("submitStoryBtn");
+    btn.disabled = true; btn.textContent = "Submitting...";
+    try{
+      const { data: userData } = await dash2Client.auth.getUser();
+      const userId = userData?.user?.id;
+      if(!userId){ statusEl.textContent = "Please sign in again."; btn.disabled = false; btn.textContent = "Submit for Review"; return; }
+
+      const { data: cat } = await dash2Client.from("learning_categories").select("id").eq("slug", "success-stories").maybeSingle();
+      const wordCount = content.split(/\s+/).filter(Boolean).length;
+      const readingTime = Math.max(1, Math.round(wordCount / 200));
+      const slug = slugify(title) + "-" + Date.now();
+
+      const { error } = await dash2Client.from("learning_articles").insert({
+        slug,
+        title,
+        short_description: content.length > 150 ? content.slice(0, 147) + "..." : content,
+        content,
+        category_id: cat?.id || null,
+        author_name: authorName || "A NeuroSarathi Parent",
+        reading_time_minutes: readingTime,
+        difficulty: "beginner",
+        is_featured: false,
+        published: false,
+        submitted_by_user_id: userId,
+      });
+      if(error){ statusEl.textContent = "Couldn't submit: " + error.message; btn.disabled = false; btn.textContent = "Submit for Review"; return; }
+
+      modal.remove();
+      alert("Thank you for sharing! Our team will review your story before it's published.");
+    }catch(err){
+      console.error("Submit success story error:", err);
+      statusEl.textContent = "Something went wrong. Please try again.";
+      btn.disabled = false; btn.textContent = "Submit for Review";
+    }
+  });
+}
+
+function openFeedbackForm(){
+  const existing = document.getElementById("feedbackModal");
+  if(existing) existing.remove();
+  let selectedRating = 0;
+  const modal = document.createElement("div");
+  modal.id = "feedbackModal";
+  modal.style.cssText = "position:fixed;inset:0;z-index:999;background:rgba(20,20,20,.55);display:flex;align-items:flex-end;justify-content:center;";
+  modal.innerHTML = `
+    <div style="background:var(--card, #fff);border-radius:22px 22px 0 0;max-width:480px;width:100%;padding:24px 20px calc(20px + env(safe-area-inset-bottom));">
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:4px;">Send Feedback</div>
+      <div style="font-size:.85rem;color:var(--muted-foreground, #7b8194);margin-bottom:14px;">Tell us what's working, or what isn't — we read every message.</div>
+      <div style="margin-bottom:14px;" id="feedbackStars">
+        ${[1,2,3,4,5].map(n => `<span class="fb-rate-star" data-n="${n}" style="cursor:pointer;font-size:1.5rem;color:#E5E7EB;margin-right:4px;">★</span>`).join("")}
+      </div>
+      <textarea id="feedbackMessage" rows="4" placeholder="What's on your mind?" style="width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--border, #e5e5e5);font-family:inherit;font-size:.9rem;margin-bottom:16px;box-sizing:border-box;"></textarea>
+      <button class="btn" id="submitFeedbackBtn" style="width:100%;margin-bottom:10px;">Send Feedback</button>
+      <button class="btn small secondary" id="feedbackCloseBtn" style="width:100%;">Cancel</button>
+      <div id="feedbackStatusMsg" style="font-size:.82rem;margin-top:10px;color:#c0392b;"></div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  document.getElementById("feedbackCloseBtn").addEventListener("click", ()=> modal.remove());
+  modal.addEventListener("click", (e)=>{ if(e.target === modal) modal.remove(); });
+  modal.querySelectorAll(".fb-rate-star").forEach(star=>{
+    star.addEventListener("click", ()=>{
+      selectedRating = parseInt(star.dataset.n);
+      modal.querySelectorAll(".fb-rate-star").forEach(s=>{
+        s.style.color = parseInt(s.dataset.n) <= selectedRating ? "#ff8a5c" : "#E5E7EB";
+      });
+    });
+  });
+  document.getElementById("submitFeedbackBtn").addEventListener("click", async ()=>{
+    const message = document.getElementById("feedbackMessage").value.trim();
+    const statusEl = document.getElementById("feedbackStatusMsg");
+    if(!message){ statusEl.textContent = "Please write a message first."; return; }
+    const btn = document.getElementById("submitFeedbackBtn");
+    btn.disabled = true; btn.textContent = "Sending...";
+    try{
+      const { data: userData } = await dash2Client.auth.getUser();
+      const userId = userData?.user?.id;
+      if(!userId){ statusEl.textContent = "Please sign in again."; btn.disabled = false; btn.textContent = "Send Feedback"; return; }
+      const { error } = await dash2Client.from("app_feedback").insert({
+        user_id: userId,
+        message,
+        rating: selectedRating || null,
+        page_context: "more_menu",
+      });
+      if(error){ statusEl.textContent = "Couldn't send: " + error.message; btn.disabled = false; btn.textContent = "Send Feedback"; return; }
+      modal.remove();
+      alert("Thanks for the feedback — we really appreciate it!");
+    }catch(err){
+      console.error("Submit feedback error:", err);
+      statusEl.textContent = "Something went wrong. Please try again.";
+      btn.disabled = false; btn.textContent = "Send Feedback";
+    }
+  });
+}
+
 // ─── Learning Centre ───
 // Categories in this list already have a real, fully-built feature
 // elsewhere in the app. Tapping them goes straight there instead of
@@ -1079,8 +1241,8 @@ async function renderLearningCentre(child){
       <button class="btn small secondary" id="lcBackBtn" style="margin-top:16px;">Back to dashboard</button>
     </div>
   `;
-  document.getElementById("lcTrustedLibraryBtn").addEventListener("click", ()=> renderLearningLibrary(child));
-  document.getElementById("lcBackBtn").addEventListener("click", ()=> renderFeed(child));
+  document.getElementById("lcTrustedLibraryBtn").addEventListener("click", ()=> navigateTo("renderLearningLibrary", child));
+  document.getElementById("lcBackBtn").addEventListener("click", ()=> history.back());
   document.getElementById("lcSearchInput").addEventListener("input", (e)=>{
     learningCentreState.searchQuery = e.target.value.toLowerCase();
     renderLearningCentreBody();
@@ -1178,7 +1340,7 @@ function renderLearningCentreBody(){
       const cat = state.categories.find(c => c.id === catId);
       const directFn = LC_CATEGORY_DIRECT_LINKS[cat?.slug];
       if(directFn && typeof window[directFn] === "function"){
-        window[directFn](learningCentreState.child);
+        navigateTo(directFn, learningCentreState.child);
         return;
       }
       learningCentreState.categoryFilter = learningCentreState.categoryFilter === catId ? "" : catId;
@@ -1188,7 +1350,7 @@ function renderLearningCentreBody(){
   body.querySelectorAll(".lc-article-card").forEach(el=>{
     el.addEventListener("click", (e)=>{
       if(e.target.closest(".lc-bookmark-btn")) return;
-      openLearningArticle(el.dataset.id);
+      navigateTo("openLearningArticle", el.dataset.id);
     });
   });
   body.querySelectorAll(".lc-bookmark-btn").forEach(el=>{
@@ -1267,12 +1429,12 @@ async function openLearningArticle(articleId){
     </div>
   `;
 
-  document.getElementById("lcArticleBackBtn").addEventListener("click", ()=> renderLearningCentre(learningCentreState.child));
+  document.getElementById("lcArticleBackBtn").addEventListener("click", ()=> history.back());
   document.getElementById("lcDetailBookmarkBtn").addEventListener("click", ()=> toggleLearningBookmark(article.id).then(()=>{
     document.getElementById("lcDetailBookmarkBtn").textContent = learningCentreState.bookmarkIds.has(article.id) ? "🔖" : "📑";
   }));
   app.querySelectorAll(".lc-article-card").forEach(el=>{
-    el.addEventListener("click", ()=> openLearningArticle(el.dataset.id));
+    el.addEventListener("click", ()=> navigateTo("openLearningArticle", el.dataset.id));
   });
 
   recordLearningView(article.id);
@@ -1402,10 +1564,10 @@ function renderFeed(child){
     </div>
   `;
 
-  document.getElementById("editChildBtn").addEventListener("click", ()=> renderAddChildForm(child));
+  document.getElementById("editChildBtn").addEventListener("click", ()=> navigateTo("renderAddChildForm", child));
   document.getElementById("addMilestoneBtn").addEventListener("click", ()=> showMilestoneForm(child));
   document.getElementById("progressBtn").addEventListener("click", ()=> showProgress(child));
-  document.getElementById("addAnotherChip").addEventListener("click", ()=> renderAddChildForm());
+  document.getElementById("addAnotherChip").addEventListener("click", ()=> navigateTo("renderAddChildForm", null));
   document.getElementById("talkToSarathiBtn").addEventListener("click", ()=> startAvatarIntake(child));
   document.getElementById("upsellBannerBtn").addEventListener("click", ()=>{
     window.location.href = "/sarathi-billing.html";
@@ -2010,7 +2172,7 @@ async function renderActivityLibrary(child){
     <div id="libraryResults"><div class="loading">Loading activities…</div></div>
   `;
 
-  document.getElementById("libBackBtn").addEventListener("click", ()=> renderFeed(currentChild));
+  document.getElementById("libBackBtn").addEventListener("click", ()=> history.back());
   document.getElementById("suggestMoreBtn").addEventListener("click", ()=> generateAiActivities(child));
 
   ["libFocusFilter","libTimeFilter","libMaterialsFilter","libFavFilter"].forEach(id=>{
@@ -2494,7 +2656,7 @@ async function renderFoodLibrary(child){
     </div>
   `;
 
-  document.getElementById("foodBackBtn").addEventListener("click", ()=> renderFeed(child));
+  document.getElementById("foodBackBtn").addEventListener("click", ()=> history.back());
   document.getElementById("generateMealsBtn").addEventListener("click", ()=> showMealGenForm(child));
   document.querySelectorAll("#mealTypeFilterRow .chip").forEach(chip=>{
     chip.addEventListener("click", ()=>{
@@ -2816,7 +2978,7 @@ async function renderLearningLibrary(child){
     </div>
   `;
 
-  document.getElementById("learningBackBtn").addEventListener("click", ()=> renderFeed(child));
+  document.getElementById("learningBackBtn").addEventListener("click", ()=> history.back());
   document.querySelectorAll("#learningCategoryRow .chip").forEach(chip=>{
     chip.addEventListener("click", ()=>{
       document.querySelectorAll("#learningCategoryRow .chip").forEach(c=>c.classList.remove("selected"));
@@ -2968,7 +3130,7 @@ async function renderProfessionals(child){
     </div>
   `;
 
-  document.getElementById("professionalsBackBtn").addEventListener("click", ()=> renderFeed(child));
+  document.getElementById("professionalsBackBtn").addEventListener("click", ()=> history.back());
   document.getElementById("pfGoToDirectoryBtn").addEventListener("click", ()=> { window.location.href = "/find-support.html"; });
   document.querySelectorAll("#pfQuickSearchRow [data-query]").forEach(btn=>{
     btn.addEventListener("click", ()=> openMapsSearch(btn.dataset.query));
@@ -3150,7 +3312,7 @@ function renderScreening(child){
       renderScreeningQuestions();
     });
   });
-  document.getElementById("screeningCancelBtn").addEventListener("click", ()=> renderFeed(child));
+  document.getElementById("screeningCancelBtn").addEventListener("click", ()=> history.back());
 }
 
 function renderScreeningQuestions(){
@@ -3201,7 +3363,7 @@ function renderScreeningQuestions(){
   });
 
   document.getElementById("screeningSubmitBtn").addEventListener("click", submitScreening);
-  document.getElementById("screeningCancelBtn").addEventListener("click", ()=> renderFeed(child));
+  document.getElementById("screeningCancelBtn").addEventListener("click", ()=> history.back());
 }
 
 async function submitScreening(){
@@ -3266,8 +3428,8 @@ function renderScreeningSummary(domainNotes){
     </div>
   `;
 
-  document.getElementById("screeningFindProBtn").addEventListener("click", ()=> renderProfessionals(child));
-  document.getElementById("screeningDoneBtn").addEventListener("click", ()=> renderFeed(child));
+  document.getElementById("screeningFindProBtn").addEventListener("click", ()=> navigateTo("renderProfessionals", child));
+  document.getElementById("screeningDoneBtn").addEventListener("click", ()=> history.back());
 }
 
 // ============================================================
@@ -3303,10 +3465,10 @@ async function renderSchoolSupport(child){
       `).join("")}
       <button class="btn secondary" id="schoolSupportBackBtn">Back to dashboard</button>
     `;
-    document.getElementById("schoolSupportBackBtn").addEventListener("click", ()=> renderFeed(child));
+    document.getElementById("schoolSupportBackBtn").addEventListener("click", ()=> history.back());
   }catch(err){
     app.innerHTML = `<div class="card"><p class="error">${escapeHtml(err.message)}</p><button class="btn secondary" id="schoolSupportBackBtn">Back</button></div>`;
-    document.getElementById("schoolSupportBackBtn").addEventListener("click", ()=> renderFeed(child));
+    document.getElementById("schoolSupportBackBtn").addEventListener("click", ()=> history.back());
   }
 }
 
@@ -3344,10 +3506,10 @@ async function renderGovtSchemes(child){
       `).join("")}
       <button class="btn secondary" id="govtSchemesBackBtn">Back to dashboard</button>
     `;
-    document.getElementById("govtSchemesBackBtn").addEventListener("click", ()=> renderFeed(child));
+    document.getElementById("govtSchemesBackBtn").addEventListener("click", ()=> history.back());
   }catch(err){
     app.innerHTML = `<div class="card"><p class="error">${escapeHtml(err.message)}</p><button class="btn secondary" id="govtSchemesBackBtn">Back</button></div>`;
-    document.getElementById("govtSchemesBackBtn").addEventListener("click", ()=> renderFeed(child));
+    document.getElementById("govtSchemesBackBtn").addEventListener("click", ()=> history.back());
   }
 }
 
@@ -3371,7 +3533,7 @@ async function renderProgressReport(child){
     </div>
   `;
 
-  document.getElementById("progressReportBackBtn").addEventListener("click", ()=> renderFeed(child));
+  document.getElementById("progressReportBackBtn").addEventListener("click", ()=> history.back());
   document.querySelectorAll("#prRangeRow .chip").forEach(chip=>{
     chip.addEventListener("click", ()=>{
       document.querySelectorAll("#prRangeRow .chip").forEach(c=>c.classList.remove("selected"));
@@ -3583,7 +3745,7 @@ async function renderRoutineBuilder(child){
     </div>
   `;
 
-  document.getElementById("routineBackBtn").addEventListener("click", ()=> renderFeed(child));
+  document.getElementById("routineBackBtn").addEventListener("click", ()=> history.back());
   document.getElementById("addRoutineItemBtn").addEventListener("click", ()=> showRoutineItemForm(child));
   document.getElementById("generateRoutineBtn").addEventListener("click", ()=> showAgeBandConfirm(child));
   document.getElementById("printRoutineBtn").addEventListener("click", ()=> openPrintableRoutine(child));
@@ -4030,7 +4192,7 @@ function renderAvatarGreeting(){
     avatarState.messages.push({ role: "assistant", content: OPENING_LINE[avatarState.language](child.display_name) });
     renderAvatarChatTurn();
   });
-  document.getElementById("avatarCancelBtn").addEventListener("click", ()=> renderFeed(currentChild));
+  document.getElementById("avatarCancelBtn").addEventListener("click", ()=> history.back());
 }
 
 async function fetchAvatarReply(finalize){
@@ -4111,7 +4273,7 @@ async function fetchAvatarReply(finalize){
         <button class="btn secondary" id="avatarBackBtn">Back to dashboard</button>
       </div>
     `;
-    document.getElementById("avatarBackBtn").addEventListener("click", ()=> renderFeed(currentChild));
+    document.getElementById("avatarBackBtn").addEventListener("click", ()=> history.back());
   }
 }
 
@@ -4146,7 +4308,7 @@ function renderSarathiPaywall(data){
       window.location.href = "/sarathi-billing.html";
     });
   });
-  document.getElementById("avatarBackBtn").addEventListener("click", ()=> renderFeed(currentChild));
+  document.getElementById("avatarBackBtn").addEventListener("click", ()=> history.back());
 }
 
 // Matches the languages the sarathi-chat backend understands.
@@ -4502,7 +4664,7 @@ function handleFinalizeReply(rawReply){
       </div>
     `;
     document.getElementById("retryFinalizeBtn").addEventListener("click", ()=> fetchAvatarReply(true));
-    document.getElementById("avatarCancelBtn").addEventListener("click", ()=> renderFeed(currentChild));
+    document.getElementById("avatarCancelBtn").addEventListener("click", ()=> history.back());
     return;
   }
 
@@ -4541,7 +4703,7 @@ function renderSuggestionApproval(){
   });
 
   document.getElementById("saveSuggestionsBtn").addEventListener("click", saveApprovedSuggestions);
-  document.getElementById("avatarCancelBtn").addEventListener("click", ()=> renderFeed(currentChild));
+  document.getElementById("avatarCancelBtn").addEventListener("click", ()=> history.back());
 }
 
 async function saveApprovedSuggestions(){

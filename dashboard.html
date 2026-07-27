@@ -556,6 +556,34 @@
     .story-row, .hero-cover, .card, .timeline-item{animation:none;}
     html{scroll-behavior:auto;}
   }
+
+  /* ─── Desktop/laptop layout ───
+     The whole app is designed mobile-first (bottom tab bar, narrow
+     single column). On wider screens we widen the content and move
+     navigation to a top bar instead of leaving it pinned to the
+     bottom with empty space on either side. */
+  @media (min-width: 900px){
+    .wrap{max-width:900px; padding-top:84px; padding-bottom:40px;}
+
+    .bottom-nav{
+      position:fixed; top:0; bottom:auto; left:0; right:0;
+      justify-content:center; gap:28px;
+      padding:14px 4px;
+      background:rgba(255,250,245,0.96);
+      border-top:none;
+      border-bottom:1px solid rgba(224,99,47,0.14);
+      box-shadow:0 2px 16px rgba(14,21,36,0.06);
+    }
+    .bottom-nav-item{
+      flex:none; flex-direction:row; gap:8px;
+      padding:8px 20px; border-radius:999px;
+    }
+    .bottom-nav-item.active{background:rgba(224,99,47,0.1);}
+    .bottom-nav-item .bn-icon{font-size:1.05rem;}
+    .bottom-nav-item .bn-label{font-size:13px;}
+
+    .avatar-fab{bottom:24px;}
+  }
 </style>
 
 </head>
@@ -2585,7 +2613,7 @@ async function renderActivityLibrary(child){
   `;
 
   document.getElementById("libBackBtn").addEventListener("click", ()=> history.back());
-  document.getElementById("suggestMoreBtn").addEventListener("click", ()=> generateAiActivities(child));
+  document.getElementById("suggestMoreBtn").addEventListener("click", ()=> generateAiActivities(child, libraryState.focusFilter));
 
   ["libFocusFilter","libTimeFilter","libMaterialsFilter","libFavFilter"].forEach(id=>{
     document.getElementById(id).querySelectorAll(".chip").forEach(chip=>{
@@ -2673,11 +2701,23 @@ async function loadLibraryResults(){
   });
 
   if(activities.length === 0){
+    const canTargetGenerate = focusFilter && favFilter !== "favorites";
+    let emptyMsg;
+    if(favFilter === "favorites"){
+      emptyMsg = "You haven't favorited any activities yet — tap the ⭐ on any activity to save it here.";
+    } else if(focusFilter){
+      emptyMsg = `No ${escapeHtml(focusLabel(focusFilter) || "")} activities yet.`;
+    } else {
+      emptyMsg = "No activities match these filters yet. Try widening your filters, or ask Sarathi Avatar to suggest some new ones.";
+    }
     resultsEl.innerHTML = `
       <div class="card">
-        <p>${favFilter === "favorites" ? "You haven't favorited any activities yet — tap the ⭐ on any activity to save it here." : "No activities match these filters yet. Try widening your filters, or ask Sarathi Avatar to suggest some new ones."}</p>
+        <p>${emptyMsg}</p>
+        ${canTargetGenerate ? `<button class="btn small" id="emptyStateAskSarathiBtn" style="margin-top:8px;">✨ Ask Sarathi Avatar for ${escapeHtml(focusLabel(focusFilter))} activities</button>` : ""}
       </div>
     `;
+    const askBtn = document.getElementById("emptyStateAskSarathiBtn");
+    if(askBtn) askBtn.addEventListener("click", ()=> generateAiActivities(child, focusFilter));
     return;
   }
 
@@ -2939,7 +2979,7 @@ async function generateDailyActivities(child, count, excludeTitles){
   }
 }
 
-async function generateAiActivities(child){
+async function generateAiActivities(child, targetFocusKey){
   const resultsEl = document.getElementById("libraryResults");
   resultsEl.innerHTML = '<div class="loading">Sarathi Avatar is thinking of some ideas…</div>';
 
@@ -2949,10 +2989,12 @@ async function generateAiActivities(child){
     return;
   }
 
-  const combinedFocusAreas = [
-    ...(child.focus_areas || []).map(k=>focusLabel(k)),
-    ...(child.ai_focus_areas || [])
-  ];
+  // If the parent has a specific focus area selected, target Sarathi's
+  // suggestions at exactly that — otherwise fall back to the child's
+  // general profile focus areas.
+  const combinedFocusAreas = targetFocusKey
+    ? [focusLabel(targetFocusKey)]
+    : [...(child.focus_areas || []).map(k=>focusLabel(k)), ...(child.ai_focus_areas || [])];
 
   try {
     const resp = await fetch(SARATHI_CHAT_URL, {
@@ -2965,7 +3007,9 @@ async function generateAiActivities(child){
         mode: "generate_activities",
         childId: child.id,
         focusAreas: combinedFocusAreas,
-        age: child.age
+        age: child.age,
+        count: targetFocusKey ? 3 : undefined,
+        validFocusKeys: FOCUS_OPTIONS.map(o=>o.key)
       })
     });
 
@@ -2980,41 +3024,34 @@ async function generateAiActivities(child){
       throw new Error("Sarathi Avatar's suggestions weren't in the expected format. Please try again.");
     }
 
-    const rows = (parsed.activities || []).map(a => ({
-      title: a.title,
-      objective: a.objective,
-      steps: a.steps || [],
-      materials: a.materials || [],
-      materials_level: (a.materials_level === "none" || a.materials_level === "household") ? a.materials_level : "household",
-      safety_tip: a.safety_tip || null,
-      focus_areas: (a.focus_areas || []).filter(f => FOCUS_OPTIONS.some(o=>o.key===f)),
-      min_age: a.min_age || null,
-      max_age: a.max_age || null,
-      time_minutes: a.time_minutes || 15,
-      source: "ai",
-      parent_id: currentUser.id,
-      child_id: child.id,
-      is_public: false
-    }));
+    const rows = (parsed.activities || []).map(a => {
+      let focusAreasClean = (a.focus_areas || []).filter(f => FOCUS_OPTIONS.some(o=>o.key===f));
+      // Safety net: if the AI still returned display-style text instead of
+      // keys and everything got filtered out, at minimum keep whichever
+      // focus area the parent actually asked for, so the activity doesn't
+      // silently disappear from that filter.
+      if(!focusAreasClean.length && targetFocusKey) focusAreasClean = [targetFocusKey];
+      return {
+        title: a.title,
+        objective: a.objective,
+        steps: a.steps || [],
+        materials: a.materials || [],
+        materials_level: (a.materials_level === "none" || a.materials_level === "household") ? a.materials_level : "household",
+        safety_tip: a.safety_tip || null,
+        focus_areas: focusAreasClean,
+        min_age: a.min_age || null,
+        max_age: a.max_age || null,
+        time_minutes: a.time_minutes || 15,
+        source: "ai",
+        parent_id: currentUser.id,
+        child_id: child.id,
+        is_public: false
+      };
+    });
 
     if(rows.length > 0){
       await dash2Client.from("activities").insert(rows);
     }
-
-    // Reset filters so the newly generated activities are guaranteed to
-    // be visible — otherwise a narrow filter left on from before (e.g.
-    // "Under 5 min") can silently hide Sarathi's new suggestions.
-    libraryState.focusFilter = null;
-    libraryState.timeFilter = null;
-    libraryState.materialsFilter = null;
-    libraryState.favFilter = null;
-    ["libFocusFilter","libTimeFilter","libMaterialsFilter","libFavFilter"].forEach(id=>{
-      const container = document.getElementById(id);
-      if(!container) return;
-      container.querySelectorAll(".chip").forEach(c=>c.classList.remove("selected"));
-      const allChip = container.querySelector(".chip");
-      if(allChip) allChip.classList.add("selected");
-    });
 
     await loadLibraryResults();
   } catch(err){

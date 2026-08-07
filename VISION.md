@@ -66,7 +66,7 @@ When we know, we'll say we know. When we don't know, we'll say we don't know. Wh
 
 ---
 
-## Founder Principle
+## Founder Principle.
 
 NeuroSarathi will always choose truth over appearance, empathy over engagement, and long-term trust over short-term growth.
 

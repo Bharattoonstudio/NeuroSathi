@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress Reports — NeuroSarathi</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #fafafa;
+            color: #333;
+        }
+        header {
+            background: linear-gradient(135deg, #1f656f 0%, #34a0a4 100%);
+            color: white;
+            padding: 20px 0;
+        }
+        header h1 { margin: 0; font-size: 28px; }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0;
+        }
+        .btn-primary {
+            background: #FF6B35;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-primary:hover { background: #e55a24; }
+        .btn-secondary {
+            background: #1f656f;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+        .card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            color: #1f656f;
+            margin-bottom: 16px;
+        }
+        .report-list {
+            list-style: none;
+        }
+        .report-item {
+            padding: 16px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #FF6B35;
+        }
+        .report-info h3 {
+            color: #1f656f;
+            margin-bottom: 4px;
+        }
+        .report-info p {
+            font-size: 12px;
+            color: #666;
+        }
+        .report-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-small {
+            background: #FF6B35;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-small:hover { background: #e55a24; }
+        .progress-report {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .progress-report h1 {
+            margin-bottom: 16px;
+            color: #1f656f;
+        }
+        .report-metadata {
+            background: #f5f5f5;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+        .report-metadata p {
+            margin: 0;
+            font-size: 14px;
+        }
+        .report-metadata strong {
+            color: #1f656f;
+        }
+        .progress-report section {
+            margin-bottom: 24px;
+        }
+        .progress-report section h2 {
+            color: #1f656f;
+            font-size: 20px;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #FFB703;
+            padding-bottom: 8px;
+        }
+        .domain-progress {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+        .domain {
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        .progress-excellent { background: #d4edda; color: #155724; }
+        .progress-good { background: #d1ecf1; color: #0c5460; }
+        .progress-fair { background: #fff3cd; color: #856404; }
+        .progress-needs_attention { background: #f8d7da; color: #721c24; }
+        .action-buttons {
+            margin-top: 24px;
+            display: flex;
+            gap: 12px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Progress Reports</h1>
+            <p>Detailed insights into your child's development</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>All Reports</h2>
+            <button class="btn-primary" onclick="showGenerateReportForm()">+ Generate Report</button>
+        </div>
+
+        <div id="reportList" class="card">
+            <h2>Your Reports</h2>
+            <ul class="report-list" id="reports"></ul>
+        </div>
+
+        <div id="reportView" style="display: none;"></div>
+    </div>
+
+    <div id="modal" class="modal"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./js/modules/progress-reports.js"></script>
+    <script>
+        const supabase = window.supabaseClient;
+
+        async function init() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                window.location.href = '/enterportal.html';
+                return;
+            }
+
+            const childId = new URLSearchParams(window.location.search).get('id');
+            if (childId) {
+                await loadChildReports(childId);
+            }
+        }
+
+        async function loadChildReports(childId) {
+            const reports = await ProgressReports.getChildReports(childId);
+            const list = document.getElementById('reports');
+            
+            if (reports.length === 0) {
+                list.innerHTML = '<li>No reports generated yet</li>';
+                return;
+            }
+
+            list.innerHTML = reports.map(r => `
+                <li class="report-item">
+                    <div class="report-info">
+                        <h3>${r.report_type} Report</h3>
+                        <p>Period: ${r.period_start_date} to ${r.period_end_date}</p>
+                        <p>Generated: ${r.report_date}</p>
+                    </div>
+                    <div class="report-actions">
+                        <button class="btn-small" onclick="viewReport('${r.id}')">View</button>
+                        <button class="btn-small" onclick="ProgressReports.downloadPDF('${r.id}')">PDF</button>
+                        <button class="btn-small" onclick="ProgressReports.shareReport('${r.id}')">Share</button>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        async function viewReport(reportId) {
+            const report = await ProgressReports.getReport(reportId);
+            if (!report) {
+                alert('Report not found');
+                return;
+            }
+
+            document.getElementById('reportList').style.display = 'none';
+            document.getElementById('reportView').style.display = 'block';
+            ProgressReports.renderReport(report, 'reportView');
+        }
+
+        function showGenerateReportForm() {
+            const childId = new URLSearchParams(window.location.search).get('id');
+            if (!childId) {
+                alert('Child ID not provided');
+                return;
+            }
+
+            const html = `
+                <div class="modal-content">
+                    <h2>Generate Progress Report</h2>
+                    <div class="form-group">
+                        <label>Report Type:</label>
+                        <select id="reportType">
+                            <option value="monthly">Monthly</option>
+                            <option value="quarterly">Quarterly</option>
+                            <option value="annual">Annual</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Period Start Date:</label>
+                        <input type="date" id="startDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Period End Date:</label>
+                        <input type="date" id="endDate">
+                    </div>
+                    <button class="btn-primary" onclick="handleGenerateReport('${childId}')">Generate</button>
+                </div>
+            `;
+            showModal(html);
+        }
+
+        async function handleGenerateReport(childId) {
+            const reportType = document.getElementById('reportType').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!reportType || !startDate || !endDate) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            const { data: { user } } = await supabase.auth.getUser();
+            const result = await ProgressReports.generateProgressReport(
+                childId, user.id, null, reportType, startDate, endDate
+            );
+
+            if (result) {
+                alert('Report generated successfully');
+                closeModal();
+                location.reload();
+            }
+        }
+
+        function showModal(html) {
+            document.getElementById('modal').innerHTML = html;
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        init();
+    </script>
+</body>
+</html>

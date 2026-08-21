@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Milestones - NeuroSarathi</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        .milestone-item {
+            padding: 12px;
+            border-left: 4px solid #4CAF50;
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .milestone-item:hover {
+            background-color: #f0f0f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .milestone-item.achieved {
+            border-left-color: #2E7D32;
+            background-color: #E8F5E9;
+        }
+        .milestone-item.pending {
+            border-left-color: #FBC02D;
+            background-color: #FFFDE7;
+        }
+        .milestone-item.delayed {
+            border-left-color: #F44336;
+            background-color: #FFEBEE;
+        }
+        .milestone-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        .status-achieved { background-color: #C8E6C9; color: #1B5E20; }
+        .status-pending { background-color: #FFF9C4; color: #F57F17; }
+        .status-delayed { background-color: #FFCDD2; color: #C62828; }
+        .domain-progress {
+            margin-bottom: 20px;
+        }
+        .domain-header {
+            padding: 10px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 6px 6px 0 0;
+            font-weight: 600;
+        }
+        .domain-stats {
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 0 0 6px 6px;
+            border: 1px solid #eee;
+            border-top: none;
+        }
+        .progress-item {
+            margin-bottom: 12px;
+        }
+        .progress-item strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+        .progress-bar-container {
+            position: relative;
+            height: 24px;
+            background-color: #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 8px;
+            color: white;
+            font-weight: 600;
+            font-size: 11px;
+            transition: width 0.3s;
+        }
+        .age-info {
+            background-color: #E3F2FD;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196F3;
+        }
+        .milestone-timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        .milestone-timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #ddd;
+        }
+        .timeline-point {
+            position: absolute;
+            left: -10px;
+            top: 8px;
+            width: 20px;
+            height: 20px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px #4CAF50;
+        }
+        .milestone-item.pending .timeline-point {
+            background-color: #FBC02D;
+            box-shadow: 0 0 0 2px #FBC02D;
+        }
+        .milestone-item.delayed .timeline-point {
+            background-color: #F44336;
+            box-shadow: 0 0 0 2px #F44336;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="dashboard.html">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <span class="nav-text" id="childName">Loading...</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1 class="mb-2">🌟 Developmental Milestones</h1>
+                <p class="text-muted">Track your child's developmental progress</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-primary btn-lg" id="addMilestoneBtn">
+                    <i class="fas fa-plus"></i> Record Milestone
+                </button>
+            </div>
+        </div>
+
+        <!-- Age Information -->
+        <div id="ageInfoContainer"></div>
+
+        <!-- Progress by Domain -->
+        <h5 class="mb-3">Progress by Domain</h5>
+        <div class="row mb-4" id="domainProgressContainer"></div>
+
+        <!-- Milestones Tabs -->
+        <h5 class="mb-3 mt-4">Milestones</h5>
+        <ul class="nav nav-tabs" id="milestoneTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="achieved-tab" data-bs-toggle="tab" 
+                        data-bs-target="#achieved" role="tab">Achieved</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="upcoming-tab" data-bs-toggle="tab" 
+                        data-bs-target="#upcoming" role="tab">Upcoming</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="delayed-tab" data-bs-toggle="tab" 
+                        data-bs-target="#delayed" role="tab">Delayed</button>
+            </li>
+        </ul>
+
+        <div class="tab-content mt-3">
+            <div class="tab-pane fade show active" id="achieved" role="tabpanel">
+                <div id="achievedList"></div>
+            </div>
+            <div class="tab-pane fade" id="upcoming" role="tabpanel">
+                <div id="upcomingList"></div>
+            </div>
+            <div class="tab-pane fade" id="delayed" role="tabpanel">
+                <div id="delayedList"></div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="text-center py-5" style="display: none;">
+            <i class="fas fa-star text-muted" style="font-size: 48px;"></i>
+            <h3 class="mt-3 text-muted">No milestones recorded yet</h3>
+            <p class="text-muted mb-4">Start recording your child's developmental milestones</p>
+            <button class="btn btn-primary" id="emptyStateAddBtn">Record First Milestone</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.0/dist/module/index.js" type="module"></script>
+    
+    <!-- Core Modules -->
+    <script src="js/core/config.js"></script>
+    <script src="js/core/state.js"></script>
+    <script src="js/core/auth.js"></script>
+    <script src="js/core/api.js"></script>
+    
+    <!-- UI Modules -->
+    <script src="js/ui/modals.js"></script>
+    <script src="js/ui/toasts.js"></script>
+    
+    <!-- Feature Modules -->
+    <script src="js/modules/milestones.js"></script>
+
+    <script>
+        const domainLabels = {
+            'communication': '🗣️ Communication',
+            'social': '👥 Social',
+            'cognitive': '🧠 Cognitive',
+            'motor_fine': '✋ Fine Motor',
+            'motor_gross': '🏃 Gross Motor',
+            'self_care': '🧹 Self-Care'
+        };
+
+        const domainColors = {
+            'communication': '#2196F3',
+            'social': '#9C27B0',
+            'cognitive': '#00BCD4',
+            'motor_fine': '#E91E63',
+            'motor_gross': '#FF9800',
+            'self_care': '#8BC34A'
+        };
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async function() {
+            const user = NeuroSarathi.State.get('user');
+            if (!user) {
+                window.location.href = 'signup.html';
+                return;
+            }
+
+            await loadMilestones();
+
+            document.getElementById('addMilestoneBtn').addEventListener('click', () => {
+                NeuroSarathi.Milestones.showAddModal();
+            });
+
+            document.getElementById('emptyStateAddBtn').addEventListener('click', () => {
+                NeuroSarathi.Milestones.showAddModal();
+            });
+
+            document.addEventListener('hidden.bs.modal', async (e) => {
+                await loadMilestones();
+            });
+        });
+
+        async function loadMilestones() {
+            const milestones = await NeuroSarathi.Milestones.load();
+            const activeChild = NeuroSarathi.State.get('activeChild');
+            
+            if (activeChild) {
+                document.getElementById('childName').textContent = activeChild.name;
+            }
+
+            renderAgeInfo();
+            renderDomainProgress();
+            renderMilestones(milestones);
+        }
+
+        function renderAgeInfo() {
+            const ageMonths = NeuroSarathi.Milestones.getChildAgeMonths();
+            const years = Math.floor(ageMonths / 12);
+            const months = ageMonths % 12;
+
+            document.getElementById('ageInfoContainer').innerHTML = `
+                <div class="age-info">
+                    <strong>Child's Age: </strong>
+                    ${years > 0 ? `${years} year${years > 1 ? 's' : ''} ` : ''}
+                    ${months} month${months !== 1 ? 's' : ''}
+                </div>
+            `;
+        }
+
+        function renderDomainProgress() {
+            const progress = NeuroSarathi.Milestones.getProgressByDomain();
+            const container = document.getElementById('domainProgressContainer');
+            
+            container.innerHTML = Object.entries(progress).map(([domain, stats]) => `
+                <div class="col-md-6 col-lg-4">
+                    <div class="domain-progress">
+                        <div class="domain-header">${domainLabels[domain]}</div>
+                        <div class="domain-stats">
+                            <div class="progress-item">
+                                <strong>${stats.achieved}/${stats.total} Achieved</strong>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill" style="width: ${stats.percentage}%; background: linear-gradient(90deg, ${domainColors[domain]}, ${adjustBrightness(domainColors[domain], -10)});">
+                                        ${stats.percentage > 5 ? `${stats.percentage}%` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderMilestones(milestones) {
+            if (milestones.length === 0) {
+                document.getElementById('emptyState').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('emptyState').style.display = 'none';
+
+            const achieved = NeuroSarathi.Milestones.getAchieved();
+            const pending = NeuroSarathi.Milestones.getPendingForAge();
+            const delayed = NeuroSarathi.Milestones.getDelayed();
+
+            document.getElementById('achievedList').innerHTML = achieved.length > 0 ?
+                achieved.map(m => createMilestoneCard(m)).join('') :
+                '<p class="text-muted text-center py-4">No achieved milestones yet</p>';
+
+            document.getElementById('upcomingList').innerHTML = pending.length > 0 ?
+                pending.map(m => createMilestoneCard(m)).join('') :
+                '<p class="text-muted text-center py-4">No upcoming milestones in this timeframe</p>';
+
+            document.getElementById('delayedList').innerHTML = delayed.length > 0 ?
+                delayed.map(m => createMilestoneCard(m)).join('') :
+                '<p class="text-muted text-center py-4">No delayed milestones</p>';
+        }
+
+        function createMilestoneCard(milestone) {
+            const domainLabel = milestone.domain ? milestone.domain.replace(/_/g, ' ').toUpperCase() : 'General';
+            const statusClass = milestone.status || 'pending';
+            const ageMonths = NeuroSarathi.Milestones.getChildAgeMonths();
+            const monthsAhead = milestone.age_months_expected - ageMonths;
+
+            return `
+                <div class="milestone-item ${statusClass} milestone-timeline">
+                    <div class="timeline-point"></div>
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <strong>${milestone.milestone_name}</strong>
+                            <span class="milestone-status status-${statusClass}">${statusClass.toUpperCase()}</span>
+                            <small class="d-block text-muted mt-1">Domain: ${domainLabel}</small>
+                            ${milestone.evidence_notes ? `
+                                <small class="d-block text-muted mt-1">
+                                    <em>${milestone.evidence_notes}</em>
+                                </small>
+                            ` : ''}
+                            <small class="d-block text-muted mt-1">
+                                Expected: ${milestone.age_months_expected}mo
+                                ${milestone.age_months_achieved ? ` • Achieved: ${milestone.age_months_achieved}mo` : ` • ${monthsAhead > 0 ? monthsAhead + 'mo away' : 'Due'}`}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function adjustBrightness(color, percent) {
+            // Simple hex color brightness adjustment
+            return color; // Simplified for now
+        }
+    </script>
+</body>
+</html>

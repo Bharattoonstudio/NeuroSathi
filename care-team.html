@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Care Team - NeuroSarathi</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        .member-card {
+            border-left: 5px solid #9C27B0;
+            transition: transform 0.2s;
+        }
+        .member-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .role-parent { background-color: #E8F5E9; color: #1B5E20; }
+        .role-therapist { background-color: #E1F5FE; color: #01579B; }
+        .role-doctor { background-color: #F3E5F5; color: #6A1B9A; }
+        .role-special_educator { background-color: #FFF3E0; color: #E65100; }
+        .role-family_member { background-color: #FCE4EC; color: #880E4F; }
+        .permission-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            margin: 2px;
+            background-color: #E8F5E9;
+            color: #2E7D32;
+        }
+        .message-box {
+            background-color: #F5F5F5;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        .message-from-me {
+            background-color: #E3F2FD;
+            margin-left: 20%;
+        }
+        .message-from-other {
+            background-color: #EEEEEE;
+            margin-right: 20%;
+        }
+        .unread-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #f44336;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="dashboard.html">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <span class="nav-text" id="childName">Loading...</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1 class="mb-2">👥 Care Team</h1>
+                <p class="text-muted">Collaborate with therapists, doctors, and family members</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-primary btn-lg" id="addMemberBtn">
+                    <i class="fas fa-user-plus"></i> Add Member
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Team Members List -->
+            <div class="col-lg-7 mb-4">
+                <h5 class="mb-3">Team Members</h5>
+                <div id="teamMembersList" class="row"></div>
+                <div id="emptyTeamState" class="text-center py-5" style="display: none;">
+                    <i class="fas fa-users text-muted" style="font-size: 48px;"></i>
+                    <h5 class="mt-3 text-muted">No team members yet</h5>
+                    <p class="text-muted">Add your first team member to start collaborating</p>
+                </div>
+            </div>
+
+            <!-- Messages Panel -->
+            <div class="col-lg-5">
+                <h5 class="mb-3">Messages</h5>
+                <div class="card">
+                    <div class="card-body">
+                        <div id="messagesPanel" style="height: 400px; overflow-y: auto; border: 1px solid #eee; border-radius: 4px; padding: 10px; margin-bottom: 15px; background-color: #fafafa;">
+                            <p class="text-center text-muted py-4">
+                                <i class="fas fa-comments"></i><br>
+                                Select a team member to view messages
+                            </p>
+                        </div>
+
+                        <div id="messageInputArea" style="display: none;">
+                            <textarea class="form-control mb-2" id="messageInput" 
+                                      placeholder="Type your message..." rows="3"></textarea>
+                            <button class="btn btn-primary w-100" id="sendMessageBtn">
+                                <i class="fas fa-paper-plane"></i> Send Message
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.0/dist/module/index.js" type="module"></script>
+    
+    <!-- Core Modules -->
+    <script src="js/core/config.js"></script>
+    <script src="js/core/state.js"></script>
+    <script src="js/core/auth.js"></script>
+    <script src="js/core/api.js"></script>
+    
+    <!-- UI Modules -->
+    <script src="js/ui/modals.js"></script>
+    <script src="js/ui/toasts.js"></script>
+    
+    <!-- Feature Modules -->
+    <script src="js/modules/care-team.js"></script>
+
+    <script>
+        let selectedMemberId = null;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Check auth
+            const user = NeuroSarathi.State.get('user');
+            if (!user) {
+                window.location.href = 'signup.html';
+                return;
+            }
+
+            // Load team members
+            await loadTeamMembers();
+
+            // Event listeners
+            document.getElementById('addMemberBtn').addEventListener('click', () => {
+                NeuroSarathi.CareTeam.showAddModal();
+            });
+
+            document.getElementById('sendMessageBtn').addEventListener('click', sendMessage);
+
+            // Reload after modal close
+            document.addEventListener('hidden.bs.modal', async (e) => {
+                await loadTeamMembers();
+            });
+        });
+
+        async function loadTeamMembers() {
+            const members = await NeuroSarathi.CareTeam.load();
+            const activeChild = NeuroSarathi.State.get('activeChild');
+            
+            // Update child name
+            if (activeChild) {
+                document.getElementById('childName').textContent = activeChild.name;
+            }
+
+            if (members.length === 0) {
+                document.getElementById('emptyTeamState').style.display = 'block';
+                document.getElementById('teamMembersList').innerHTML = '';
+                return;
+            }
+
+            document.getElementById('emptyTeamState').style.display = 'none';
+            renderTeamMembers(members);
+        }
+
+        function renderTeamMembers(members) {
+            const teamMembersList = document.getElementById('teamMembersList');
+            teamMembersList.innerHTML = '';
+
+            members.forEach(member => {
+                const memberHtml = createMemberCard(member);
+                teamMembersList.innerHTML += memberHtml;
+            });
+
+            // Add click handlers
+            members.forEach(member => {
+                document.getElementById(`member-${member.id}`).addEventListener('click', () => {
+                    selectMember(member);
+                });
+            });
+        }
+
+        function createMemberCard(member) {
+            const roleClass = `role-${member.role}`;
+            const permissions = [];
+            if (member.can_view_progress) permissions.push('View Progress');
+            if (member.can_add_sessions) permissions.push('Add Sessions');
+            if (member.can_message) permissions.push('Message');
+            if (member.can_edit_plans) permissions.push('Edit Plans');
+
+            return `
+                <div class="col-12 mb-3" id="member-${member.id}" style="cursor: pointer;">
+                    <div class="card member-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="card-title mb-2">${member.name}</h6>
+                                    <span class="role-badge ${roleClass}">
+                                        ${member.role.replace(/_/g, ' ').toUpperCase()}
+                                    </span>
+                                    ${member.relationship ? `
+                                        <small class="text-muted d-block mt-1">${member.relationship}</small>
+                                    ` : ''}
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                            type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#" 
+                                               onclick="editMemberPermissions('${member.id}')">
+                                            Edit Permissions
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" href="#" 
+                                               onclick="removeMember('${member.id}')">
+                                            Remove
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="mt-2">
+                                ${permissions.map(p => `<span class="permission-badge">${p}</span>`).join('')}
+                            </div>
+
+                            ${member.email ? `
+                                <small class="text-muted d-block mt-2">
+                                    <i class="fas fa-envelope"></i> ${member.email}
+                                </small>
+                            ` : ''}
+                            ${member.phone ? `
+                                <small class="text-muted d-block">
+                                    <i class="fas fa-phone"></i> ${member.phone}
+                                </small>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function selectMember(member) {
+            selectedMemberId = member.id;
+            document.getElementById('messageInputArea').style.display = 'block';
+
+            // Load message history
+            const messages = await NeuroSarathi.CareTeam.loadMessageHistory(member.user_id);
+            renderMessages(messages, member.name);
+
+            // Mark as read
+            const unreadMessageIds = messages.filter(m => !m.is_read).map(m => m.id);
+            if (unreadMessageIds.length > 0) {
+                await NeuroSarathi.CareTeam.markAsRead(unreadMessageIds);
+            }
+        }
+
+        function renderMessages(messages, memberName) {
+            const user = NeuroSarathi.State.get('user');
+            const messagesPanel = document.getElementById('messagesPanel');
+            
+            if (messages.length === 0) {
+                messagesPanel.innerHTML = `
+                    <p class="text-center text-muted py-4">
+                        No messages yet. Start a conversation with ${memberName}!
+                    </p>
+                `;
+                return;
+            }
+
+            messagesPanel.innerHTML = messages.map(msg => `
+                <div class="message-box ${msg.sender_id === user.id ? 'message-from-me' : 'message-from-other'}">
+                    <small class="text-muted d-block mb-1">
+                        ${new Date(msg.created_at).toLocaleString()}
+                    </small>
+                    <p class="mb-0">${msg.message}</p>
+                </div>
+            `).join('');
+
+            // Scroll to bottom
+            messagesPanel.scrollTop = messagesPanel.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const messageText = document.getElementById('messageInput').value.trim();
+            
+            if (!messageText) {
+                NeuroSarathi.UI.Toasts.show('Please type a message', 'warning');
+                return;
+            }
+
+            if (!selectedMemberId) {
+                NeuroSarathi.UI.Toasts.show('Please select a team member', 'warning');
+                return;
+            }
+
+            const members = NeuroSarathi.State.get('careTeamMembers') || [];
+            const member = members.find(m => m.id === selectedMemberId);
+
+            if (member) {
+                await NeuroSarathi.CareTeam.sendMessage(member.user_id, messageText);
+                document.getElementById('messageInput').value = '';
+                
+                // Reload messages
+                await selectMember(member);
+            }
+        }
+
+        async function removeMember(memberId) {
+            if (confirm('Are you sure you want to remove this team member?')) {
+                await NeuroSarathi.CareTeam.removeMember(memberId);
+            }
+        }
+
+        async function editMemberPermissions(memberId) {
+            const members = NeuroSarathi.State.get('careTeamMembers') || [];
+            const member = members.find(m => m.id === memberId);
+
+            if (!member) return;
+
+            // Show permission edit modal
+            NeuroSarathi.UI.Modals.create({
+                id: 'editPermissionsModal',
+                size: 'modal-lg',
+                header: `Edit Permissions - ${member.name}`,
+                body: `
+                    <div class="form-group">
+                        <label class="form-checkbox">
+                            <input type="checkbox" id="permViewProgress" 
+                                   ${member.can_view_progress ? 'checked' : ''} />
+                            <span>Can view progress and milestones</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-checkbox">
+                            <input type="checkbox" id="permAddSessions" 
+                                   ${member.can_add_sessions ? 'checked' : ''} />
+                            <span>Can add therapy sessions</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-checkbox">
+                            <input type="checkbox" id="permMessage" 
+                                   ${member.can_message ? 'checked' : ''} />
+                            <span>Can send messages</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-checkbox">
+                            <input type="checkbox" id="permEditPlans" 
+                                   ${member.can_edit_plans ? 'checked' : ''} />
+                            <span>Can edit therapy plans</span>
+                        </label>
+                    </div>
+                `,
+                footer: `
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="savePermissionsBtn">Save</button>
+                `,
+                onShow: function() {
+                    document.getElementById('savePermissionsBtn').addEventListener('click', async function() {
+                        const permissions = {
+                            can_view_progress: document.getElementById('permViewProgress').checked,
+                            can_add_sessions: document.getElementById('permAddSessions').checked,
+                            can_message: document.getElementById('permMessage').checked,
+                            can_edit_plans: document.getElementById('permEditPlans').checked
+                        };
+
+                        await NeuroSarathi.CareTeam.updatePermissions(memberId, permissions);
+                        document.querySelector('[data-dismiss="modal"]').click();
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>

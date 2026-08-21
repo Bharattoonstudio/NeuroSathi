@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+
+aPage_UpPage_UpPage_UpPage_UpPage_Uphonclick="profSignup()"  onclick="showTermsModal()"﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -861,4 +862,7 @@ async function submitProfessionalRegistration(event){
 <script src="/js/sw-register.js"></script>
 </body>
 </html>
+
+
+function showTermsModal(){const t=document.getElementById('termsModal');t&&(t.style.display='block',t.querySelectorAll('.termsCheck').forEach(e=>e.checked=!1),validateTermsGate())}function closeTermsModal(){const t=document.getElementById('termsModal');t&&(t.style.display='none')}document.addEventListener('DOMContentLoaded',function(){const t=document.getElementById('termsAcceptBtn');t&&t.addEventListener('click',function(e){e.preventDefault(),this.disabled||(profSignup(),closeTermsModal())})});
 

@@ -15,23 +15,54 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
-    --background:#fffaf5;
-    --ink:#0e1524;
+    /* Light theme (default) */
+    --background:#fef5f0;
+    --ink:#1a1a2e;
     --ink-soft:#4a5164;
     --card:#ffffff;
-    --primary:#ff8a5c;
+    --primary:#ff6b5b;
     --primary-dark:#e0632f;
-    --primary-foreground:#1a1200;
-    --sage-soft:#e2f1ee;
-    --terracotta:#e0632f;
-    --gold:#ffb083;
+    --primary-foreground:#ffffff;
+    --sage-soft:#d4f1e8;
+    --terracotta:#ff8c42;
+    --gold:#ffd97d;
     --muted-foreground:#7b8194;
-    --border:hsl(24 40% 90%);
-    --teal:#2d6b7a;
-    --indigo:#1e3a5f;
-    --shadow-lift:0 2px 4px rgba(14,21,36,0.05), 0 24px 60px -20px rgba(14,21,36,0.18);
-    --shadow-soft:0 1px 2px rgba(14,21,36,0.04), 0 8px 24px -12px rgba(14,21,36,0.12);
+    --border:hsl(12 60% 88%);
+    --teal:#00a99d;
+    --indigo:#6366f1;
+    --purple:#a855f7;
+    --pink:#ec4899;
+    --cyan:#06b6d4;
+    --lime:#84cc16;
+    --shadow-lift:0 8px 24px rgba(255,107,91,0.15), 0 16px 48px -8px rgba(255,107,91,0.1);
+    --shadow-soft:0 2px 8px rgba(0,0,0,0.08);
+    --shadow-hover:0 12px 32px rgba(255,107,91,0.2);
     --ease:cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* Dark theme (blood red & electric blue) */
+  html[data-theme="dark"] {
+    --background:#0a0e27;
+    --ink:#ffffff;
+    --ink-soft:#a0a0ff;
+    --card:#1a1f3a;
+    --primary:#ff1744;
+    --primary-dark:#ff5252;
+    --primary-foreground:#ffffff;
+    --sage-soft:#003d5e;
+    --terracotta:#ff5252;
+    --gold:#0066ff;
+    --muted-foreground:#7080c0;
+    --border:#333366;
+    --teal:#0052cc;
+    --indigo:#0066ff;
+    --purple:#00d9ff;
+    --pink:#ff1744;
+    --cyan:#00d9ff;
+    --lime:#0066ff;
+    --shadow-lift:0 8px 24px rgba(255,23,68,0.25), 0 16px 48px -8px rgba(0,102,255,0.15);
+    --shadow-soft:0 2px 8px rgba(255,255,255,0.1);
+    --shadow-hover:0 12px 32px rgba(255,23,68,0.3);
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -40,6 +71,10 @@
     background-attachment:fixed;
     position:relative;
     overflow-x:hidden;
+    transition: background .3s ease, color .3s ease;
+  }
+  html[data-theme="dark"] body{
+    background-image: radial-gradient(1000px 500px at 15% 0%, rgba(255,23,68,0.1), transparent 60%), radial-gradient(800px 500px at 100% 20%, rgba(0,102,255,0.1), transparent 60%);
   }
 
   /* Floating decorative texture, ambient not distracting */
@@ -59,8 +94,13 @@
   .topbar{position:sticky;top:0;z-index:900;display:flex;justify-content:space-between;align-items:center;
     padding:16px 4px;margin-bottom:4px;backdrop-filter:blur(14px);
     background:rgba(255,250,245,0.85);border-bottom:1px solid rgba(224,99,47,0.12);}
+  html[data-theme="dark"] .topbar{background:rgba(10,14,39,0.85);border-bottom:1px solid rgba(0,217,255,0.15);}
   .topbar .brand{display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;letter-spacing:-0.01em;color:var(--ink);}
   .topbar .brand-dot{width:8px;height:8px;border-radius:50%;background:var(--terracotta);}
+  .topbar-controls{display:flex;align-items:center;gap:12px;}
+  .theme-toggle{background:none;border:2px solid var(--border);color:var(--ink);font-size:1.2rem;width:40px;height:40px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s ease;}
+  .theme-toggle:hover{transform:scale(1.1);}
+  html[data-theme="dark"] .theme-toggle{border-color:#00d9ff;color:#00d9ff;}
   .topbar a{color:var(--muted-foreground);font-size:.8rem;text-decoration:none;font-weight:600;}
 
   .disclaimer{background:rgba(255,138,92,0.1);border:1px solid rgba(224,99,47,0.35);color:#8a3a1a;
@@ -85,9 +125,9 @@
   .story-row{display:flex;gap:14px;overflow-x:auto;padding:6px 2px 18px;scrollbar-width:none;}
   .story-row::-webkit-scrollbar{display:none;}
   .story-item{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;cursor:pointer;}
-  .story-ring{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    background:var(--border);padding:3px;transition:transform .15s var(--ease);}
-  .story-item.active .story-ring{background:linear-gradient(135deg, var(--terracotta), var(--gold), var(--teal));}
+  .story-ring{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:var(--border);padding:3px;transition:transform .15s var(--ease), box-shadow .15s var(--ease);box-shadow:0 4px 12px rgba(0,0,0,0.08);}
+  .story-item.active .story-ring{background:linear-gradient(135deg, #ff6b5b, #ff8c42, #ffd97d, #00a99d);box-shadow:0 8px 20px rgba(255,107,91,0.3);}
   .story-item:active .story-ring{transform:scale(0.94);}
   .story-avatar{width:100%;height:100%;border-radius:50%;background:var(--card);
     display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;
@@ -97,10 +137,10 @@
   .story-add .story-ring{background:none;border:2px dashed var(--border);}
   .story-add .story-avatar{background:var(--background);color:var(--muted-foreground);font-size:1.5rem;border:none;}
 
-  /* Hero cover card — dark, matches the site's bold hero language */
+  /* Hero cover card — vibrant and kid-friendly */
   .hero-cover{position:relative;border-radius:24px;overflow:hidden;margin-bottom:16px;
-    background:linear-gradient(155deg, #0e1524 0%, #1e3a5f 100%);
-    box-shadow:var(--shadow-lift);padding:24px 22px;color:#fff;}
+    background:linear-gradient(135deg, #ff6b5b 0%, #ff8c42 50%, #ffd97d 100%);
+    box-shadow:var(--shadow-hover);padding:28px 24px;color:#ffffff;border:2px solid rgba(255,255,255,0.2);}
   .hero-cover::before{content:'';position:absolute;width:260px;height:260px;border-radius:50%;filter:blur(70px);opacity:0.4;
     background:radial-gradient(circle, var(--primary), transparent 70%);top:-90px;right:-60px;
     animation:float 9s var(--ease) infinite;}
@@ -134,19 +174,28 @@
   }
 
   /* Content cards */
-  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;
-    padding:16px;margin-bottom:14px;box-shadow:var(--shadow-soft);transition:box-shadow .25s var(--ease), transform .25s var(--ease);}
+  .card{background:var(--card);border:2px solid var(--border);border-radius:20px;
+    padding:18px;margin-bottom:16px;box-shadow:var(--shadow-soft);transition:box-shadow .25s var(--ease), transform .25s var(--ease), border-color .25s var(--ease);position:relative;overflow:hidden;}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg, var(--primary), var(--terracotta), var(--gold));}
   .card-head{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
-  .card-icon{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;
-    justify-content:center;font-size:19px;flex-shrink:0;background:linear-gradient(150deg,#1a8f78,var(--teal));
-    box-shadow:0 8px 16px -6px rgba(14,21,36,0.2);}
-  .card-icon.terracotta{background:linear-gradient(150deg,#ff8a5c,var(--terracotta));}
-  .card-icon.gold{background:linear-gradient(150deg,var(--gold),var(--primary-dark));}
+  .card-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;
+    justify-content:center;font-size:22px;flex-shrink:0;background:linear-gradient(135deg,#00a99d,#06b6d4);
+    box-shadow:0 8px 20px rgba(0,169,157,0.4);color:#fff;}
+  .card-icon.terracotta{background:linear-gradient(135deg,#ff6b5b,#ff8c42);box-shadow:0 8px 20px rgba(255,107,91,0.4);}
+  .card-icon.gold{background:linear-gradient(135deg,#ffd97d,#ff8c42);box-shadow:0 8px 20px rgba(255,217,125,0.4);}
+  .card-icon.purple{background:linear-gradient(135deg,#a855f7,#6366f1);box-shadow:0 8px 20px rgba(163,85,247,0.4);}
+  .card-icon.pink{background:linear-gradient(135deg,#ec4899,#a855f7);box-shadow:0 8px 20px rgba(236,72,153,0.4);}
 
   .more-menu-grid{display:flex;flex-direction:column;gap:10px;}
-  .more-menu-item{display:flex;align-items:center;gap:14px;padding:14px;border-radius:16px;
-    background:var(--background);border:1px solid var(--border);cursor:pointer;transition:transform .15s var(--ease);}
-  .more-menu-item:active{transform:scale(0.98);}
+  .more-menu-item{display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;
+    background:linear-gradient(135deg, rgba(255,107,91,0.12), rgba(255,140,66,0.1));border:2px solid var(--border);cursor:pointer;transition:transform .15s var(--ease), box-shadow .15s var(--ease), border-color .15s var(--ease);}
+  .more-menu-item:nth-child(1){background:linear-gradient(135deg, rgba(255,107,91,0.15), rgba(255,140,66,0.1));}
+  .more-menu-item:nth-child(2){background:linear-gradient(135deg, rgba(0,169,157,0.12), rgba(6,182,212,0.1));}
+  .more-menu-item:nth-child(3){background:linear-gradient(135deg, rgba(163,85,247,0.12), rgba(236,72,153,0.1));}
+  .more-menu-item:nth-child(4){background:linear-gradient(135deg, rgba(99,102,241,0.12), rgba(6,182,212,0.1));}
+  .more-menu-item:nth-child(5){background:linear-gradient(135deg, rgba(255,217,125,0.15), rgba(255,140,66,0.1));}
+  .more-menu-item:nth-child(n+6){background:linear-gradient(135deg, rgba(34,197,94,0.12), rgba(59,130,246,0.1));}
+  .more-menu-item:active{transform:scale(0.97);box-shadow:0 8px 20px rgba(255,107,91,0.15);border-color:var(--primary);}
   .more-menu-icon{font-size:1.5rem;flex-shrink:0;width:42px;text-align:center;}
   .more-menu-text{flex:1;min-width:0;}
   .more-menu-label{font-weight:700;font-size:.95rem;color:var(--ink);}
@@ -154,8 +203,16 @@
   .more-menu-arrow{color:var(--muted-foreground);font-size:1.1rem;flex-shrink:0;}
 
   .screening-infographic-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
-  .screening-domain-card{background:var(--background);border:1px solid var(--border);border-radius:14px;padding:14px 12px;text-align:center;display:flex;flex-direction:column;align-items:center;}
-  .screening-domain-icon-badge{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+  .screening-domain-card{background:var(--background);border:2px solid var(--border);border-radius:14px;padding:14px 12px;text-align:center;display:flex;flex-direction:column;align-items:center;transition:all .2s var(--ease);}
+  .screening-domain-card:nth-child(1){background:linear-gradient(135deg, rgba(255,107,91,0.08), rgba(255,140,66,0.05));border-color:rgba(255,107,91,0.3);}
+  .screening-domain-card:nth-child(2){background:linear-gradient(135deg, rgba(0,169,157,0.08), rgba(6,182,212,0.05));border-color:rgba(0,169,157,0.3);}
+  .screening-domain-card:nth-child(3){background:linear-gradient(135deg, rgba(163,85,247,0.08), rgba(236,72,153,0.05));border-color:rgba(163,85,247,0.3);}
+  .screening-domain-card:nth-child(4){background:linear-gradient(135deg, rgba(99,102,241,0.08), rgba(59,130,246,0.05));border-color:rgba(99,102,241,0.3);}
+  .screening-domain-icon-badge{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:8px;font-weight:700;font-size:20px;color:#fff;box-shadow:0 6px 16px rgba(0,0,0,0.15);}
+  .screening-domain-card:nth-child(1) .screening-domain-icon-badge{background:linear-gradient(135deg, #ff6b5b, #ff8c42);}
+  .screening-domain-card:nth-child(2) .screening-domain-icon-badge{background:linear-gradient(135deg, #00a99d, #06b6d4);}
+  .screening-domain-card:nth-child(3) .screening-domain-icon-badge{background:linear-gradient(135deg, #a855f7, #ec4899);}
+  .screening-domain-card:nth-child(4) .screening-domain-icon-badge{background:linear-gradient(135deg, #6366f1, #06b6d4);}
   .screening-domain-label{font-weight:700;font-size:.82rem;color:var(--ink);margin-bottom:4px;}
   .screening-domain-note{font-size:.76rem;font-weight:600;line-height:1.3;}
 
@@ -170,21 +227,31 @@
     font-family:inherit;font-size:.92rem;background:var(--card);color:var(--ink);margin-bottom:14px;box-sizing:border-box;}
   .lc-search:focus{outline:none;border-color:var(--terracotta);}
   .lc-cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:8px 0 18px;}
-  .lc-cat-item{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 6px;
-    border-radius:16px;background:var(--card);border:1px solid var(--border);cursor:pointer;text-align:center;
-    transition:transform .15s var(--ease);}
-  .lc-cat-item:active{transform:scale(0.95);}
-  .lc-cat-item.selected{border-color:var(--terracotta);background:var(--sage-soft);}
+  .lc-cat-item{display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 8px;
+    border-radius:14px;background:var(--card);border:1.5px solid var(--border);cursor:pointer;text-align:center;
+    transition:all .2s var(--ease);}
+  .lc-cat-item:active{transform:scale(0.94);}
+  .lc-cat-item.selected{border-color:var(--primary);background:linear-gradient(135deg, rgba(255,107,91,0.15), rgba(255,140,66,0.12));box-shadow:0 4px 12px rgba(255,107,91,0.2);border-width:2px;}
+  .lc-cat-item:nth-child(1).selected{background:linear-gradient(135deg, rgba(255,107,91,0.15), rgba(255,140,66,0.12));border-color:#ff6b5b;}
+  .lc-cat-item:nth-child(2).selected{background:linear-gradient(135deg, rgba(0,169,157,0.15), rgba(6,182,212,0.12));border-color:#00a99d;}
+  .lc-cat-item:nth-child(3).selected{background:linear-gradient(135deg, rgba(163,85,247,0.15), rgba(236,72,153,0.12));border-color:#a855f7;}
+  .lc-cat-item:nth-child(4).selected{background:linear-gradient(135deg, rgba(255,217,125,0.15), rgba(255,140,66,0.12));border-color:#ffd97d;}
   .lc-cat-icon{font-size:1.4rem;}
   .lc-cat-label{font-size:10.5px;font-weight:700;color:var(--ink-soft);line-height:1.2;}
-  .lc-section-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;margin:20px 0 10px;color:var(--ink);}
+  .lc-section-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;margin:20px 0 10px;color:var(--ink);position:relative;padding-left:12px;}
+  .lc-section-title::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:4px;height:24px;border-radius:2px;background:linear-gradient(180deg, #ff6b5b, #06b6d4);}
   .lc-article-row{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;scrollbar-width:none;}
   .lc-article-row::-webkit-scrollbar{display:none;}
-  .lc-article-card{background:var(--card);border:1px solid var(--border);border-radius:16px;
-    padding:14px;margin-bottom:10px;box-shadow:var(--shadow-soft);}
+  .lc-article-card{background:var(--card);border:2px solid var(--border);border-radius:18px;
+    padding:14px;margin-bottom:12px;box-shadow:0 6px 16px rgba(0,0,0,0.08);transition:all .3s var(--ease);}
+  .lc-article-card:active{transform:translateY(-2px);box-shadow:0 10px 24px rgba(255,107,91,0.15);}
   .lc-article-row .lc-article-card{flex-shrink:0;width:230px;margin-bottom:0;}
-  .lc-article-thumb{width:100%;height:100px;border-radius:12px;background:linear-gradient(135deg,var(--sage-soft),var(--gold));
-    display:flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:10px;}
+  .lc-article-thumb{width:100%;height:100px;border-radius:12px;background:linear-gradient(135deg,#ffd97d,#ff8c42);
+    display:flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:10px;box-shadow:0 6px 16px rgba(255,217,125,0.2);}
+  .lc-article-row .lc-article-card:nth-child(2) .lc-article-thumb{background:linear-gradient(135deg, #00a99d, #06b6d4);box-shadow:0 6px 16px rgba(0,169,157,0.2);}
+  .lc-article-row .lc-article-card:nth-child(3) .lc-article-thumb{background:linear-gradient(135deg, #a855f7, #6366f1);box-shadow:0 6px 16px rgba(163,85,247,0.2);}
+  .lc-article-row .lc-article-card:nth-child(4) .lc-article-thumb{background:linear-gradient(135deg, #ec4899, #06b6d4);box-shadow:0 6px 16px rgba(236,72,153,0.2);}
+  .lc-article-row .lc-article-card:nth-child(5) .lc-article-thumb{background:linear-gradient(135deg, #ffd97d, #ff6b5b);box-shadow:0 6px 16px rgba(255,217,125,0.2);}
   .lc-article-cat{font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--terracotta);margin-bottom:4px;}
   .lc-article-title{font-weight:700;font-size:.92rem;color:var(--ink);line-height:1.3;margin-bottom:4px;}
   .lc-article-desc{font-size:.8rem;color:var(--muted-foreground);line-height:1.4;margin-bottom:8px;
@@ -208,10 +275,10 @@
   .post-badge{font-size:14px;flex-shrink:0;}
 
   /* Composer bar */
-  .composer{background:var(--card);border:1px solid var(--border);border-radius:16px;
-    padding:12px 14px;margin-bottom:14px;box-shadow:var(--shadow-soft);
-    display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .2s var(--ease);}
-  .composer:active{background:var(--background);}
+  .composer{background:linear-gradient(135deg, rgba(255,107,91,0.1), rgba(255,140,66,0.08));border:2px solid var(--border);border-radius:18px;
+    padding:14px 16px;margin-bottom:16px;box-shadow:0 4px 12px rgba(255,107,91,0.1);
+    display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .2s var(--ease), box-shadow .2s var(--ease);}
+  .composer:active{background:linear-gradient(135deg, rgba(255,107,91,0.15), rgba(255,140,66,0.12));box-shadow:0 6px 16px rgba(255,107,91,0.15);}
   .composer-avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;
     background:linear-gradient(150deg,var(--primary),var(--primary-dark));color:#fff;display:flex;align-items:center;
     justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.9rem;
@@ -220,13 +287,17 @@
     border-radius:999px;padding:10px 16px;color:var(--muted-foreground);font-size:.88rem;}
 
   /* Bottom action row like a Facebook post */
-  .post-actions{display:flex;border-top:1px solid var(--border);margin-top:12px;padding-top:6px;}
+  .post-actions{display:flex;border-top:2px solid var(--border);margin-top:14px;padding-top:8px;gap:4px;}
   .post-action-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
-    background:none;border:none;padding:9px 4px;border-radius:8px;cursor:pointer;
-    color:var(--muted-foreground);font-size:.82rem;font-weight:600;font-family:inherit;
-    transition:background .2s var(--ease);}
-  .post-action-btn:active{background:var(--background);}
-  .post-action-btn.active-like{color:var(--primary-dark);}
+    background:linear-gradient(135deg, rgba(255,107,91,0.08), rgba(255,140,66,0.06));border:2px solid transparent;padding:11px 6px;border-radius:12px;cursor:pointer;
+    color:var(--muted-foreground);font-size:.82rem;font-weight:700;font-family:inherit;
+    transition:background .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease);}
+  .post-action-btn:nth-child(1){background:linear-gradient(135deg, rgba(255,107,91,0.1), rgba(255,140,66,0.08));}
+  .post-action-btn:nth-child(2){background:linear-gradient(135deg, rgba(0,169,157,0.1), rgba(6,182,212,0.08));}
+  .post-action-btn:nth-child(3){background:linear-gradient(135deg, rgba(163,85,247,0.1), rgba(236,72,153,0.08));}
+  .post-action-btn:nth-child(4){background:linear-gradient(135deg, rgba(255,217,125,0.1), rgba(255,140,66,0.08));}
+  .post-action-btn:active{transform:scale(0.97);border-color:var(--primary);}
+  .post-action-btn.active-like{color:var(--primary);border-color:var(--primary);background:linear-gradient(135deg, rgba(255,107,91,0.15), rgba(255,140,66,0.12));}
 
   h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.4rem;letter-spacing:-0.01em;margin:0 0 4px;color:var(--ink);}
   h2{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.08rem;letter-spacing:-0.01em;margin:0;color:var(--ink);}
@@ -242,13 +313,15 @@
     transition:transform .15s var(--ease);}
   .chip:active{transform:scale(0.96);}
   .chip.selected{background:var(--primary);color:var(--primary-foreground);border-color:var(--primary);font-weight:700;}
-  .btn{display:inline-block;width:100%;text-align:center;background:var(--primary);
-    color:var(--primary-foreground);border:none;padding:14px;border-radius:999px;
-    font-weight:700;font-size:1rem;cursor:pointer;transition:transform .2s var(--ease);
-    box-shadow:0 8px 20px -6px rgba(255,138,92,0.5);margin-top:18px;font-family:inherit;}
-  .btn:active{transform:scale(0.98);}
-  .btn.secondary{background:var(--background);color:var(--primary-dark);border:1px solid var(--primary);box-shadow:none;}
-  .btn.small{width:auto;padding:10px 18px;font-size:.85rem;margin-top:0;}
+  .btn{display:inline-block;width:100%;text-align:center;background:linear-gradient(135deg, var(--primary), var(--terracotta));
+    color:var(--primary-foreground);border:none;padding:16px;border-radius:999px;
+    font-weight:700;font-size:1rem;cursor:pointer;transition:transform .2s var(--ease), box-shadow .2s var(--ease);
+    box-shadow:0 10px 28px -8px rgba(255,107,91,0.4);margin-top:18px;font-family:inherit;position:relative;overflow:hidden;}
+  .btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg, rgba(255,255,255,0.2), transparent);opacity:0;transition:opacity .3s;}
+  .btn:hover::before{opacity:1;}
+  .btn:active{transform:scale(0.97);box-shadow:0 6px 16px -4px rgba(255,107,91,0.3);}
+  .btn.secondary{background:var(--background);color:var(--primary);border:2px solid var(--primary);box-shadow:none;}
+  .btn.small{width:auto;padding:11px 20px;font-size:.85rem;margin-top:0;background:linear-gradient(135deg, var(--teal), var(--cyan));}
   .row{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;}
   .row .btn{margin-top:0;}
   .soon{opacity:0.65;}
@@ -289,10 +362,14 @@
     background:rgba(255,250,245,0.92);backdrop-filter:blur(14px);border-top:1px solid rgba(224,99,47,0.14);
     padding:8px 4px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(14,21,36,0.06);}
   .bottom-nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;cursor:pointer;
-    padding:4px 2px;border-radius:12px;color:var(--muted-foreground);transition:color .15s var(--ease);}
+    padding:4px 2px;border-radius:12px;color:var(--muted-foreground);transition:color .15s var(--ease), background .15s var(--ease);}
   .bottom-nav-item .bn-icon{font-size:1.25rem;line-height:1;}
   .bottom-nav-item .bn-label{font-size:10.5px;font-weight:700;}
-  .bottom-nav-item.active{color:var(--terracotta);}
+  .bottom-nav-item.active{background:rgba(255,107,91,0.1);border-radius:12px;}
+  .bottom-nav-item:nth-child(1).active{color:#ff6b5b;background:rgba(255,107,91,0.12);}
+  .bottom-nav-item:nth-child(2).active{color:#00a99d;background:rgba(0,169,157,0.12);}
+  .bottom-nav-item:nth-child(3).active{color:#a855f7;background:rgba(163,85,247,0.12);}
+  .bottom-nav-item:nth-child(4).active{color:#06b6d4;background:rgba(6,182,212,0.12);}
   .bottom-nav-item:active{transform:scale(0.94);}
 
   .avatar-fab{position:fixed;bottom:84px;right:20px;width:60px;height:60px;border-radius:50%;
@@ -318,25 +395,25 @@
   .reviewed-badge{font-size:10px; font-weight:700; color:var(--teal); background:var(--background); padding:3px 9px; border-radius:999px;}
   .plan-goal h3{font-size:14px; font-weight:700; margin-bottom:4px;}
   .plan-goal p{font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin-bottom:0;}
-  .active-goal{background:rgba(255,138,92,0.06); margin:0 -16px; padding:14px 16px; border-radius:12px;}
+  .active-goal{background:linear-gradient(135deg, rgba(255,107,91,0.12), rgba(255,140,66,0.08)); margin:0 -16px; padding:14px 16px; border-radius:12px;border-left:4px solid #ff6b5b;}
   .plan-btn{margin-top:10px; background:var(--primary); color:var(--primary-foreground); border:none; font-weight:700; font-size:11.5px; padding:8px 14px; border-radius:999px; cursor:pointer;}
   .plan-source{font-size:10.5px; color:var(--muted-foreground); text-align:center; margin:12px 0 4px; line-height:1.5; font-family:'IBM Plex Mono',monospace;}
 
   /* ============ PARENT TIP ============ */
-  .tip-card{display:flex; gap:12px; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; margin:14px 0; box-shadow:var(--shadow-soft);}
-  .tip-icon{width:40px; height:40px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:18px; background:linear-gradient(150deg,var(--gold),var(--primary-dark));}
+  .tip-card{display:flex; gap:12px; background:linear-gradient(135deg, rgba(255,217,125,0.12), rgba(0,169,157,0.08)); border:2px solid rgba(255,217,125,0.3); border-radius:18px; padding:16px; margin:16px 0; box-shadow:0 4px 12px rgba(255,217,125,0.1);}
+  .tip-icon{width:44px; height:44px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:20px; background:linear-gradient(135deg,#ffd97d,#ff8c42);box-shadow:0 6px 14px rgba(255,217,125,0.3);}
   .tip-eyebrow{font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--primary-dark); text-transform:uppercase; margin-bottom:3px; font-weight:600;}
   .tip-body h3{font-size:14.5px; font-weight:700; margin-bottom:5px;}
   .tip-text{font-size:12.5px; color:var(--muted-foreground); line-height:1.5; margin-bottom:8px;}
   .tip-more{background:none; border:none; color:var(--primary-dark); font-weight:700; font-size:11.5px; cursor:pointer; padding:0;}
 
   /* ============ ROUTINE CHECKLIST ============ */
-  .checklist-card{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:4px 16px; margin-bottom:14px; box-shadow:var(--shadow-soft);}
-  .check-item{display:flex; align-items:center; gap:12px; padding:12px 0; border-top:1px solid var(--border); cursor:pointer;}
+  .checklist-card{background:linear-gradient(135deg, rgba(0,169,157,0.08), rgba(6,182,212,0.06)); border:2px solid rgba(0,169,157,0.2); border-radius:18px; padding:6px 16px; margin-bottom:16px; box-shadow:0 4px 12px rgba(0,169,157,0.1);}
+  .check-item{display:flex; align-items:center; gap:12px; padding:14px 0; border-top:1px solid var(--border); cursor:pointer;}
   .check-item:first-child{border-top:none;}
-  .check-dot{width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0;}
-  .check-item.done .check-dot{background:linear-gradient(150deg,#1a8f78,var(--teal)); color:#fff;}
-  .check-item:not(.done) .check-dot{background:var(--background); color:var(--muted-foreground); border:1.5px dashed var(--border);}
+  .check-dot{width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0;transition:all .3s var(--ease);}
+  .check-item.done .check-dot{background:linear-gradient(135deg,#00a99d,#06b6d4); color:#fff;box-shadow:0 4px 12px rgba(0,169,157,0.3);}
+  .check-item:not(.done) .check-dot{background:var(--background); color:var(--muted-foreground); border:2px solid var(--border);}
   .check-label{font-size:13.5px; font-weight:600;}
   .check-item:not(.done) .check-label{color:var(--muted-foreground); font-weight:500;}
 
@@ -344,10 +421,12 @@
   .frames-row{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px;}
   @media (max-width:500px){.frames-row{grid-template-columns:repeat(2,1fr);}}
   .frame-card{border-radius:14px; padding:14px 10px; text-align:center; box-shadow:var(--shadow-soft); border:1px solid var(--border);}
-  .frame-saffron{background:linear-gradient(155deg,#fff3e8,#fff);}
-  .frame-teal{background:linear-gradient(155deg,#e8f5f2,#fff);}
-  .frame-indigo{background:linear-gradient(155deg,#ece9f7,#fff);}
-  .frame-coral{background:linear-gradient(155deg,#fdece7,#fff);}
+  .frame-saffron{background:linear-gradient(135deg,#ffd97d,#ff8c42);}
+  .frame-teal{background:linear-gradient(135deg,#00a99d,#06b6d4);}
+  .frame-indigo{background:linear-gradient(135deg,#a855f7,#6366f1);}
+  .frame-coral{background:linear-gradient(135deg,#ff6b5b,#ec4899);}
+  .frame-card{border:2px solid rgba(255,255,255,0.4);}
+  .frame-label{color:#fff;font-weight:700;}
   .frame-photo{width:100%; aspect-ratio:1; border-radius:9px; background:rgba(255,255,255,0.6); display:flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:8px; border:2px solid rgba(255,255,255,0.9);}
   .frame-label{font-size:11px; font-weight:700; line-height:1.3; margin-bottom:2px;}
   .frame-date{font-size:9.5px; color:var(--muted-foreground); font-family:'IBM Plex Mono',monospace;}
@@ -356,17 +435,22 @@
   .add-frame .frame-label{color:var(--muted-foreground);}
 
   /* ============ SARATHI ACADEMY ============ */
-  .academy-card{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; margin-bottom:14px; box-shadow:var(--shadow-soft);}
-  .academy-progress-bar{height:5px; background:var(--background); border-radius:999px; overflow:hidden; margin-bottom:14px;}
-  .academy-progress-fill{height:100%; background:linear-gradient(90deg,var(--teal),var(--primary)); border-radius:999px;}
-  .acad-module{display:flex; align-items:center; gap:10px; padding:10px 4px; border-radius:11px;}
-  .acad-module.active{background:var(--background);}
+  .academy-card{background:linear-gradient(135deg, rgba(255,107,91,0.08), rgba(0,169,157,0.08)); border:2px solid var(--border); border-radius:20px; padding:18px; margin-bottom:16px; box-shadow:0 4px 12px rgba(0,0,0,0.08);}
+  .academy-progress-bar{height:8px; background:var(--border); border-radius:999px; overflow:hidden; margin-bottom:16px; box-shadow:inset 0 2px 4px rgba(0,0,0,0.05);}
+  .academy-progress-fill{height:100%; background:linear-gradient(90deg,#ff6b5b,#ff8c42,#ffd97d,#00a99d); border-radius:999px; box-shadow:0 0 12px rgba(255,107,91,0.4);}
+  .acad-module{display:flex; align-items:center; gap:10px; padding:10px 4px; border-radius:11px;transition:background .2s var(--ease);}
+  .acad-module.active{background:var(--background);border-left:3px solid transparent;}
+  .acad-module:nth-child(1).active{border-left-color:#ff6b5b;}
+  .acad-module:nth-child(2).active{border-left-color:#00a99d;}
+  .acad-module:nth-child(3).active{border-left-color:#a855f7;}
+  .acad-module:nth-child(4).active{border-left-color:#ffd97d;}
+  .acad-module:nth-child(5).active{border-left-color:#06b6d4;}
   .acad-module.locked{opacity:0.5;}
   .acad-icon{width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;}
-  .acad-teal{background:linear-gradient(150deg,#1a8f78,var(--teal));}
-  .acad-saffron{background:linear-gradient(150deg,var(--gold),var(--primary-dark));}
-  .acad-indigo{background:linear-gradient(150deg,#4a3f8c,var(--indigo));}
-  .acad-coral{background:linear-gradient(150deg,#e8836a,var(--terracotta));}
+  .acad-teal{background:linear-gradient(135deg,#00a99d,#06b6d4);}
+  .acad-saffron{background:linear-gradient(135deg,#ffd97d,#ff8c42);}
+  .acad-indigo{background:linear-gradient(135deg,#6366f1,#a855f7);}
+  .acad-coral{background:linear-gradient(135deg,#ff6b5b,#ec4899);}
   .acad-body{flex:1; min-width:0;}
   .acad-body b{font-size:13px; display:block; margin-bottom:1px;}
   .acad-body span{font-size:11px; color:var(--muted-foreground);}
@@ -397,11 +481,11 @@
 
   /* ============ UNLIMITED CHAT UPSELL BANNER ============ */
   .upsell-banner{
-    display:flex; align-items:center; gap:14px; background:linear-gradient(150deg,var(--indigo),#17133a);
-    border-radius:16px; padding:16px 18px; margin:14px 0; cursor:pointer; box-shadow:var(--shadow-soft);
-    transition:transform .2s var(--ease);
+    display:flex; align-items:center; gap:14px; background:linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+    border-radius:20px; padding:18px 20px; margin:16px 0; cursor:pointer; box-shadow:0 12px 32px rgba(99,102,241,0.3);
+    transition:transform .2s var(--ease), box-shadow .2s var(--ease);border:2px solid rgba(255,255,255,0.2);
   }
-  .upsell-banner:active{transform:scale(0.98);}
+  .upsell-banner:active{transform:scale(0.97);box-shadow:0 8px 20px rgba(99,102,241,0.2);}
   .upsell-icon{
     width:42px; height:42px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
     font-size:19px; background:linear-gradient(150deg,var(--gold),var(--primary-dark));
@@ -609,7 +693,10 @@
 <div class="wrap">
   <div class="topbar">
     <div class="brand"><span class="brand-dot"></span>NeuroSarathi</div>
-    <a href="#" id="signOutLink">Sign out</a>
+    <div class="topbar-controls">
+      <button class="theme-toggle" id="themeToggle" title="Toggle dark/light mode">☀️</button>
+      <a href="#" id="signOutLink">Sign out</a>
+    </div>
   </div>
 
   <div class="disclaimer">
@@ -727,6 +814,41 @@ window.addEventListener("popstate", (e)=>{
 });
 
 let allChildren = [];
+
+// Theme toggle functionality
+function initThemeToggle() {
+  const themeToggle = document.getElementById('themeToggle');
+  const savedTheme = localStorage.getItem('ns-theme') || 'light';
+
+  // Apply saved theme
+  if (savedTheme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    themeToggle.textContent = '🌙';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    themeToggle.textContent = '☀️';
+  }
+
+  // Toggle theme on button click
+  themeToggle.addEventListener('click', (e) => {
+    e.preventDefault();
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+    if (newTheme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      themeToggle.textContent = '🌙';
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      themeToggle.textContent = '☀️';
+    }
+
+    localStorage.setItem('ns-theme', newTheme);
+  });
+}
+
+// Initialize theme on page load
+initThemeToggle();
 
 async function init(){
   const { data: { session } } = await dash2Client.auth.getSession();
@@ -1297,11 +1419,27 @@ function renderMoreMenu(child){
   setActiveBottomTab("more");
   const items = [
     { icon:"📅", label:"Routine Builder", desc:"Build a daily routine that works for your child.", action:"renderRoutineBuilder" },
+    { icon:"🎮", label:"Games & Social Stories", desc:"Simple games and read-along stories to enjoy together.", action:"renderLearningGames" },
+    { icon:"🗣️", label:"Speech & Communication Board", desc:"Tap pictures to build a sentence and hear it out loud.", action:"renderSpeechBoard" },
+    { icon:"📚", label:"Parent Learning Guides", desc:"Practical tips and strategies to support your child at home.", action:"renderParentGuides" },
+    // Phase 2: Literacy & Numeracy
+    { icon:"📖", label:"Reading Support", desc:"Read-aloud mode with dyslexia-friendly text options.", action:"renderReadingSupport" },
+    { icon:"🧮", label:"Math Games", desc:"Visual counting, addition & subtraction with pictures.", action:"renderMathGames" },
+    { icon:"✏️", label:"Writing Practice", desc:"Letter formation, simple words, speech-to-text.", action:"renderWritingPractice" },
+    { icon:"🔤", label:"Phonics & Sight-Words", desc:"Learn letter sounds and recognize common words.", action:"renderPhonicsGames" },
+    // Phase 3: Speech & Communication
+    { icon:"💬", label:"Vocabulary Builder", desc:"Learn new words through pictures and games.", action:"renderVocabularyBuilder" },
+    { icon:"😊", label:"Emotions & Social", desc:"Recognize feelings and practice social situations.", action:"renderEmotionsSocial" },
+    // Phase 4: Accessibility & Support
+    { icon:"🎨", label:"Sensory Modes", desc:"Adjust colors, sounds, animations to your preference.", action:"renderSensoryModes" },
+    { icon:"⚡", label:"Focus & ADHD Tools", desc:"Timer, task breakdown, distraction-free practice.", action:"renderFocusTools" },
     { icon:"🧠", label:"Developmental Check-in", desc:"A free, educational observation check-in.", action:"renderScreening" },
     { icon:"📞", label:"Connect with NeuroSarathi Founder", desc:"Reach out directly via WhatsApp or email.", action:"connectFounder" },
     { icon:"📣", label:"Refer NeuroSarathi", desc:"Know a parent who could use this? Share it with them.", action:"referApp" },
     { icon:"🌟", label:"Share Your Success Story", desc:"Tell other parents what's worked for your family.", action:"shareSuccessStory" },
     { icon:"💬", label:"Send Feedback", desc:"Tell us what's working, or what isn't.", action:"sendFeedback" },
+    { icon:"🔒", label:"Privacy Policy", desc:"Learn how we protect your family's data.", action:"openPrivacy" },
+    { icon:"🚪", label:"Delete Account & Data", desc:"Permanently remove your account and all your data.", action:"openDeleteAccount" },
   ];
   app.innerHTML = `
     <div class="card">
@@ -1331,6 +1469,8 @@ function renderMoreMenu(child){
       if(fnName === "referApp"){ openReferSheet(child); return; }
       if(fnName === "shareSuccessStory"){ openSuccessStoryForm(); return; }
       if(fnName === "sendFeedback"){ openFeedbackForm(); return; }
+      if(fnName === "openPrivacy"){ window.location.href = "/privacy.html"; return; }
+      if(fnName === "openDeleteAccount"){ window.location.href = "/delete-account.html"; return; }
       if(typeof window[fnName] === "function") navigateTo(fnName, child);
     });
   });
@@ -2716,6 +2856,17 @@ async function loadLibraryResults(){
     return true;
   });
 
+  const speechBoardBannerHtml = focusFilter === "speech_delay" ? `
+    <div class="card" id="speechBoardBanner" style="cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+      <div class="card-icon gold" style="margin:0;">🗣️</div>
+      <div style="flex:1;">
+        <div style="font-weight:700;">Try the Speech & Communication Board</div>
+        <div style="font-size:.85rem;opacity:.75;">Tap pictures to build a sentence and hear it spoken aloud.</div>
+      </div>
+      <div class="more-menu-arrow">→</div>
+    </div>
+  ` : "";
+
   if(activities.length === 0){
     const canTargetGenerate = focusFilter && favFilter !== "favorites";
     let emptyMsg;
@@ -2727,6 +2878,7 @@ async function loadLibraryResults(){
       emptyMsg = "No activities match these filters yet. Try widening your filters, or ask Sarathi Avatar to suggest some new ones.";
     }
     resultsEl.innerHTML = `
+      ${speechBoardBannerHtml}
       <div class="card">
         <p>${emptyMsg}</p>
         ${canTargetGenerate ? `<button class="btn small" id="emptyStateAskSarathiBtn" style="margin-top:8px;">✨ Ask Sarathi Avatar for ${escapeHtml(focusLabel(focusFilter))} activities</button>` : ""}
@@ -2734,11 +2886,15 @@ async function loadLibraryResults(){
     `;
     const askBtn = document.getElementById("emptyStateAskSarathiBtn");
     if(askBtn) askBtn.addEventListener("click", ()=> generateAiActivities(child, focusFilter));
+    const bannerEl0 = document.getElementById("speechBoardBanner");
+    if(bannerEl0) bannerEl0.addEventListener("click", ()=> navigateTo("renderSpeechBoard", child));
     return;
   }
 
-  resultsEl.innerHTML = activities.map(a => renderActivityCardHtml(a)).join("");
+  resultsEl.innerHTML = speechBoardBannerHtml + activities.map(a => renderActivityCardHtml(a)).join("");
   wireActivityCardClicks(resultsEl, activities);
+  const bannerEl = document.getElementById("speechBoardBanner");
+  if(bannerEl) bannerEl.addEventListener("click", ()=> navigateTo("renderSpeechBoard", child));
 }
 
 let favoriteActivityIds = new Set();
@@ -4997,6 +5153,1834 @@ function showRoutineApproval(child, items){
     document.getElementById("routineApprovalCard").remove();
     await loadRoutineData();
   });
+}
+
+// ─── Learning Games & Social Stories ───
+// Level 1 (educational, non-personalized): hand-written games and
+// stories, no AI generation, no scoring/pressure language, no data
+// collection beyond what's needed to render the screen — consistent
+// with AI_GUARDRAILS.md and the Trusted Learning Library's "no
+// AI-generated content" precedent.
+
+const learningGamesState = { child: null };
+
+const SOCIAL_STORIES = {
+  doctor_visit: {
+    title: "Going to the Doctor",
+    icon: "🩺",
+    slides: [
+      "Today I am going to visit the doctor.",
+      "The doctor's job is to help keep my body healthy and strong.",
+      "In the waiting room, I might see other kids and grown-ups. It's okay to feel a little nervous — lots of people do.",
+      "The doctor might look in my ears, listen to my heart, or ask me questions. I can ask questions too!",
+      "If something feels uncomfortable, I can tell my grown-up or the doctor.",
+      "When the visit is over, I did it! I can feel proud of myself.",
+      "The End 🎉"
+    ]
+  },
+  new_class: {
+    title: "My First Day in a New Class",
+    icon: "🎒",
+    slides: [
+      "Today is my first day in a new class.",
+      "I might feel excited, nervous, or both at the same time — all of those feelings are okay.",
+      "I will see a new teacher and maybe some new friends.",
+      "If I don't know what to do, I can watch what others are doing, or ask my teacher for help.",
+      "It's okay if everything feels new and different today. It will start to feel more familiar the more times I go.",
+      "By the end of the day, I will have learned something new about my class.",
+      "The End 🎉"
+    ]
+  },
+  waiting_turn: {
+    title: "Waiting My Turn",
+    icon: "⏳",
+    slides: [
+      "Sometimes I want to do something right away, but I have to wait my turn.",
+      "Waiting can feel hard. I might feel wiggly or frustrated — that's normal.",
+      "While I wait, I can take a deep breath, count to five, or think about something I like.",
+      "My turn will come. Waiting doesn't mean I don't get a turn — it just means not yet.",
+      "When my turn comes, I get to enjoy it fully because I waited.",
+      "The End 🎉"
+    ]
+  }
+};
+
+const FEELINGS_ROUNDS = [
+  { scenario: "Your friend shares their favorite toy with you.", correct: "😊", options: ["😊", "😢", "😠", "😴"], correctLabel: "Happy" },
+  { scenario: "You dropped your ice cream on the ground.", correct: "😢", options: ["😄", "😢", "😲", "😌"], correctLabel: "Sad" },
+  { scenario: "Someone took your turn without asking.", correct: "😠", options: ["😠", "😊", "😴", "🥳"], correctLabel: "Frustrated" },
+  { scenario: "It's bedtime and you've had a long day.", correct: "😴", options: ["😲", "😠", "😴", "😊"], correctLabel: "Tired" },
+  { scenario: "You just won a fun game with your family.", correct: "🥳", options: ["😢", "😌", "🥳", "😠"], correctLabel: "Excited" },
+  { scenario: "A loud noise happened suddenly nearby.", correct: "😲", options: ["😲", "😴", "😊", "😌"], correctLabel: "Surprised" },
+  { scenario: "You're curled up with a favorite book, all cozy.", correct: "😌", options: ["😠", "😌", "😢", "🥳"], correctLabel: "Calm" },
+  { scenario: "Your friend fell down and scraped their knee.", correct: "😟", options: ["🥳", "😊", "😟", "😴"], correctLabel: "Worried (for a friend)" }
+];
+
+const SEQUENCE_ROUNDS = [
+  { title: "Brushing Teeth", steps: ["🪥 Wet the toothbrush", "🧴 Put on toothpaste", "😁 Brush all your teeth", "🚰 Rinse and spit"] },
+  { title: "Getting Ready for Bed", steps: ["🛁 Take a bath", "👕 Put on pajamas", "📖 Read a story", "😴 Go to sleep"] },
+  { title: "Washing Hands", steps: ["🚰 Turn on the water", "🧼 Add soap", "🤲 Scrub for 20 seconds", "🧻 Dry your hands"] },
+  { title: "Making a Sandwich", steps: ["🍞 Get two slices of bread", "🥜 Add the filling", "🥪 Put the slices together", "🍽️ Put it on a plate"] }
+];
+
+function renderLearningGames(child){
+  learningGamesState.child = child;
+
+  app.innerHTML = `
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon gold">🎮</div>
+        <h1 style="margin:0;">Games & Social Stories</h1>
+      </div>
+      <p style="font-style:italic;opacity:0.8;">Simple, hand-written games and read-along stories to enjoy together. Not a test, not scored, not personalized — just for fun and gentle practice.</p>
+
+      <h2 style="font-size:1rem;margin-top:16px;">Games</h2>
+      <div class="more-menu-item" data-launch="feelings">
+        <div class="more-menu-icon">🙂</div>
+        <div class="more-menu-text">
+          <div class="more-menu-label">Feelings Match</div>
+          <div class="more-menu-desc">Match a short scene to how someone might feel.</div>
+        </div>
+        <div class="more-menu-arrow">→</div>
+      </div>
+      <div class="more-menu-item" data-launch="sequence">
+        <div class="more-menu-icon">🔢</div>
+        <div class="more-menu-text">
+          <div class="more-menu-label">What Comes Next?</div>
+          <div class="more-menu-desc">Put the steps of a daily routine in order.</div>
+        </div>
+        <div class="more-menu-arrow">→</div>
+      </div>
+
+      <h2 style="font-size:1rem;margin-top:20px;">Social Stories</h2>
+      ${Object.entries(SOCIAL_STORIES).map(([id, story]) => `
+        <div class="more-menu-item" data-story="${id}">
+          <div class="more-menu-icon">${story.icon}</div>
+          <div class="more-menu-text">
+            <div class="more-menu-label">${escapeHtml(story.title)}</div>
+            <div class="more-menu-desc">${story.slides.length} short pages, read at your own pace.</div>
+          </div>
+          <div class="more-menu-arrow">→</div>
+        </div>
+      `).join("")}
+
+      <button class="btn secondary" id="learningGamesBackBtn" style="margin-top:16px;">Back to dashboard</button>
+    </div>
+  `;
+
+  document.getElementById("learningGamesBackBtn").addEventListener("click", ()=> history.back());
+  document.querySelectorAll("[data-launch]").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      if(el.dataset.launch === "feelings") navigateTo("renderFeelingsGame", child);
+      if(el.dataset.launch === "sequence") navigateTo("renderSequenceGame", child);
+    });
+  });
+  document.querySelectorAll("[data-story]").forEach(el=>{
+    el.addEventListener("click", ()=> navigateTo("renderSocialStory", { child, storyId: el.dataset.story }));
+  });
+}
+
+// ─── Feelings Match game ───
+
+function renderFeelingsGame(child){
+  const state = { round: 0, feedback: null };
+
+  function draw(){
+    const r = FEELINGS_ROUNDS[state.round];
+    app.innerHTML = `
+      <div class="card">
+        <div class="card-head">
+          <div class="card-icon gold">🙂</div>
+          <h1 style="margin:0;">Feelings Match</h1>
+        </div>
+        <p style="opacity:0.75;">Round ${state.round + 1} of ${FEELINGS_ROUNDS.length}</p>
+        <p style="font-size:1.05rem;margin:12px 0;">${escapeHtml(r.scenario)}</p>
+        <p style="opacity:0.8;">How might they feel?</p>
+        <div class="chip-grid" id="feelingsOptions" style="margin:12px 0;">
+          ${r.options.map(opt => `<span class="chip" data-opt="${opt}" style="cursor:pointer;font-size:1.4rem;padding:10px 16px;">${opt}</span>`).join("")}
+        </div>
+        <div id="feelingsFeedback" style="min-height:28px;font-weight:600;"></div>
+        <div class="row" style="margin-top:12px;">
+          <button class="btn secondary" id="feelingsBackBtn">Back to dashboard</button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById("feelingsBackBtn").addEventListener("click", ()=> navigateTo("renderLearningGames", child));
+
+    document.querySelectorAll("#feelingsOptions .chip").forEach(chip=>{
+      chip.addEventListener("click", ()=>{
+        if(state.feedback) return; // one answer per round, no pressure to redo
+        const picked = chip.dataset.opt;
+        const feedbackEl = document.getElementById("feelingsFeedback");
+        if(picked === r.correct){
+          state.feedback = "correct";
+          feedbackEl.textContent = `That's right — ${r.correctLabel.toLowerCase()}. 😊`;
+          feedbackEl.style.color = "#2a9d8f";
+        } else {
+          state.feedback = "try";
+          feedbackEl.textContent = `Good try — this scene usually feels like ${r.correctLabel.toLowerCase()} (${r.correct}). Every feeling is okay to talk about.`;
+          feedbackEl.style.color = "#e0632f";
+        }
+        setTimeout(()=>{
+          if(state.round < FEELINGS_ROUNDS.length - 1){
+            state.round++; state.feedback = null; draw();
+          } else {
+            renderLearningGamesComplete(child, "Feelings Match");
+          }
+        }, 1800);
+      });
+    });
+  }
+
+  draw();
+}
+
+// ─── What Comes Next? sequencing game ───
+
+function renderSequenceGame(child){
+  const roundIdx = Math.floor(Math.random() * SEQUENCE_ROUNDS.length);
+  const round = SEQUENCE_ROUNDS[roundIdx];
+  const shownCount = round.steps.length - 1;
+  const shown = round.steps.slice(0, shownCount);
+  const correctNext = round.steps[shownCount];
+  const distractors = SEQUENCE_ROUNDS.filter((_, i) => i !== roundIdx).map(r => r.steps[r.steps.length - 1]);
+  const options = shuffle([correctNext, distractors[0], distractors[1] || round.steps[0]]);
+  let answered = false;
+
+  app.innerHTML = `
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon gold">🔢</div>
+        <h1 style="margin:0;">What Comes Next?</h1>
+      </div>
+      <p style="opacity:0.8;">${escapeHtml(round.title)}</p>
+      <div class="timeline" style="margin:12px 0;">
+        ${shown.map(s => `
+          <div class="timeline-item">
+            <div class="timeline-dot" style="background:#2a9d8f;"></div>
+            <div class="timeline-note">${escapeHtml(s)}</div>
+          </div>
+        `).join("")}
+      </div>
+      <p style="opacity:0.8;">What comes next?</p>
+      <div id="sequenceOptions">
+        ${options.map(opt => `<button class="btn small secondary" data-opt="${escapeHtml(opt)}" style="display:block;width:100%;text-align:left;margin-bottom:8px;">${escapeHtml(opt)}</button>`).join("")}
+      </div>
+      <div id="sequenceFeedback" style="min-height:28px;font-weight:600;"></div>
+      <div class="row" style="margin-top:12px;">
+        <button class="btn secondary" id="sequenceBackBtn">Back to dashboard</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("sequenceBackBtn").addEventListener("click", ()=> navigateTo("renderLearningGames", child));
+
+  document.querySelectorAll("#sequenceOptions [data-opt]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      if(answered) return;
+      answered = true;
+      const feedbackEl = document.getElementById("sequenceFeedback");
+      if(btn.dataset.opt === correctNext){
+        feedbackEl.textContent = "That's the next step! ✅";
+        feedbackEl.style.color = "#2a9d8f";
+      } else {
+        feedbackEl.textContent = `Good try — the next step is usually "${correctNext}".`;
+        feedbackEl.style.color = "#e0632f";
+      }
+      setTimeout(()=> renderSequenceGame(child), 1800);
+    });
+  });
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function renderLearningGamesComplete(child, gameName){
+  app.innerHTML = `
+    <div class="card" style="text-align:center;">
+      <div class="card-icon gold" style="margin:0 auto 12px;">🎉</div>
+      <h1>Nicely done!</h1>
+      <p>You finished ${escapeHtml(gameName)}. Play again anytime — there's no score to beat.</p>
+      <div class="row" style="justify-content:center;margin-top:16px;">
+        <button class="btn" id="gamesAgainBtn">Back to Games & Stories</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("gamesAgainBtn").addEventListener("click", ()=> navigateTo("renderLearningGames", child));
+}
+
+// ─── Social Story reader ───
+
+function renderSocialStory(arg){
+  const { child, storyId } = arg;
+  const story = SOCIAL_STORIES[storyId];
+  if(!story){ navigateTo("renderLearningGames", child); return; }
+
+  let page = 0;
+
+  function draw(){
+    const isLast = page === story.slides.length - 1;
+    app.innerHTML = `
+      <div class="card">
+        <div class="card-head">
+          <div class="card-icon gold">${story.icon}</div>
+          <h1 style="margin:0;">${escapeHtml(story.title)}</h1>
+        </div>
+        <p style="opacity:0.7;">Page ${page + 1} of ${story.slides.length}</p>
+        <p style="font-size:1.1rem;line-height:1.6;margin:16px 0;">${escapeHtml(story.slides[page])}</p>
+        <div class="row">
+          <button class="btn small secondary" id="storyPrevBtn" ${page === 0 ? "disabled" : ""}>◀ Back</button>
+          ${isLast
+            ? `<button class="btn small" id="storyDoneBtn">Finish</button>`
+            : `<button class="btn small" id="storyNextBtn">Next ▶</button>`}
+        </div>
+        <button class="btn secondary" id="storyExitBtn" style="margin-top:16px;">Back to dashboard</button>
+      </div>
+    `;
+
+    document.getElementById("storyExitBtn").addEventListener("click", ()=> navigateTo("renderLearningGames", child));
+    const prevBtn = document.getElementById("storyPrevBtn");
+    if(prevBtn) prevBtn.addEventListener("click", ()=>{ if(page > 0){ page--; draw(); } });
+    const nextBtn = document.getElementById("storyNextBtn");
+    if(nextBtn) nextBtn.addEventListener("click", ()=>{ page++; draw(); });
+    const doneBtn = document.getElementById("storyDoneBtn");
+    if(doneBtn) doneBtn.addEventListener("click", ()=> navigateTo("renderLearningGames", child));
+  }
+
+  draw();
+}
+
+// ─── Speech & Communication Board (AAC) ───
+// A simple, native tap-to-speak communication board — helpful for any child
+// working on speech/expressive language, not just a diagnosed group. All
+// client-side (browser text-to-speech + localStorage), so it works even
+// before any backend table for this is confirmed. Level 1: educational
+// communication support tool, no AI, no scoring, no data leaves the device.
+
+const SPEECH_BOARD_CATEGORIES = [
+  { key:"needs", label:"Needs", icon:"🙋", words:[
+    {icon:"🙋", label:"I want"}, {icon:"➕", label:"More"}, {icon:"✋", label:"Stop"},
+    {icon:"🆘", label:"Help"}, {icon:"✅", label:"All done"}, {icon:"⏳", label:"Wait"},
+    {icon:"👍", label:"Yes"}, {icon:"👎", label:"No"}
+  ]},
+  { key:"feelings", label:"Feelings", icon:"😊", words:[
+    {icon:"😊", label:"Happy"}, {icon:"😢", label:"Sad"}, {icon:"😠", label:"Angry"},
+    {icon:"😴", label:"Tired"}, {icon:"😨", label:"Scared"}, {icon:"🤕", label:"Hurt"}
+  ]},
+  { key:"people", label:"People", icon:"👩", words:[
+    {icon:"👩", label:"Mom"}, {icon:"👨", label:"Dad"}, {icon:"🍎", label:"Teacher"},
+    {icon:"🧑‍🤝‍🧑", label:"Friend"}, {icon:"🩺", label:"Doctor"}
+  ]},
+  { key:"food", label:"Food & Drink", icon:"🍽️", words:[
+    {icon:"🍽️", label:"Eat"}, {icon:"🥤", label:"Drink"}, {icon:"💧", label:"Water"},
+    {icon:"🍪", label:"Snack"}, {icon:"🥛", label:"Milk"}
+  ]},
+  { key:"actions", label:"Actions", icon:"▶️", words:[
+    {icon:"▶️", label:"Play"}, {icon:"🚻", label:"Bathroom"}, {icon:"🛌", label:"Sleep"},
+    {icon:"📖", label:"Read"}, {icon:"🌳", label:"Outside"}
+  ]},
+  { key:"places", label:"Places", icon:"🏠", words:[
+    {icon:"🏠", label:"Home"}, {icon:"🏫", label:"School"}, {icon:"🌳", label:"Park"}, {icon:"🚗", label:"Car"}
+  ]}
+];
+
+function speechBoardCustomKey(childId){ return `nsSpeechBoardCustom_${childId}`; }
+
+function loadSpeechBoardCustomWords(childId){
+  try{
+    const raw = localStorage.getItem(speechBoardCustomKey(childId));
+    return raw ? JSON.parse(raw) : [];
+  }catch(err){ return []; }
+}
+
+function saveSpeechBoardCustomWords(childId, words){
+  try{ localStorage.setItem(speechBoardCustomKey(childId), JSON.stringify(words)); }catch(err){}
+}
+
+function speakBoardText(text){
+  if(!text || !text.trim()) return;
+  try{
+    if(!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = (typeof LANG_SPEECH_LOCALE !== "undefined" && LANG_SPEECH_LOCALE[getSavedLanguage()]) || "en-IN";
+    window.speechSynthesis.speak(utter);
+  }catch(err){ console.error("Speech board TTS error:", err); }
+}
+
+const speechBoardState = { child: null, activeCategory: "needs", sentence: [] };
+
+function renderSpeechBoard(child){
+  speechBoardState.child = child;
+  speechBoardState.activeCategory = "needs";
+  speechBoardState.sentence = [];
+  drawSpeechBoard();
+}
+
+function drawSpeechBoard(){
+  const child = speechBoardState.child;
+  const custom = loadSpeechBoardCustomWords(child.id);
+  const categories = custom.length
+    ? [...SPEECH_BOARD_CATEGORIES, { key:"mine", label:"My Words", icon:"⭐", words: custom }]
+    : SPEECH_BOARD_CATEGORIES;
+  const active = categories.find(c => c.key === speechBoardState.activeCategory) || categories[0];
+
+  app.innerHTML = `
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon gold">🗣️</div>
+        <h1 style="margin:0;">Speech & Communication Board</h1>
+      </div>
+      <p style="font-style:italic;opacity:0.8;">Tap pictures to build a sentence and hear it out loud. A communication support tool for any child working on speech — not therapy, not a test.</p>
+
+      <div style="border:1px solid var(--border, #e5e5e5);border-radius:14px;padding:12px;margin:14px 0;background:var(--background, #fffaf5);">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;min-height:40px;align-items:center;">
+          ${speechBoardState.sentence.length
+            ? speechBoardState.sentence.map((w, i) => `<span class="chip selected" data-remove="${i}" style="cursor:pointer;">${w.icon} ${escapeHtml(w.label)} ✕</span>`).join("")
+            : `<span style="opacity:0.5;">Tap words below to build a sentence…</span>`}
+        </div>
+        <div class="row" style="margin-top:10px;">
+          <button class="btn small" id="speechSpeakBtn" ${speechBoardState.sentence.length ? "" : "disabled"}>🔊 Speak sentence</button>
+          <button class="btn small secondary" id="speechClearBtn" ${speechBoardState.sentence.length ? "" : "disabled"}>Clear</button>
+        </div>
+      </div>
+
+      <div class="chip-grid" id="speechCategoryTabs" style="margin-bottom:12px;">
+        ${categories.map(c => `<span class="chip ${c.key === active.key ? "selected" : ""}" data-cat="${c.key}" style="cursor:pointer;">${c.icon} ${escapeHtml(c.label)}</span>`).join("")}
+      </div>
+
+      <div class="more-menu-grid" id="speechWordGrid">
+        ${active.words.map((w, i) => `
+          <div class="more-menu-item" data-word-idx="${i}" style="cursor:pointer;">
+            <div class="more-menu-icon" style="font-size:1.6rem;">${w.icon}</div>
+            <div class="more-menu-text"><div class="more-menu-label">${escapeHtml(w.label)}</div></div>
+          </div>
+        `).join("")}
+        <div class="more-menu-item" id="speechAddWordBtn" style="cursor:pointer;border-style:dashed;">
+          <div class="more-menu-icon">➕</div>
+          <div class="more-menu-text"><div class="more-menu-label">Add your own word</div></div>
+        </div>
+      </div>
+
+      <button class="btn secondary" id="speechBackBtn" style="margin-top:16px;">Back to dashboard</button>
+    </div>
+  `;
+
+  document.getElementById("speechBackBtn").addEventListener("click", ()=> history.back());
+  const speakBtn = document.getElementById("speechSpeakBtn");
+  if(speakBtn) speakBtn.addEventListener("click", ()=>{
+    speakBoardText(speechBoardState.sentence.map(w=>w.label).join(" "));
+  });
+  const clearBtn = document.getElementById("speechClearBtn");
+  if(clearBtn) clearBtn.addEventListener("click", ()=>{
+    speechBoardState.sentence = [];
+    drawSpeechBoard();
+  });
+  document.querySelectorAll("#speechCategoryTabs .chip").forEach(chip=>{
+    chip.addEventListener("click", ()=>{
+      speechBoardState.activeCategory = chip.dataset.cat;
+      drawSpeechBoard();
+    });
+  });
+  document.querySelectorAll("[data-word-idx]").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      const w = active.words[parseInt(el.dataset.wordIdx, 10)];
+      if(!w) return;
+      speechBoardState.sentence.push(w);
+      speakBoardText(w.label);
+      drawSpeechBoard();
+    });
+  });
+  document.querySelectorAll("[data-remove]").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      speechBoardState.sentence.splice(parseInt(el.dataset.remove, 10), 1);
+      drawSpeechBoard();
+    });
+  });
+  document.getElementById("speechAddWordBtn").addEventListener("click", ()=> openAddSpeechWordSheet(child));
+}
+
+function openAddSpeechWordSheet(child){
+  const existing = document.getElementById("addSpeechWordModal");
+  if(existing) existing.remove();
+  const modal = document.createElement("div");
+  modal.id = "addSpeechWordModal";
+  modal.style.cssText = "position:fixed;inset:0;z-index:999;background:rgba(20,20,20,.55);display:flex;align-items:flex-end;justify-content:center;";
+  modal.innerHTML = `
+    <div style="background:var(--card, #fff);border-radius:22px 22px 0 0;max-width:480px;width:100%;padding:24px 20px calc(20px + env(safe-area-inset-bottom));max-height:85vh;overflow-y:auto;">
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:4px;">Add your own word</div>
+      <div style="font-size:.85rem;color:var(--muted-foreground, #7b8194);margin-bottom:16px;">Saved just on this device, for this child.</div>
+      <label style="display:block;font-size:.82rem;font-weight:700;margin-bottom:5px;">Emoji (optional)</label>
+      <input type="text" id="newWordEmoji" placeholder="e.g. 🧸" maxlength="4" style="width:80px;padding:11px 14px;border-radius:12px;border:1px solid var(--border, #e5e5e5);font-family:inherit;font-size:1rem;margin-bottom:14px;box-sizing:border-box;">
+      <label style="display:block;font-size:.82rem;font-weight:700;margin-bottom:5px;">Word</label>
+      <input type="text" id="newWordLabel" placeholder="e.g. Teddy bear" maxlength="24" style="width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--border, #e5e5e5);font-family:inherit;font-size:.9rem;margin-bottom:16px;box-sizing:border-box;">
+      <button class="btn" id="newWordSaveBtn" style="width:100%;margin-bottom:10px;">Add word</button>
+      <button class="btn small secondary" id="newWordCancelBtn" style="width:100%;">Cancel</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.addEventListener("click", (e)=>{ if(e.target === modal) modal.remove(); });
+  document.getElementById("newWordCancelBtn").addEventListener("click", ()=> modal.remove());
+  document.getElementById("newWordSaveBtn").addEventListener("click", ()=>{
+    const label = document.getElementById("newWordLabel").value.trim();
+    if(!label) return;
+    const icon = document.getElementById("newWordEmoji").value.trim() || "💬";
+    const words = loadSpeechBoardCustomWords(child.id);
+    words.push({ icon, label });
+    saveSpeechBoardCustomWords(child.id, words);
+    modal.remove();
+    speechBoardState.activeCategory = "mine";
+    drawSpeechBoard();
+  });
+}
+
+// ─── Parent Learning Guides (Phase 1) ───
+function renderParentGuides(child){
+  setActiveBottomTab("more");
+  const guides = [
+    {
+      id: "speech-at-home",
+      title: "💬 Speech & Communication at Home",
+      icon: "🗣️",
+      tips: [
+        "Talk during daily activities: narrate what you're doing (\"Now we're putting on your shoes\").",
+        "Wait for responses: give your child time to respond or point, even if they're not using words.",
+        "Repeat what they say: if they say \"ba,\" say \"Yes, ball!\" to expand their words.",
+        "Sing songs & nursery rhymes: repetition helps with speech development.",
+        "Read books together: point to pictures and ask questions like \"What's that?\"",
+        "Use gestures: point, wave, nod — help them understand gestures are communication too.",
+        "Make it fun: no pressure — practice should feel like play, not a lesson."
+      ]
+    },
+    {
+      id: "reading-at-home",
+      title: "📖 Help Your Child Love Reading",
+      icon: "📚",
+      tips: [
+        "Start early: read aloud every day, even if your child doesn't sit still at first.",
+        "Choose books with repetition: kids love the same story over and over.",
+        "Point and ask: \"Where's the cat? Can you point?\" — make it interactive.",
+        "Use different voices: silly voices make stories more fun.",
+        "Don't worry about perfection: it's okay if your child skips pages or reads pictures only.",
+        "Mix it up: read actual books, comics, cereal boxes — anything with words counts.",
+        "Celebrate progress: \"Great listening!\" or \"You found the word!\" builds confidence.",
+        "If struggling with letters: try phonics games (listening to sounds, not just letter names)."
+      ]
+    },
+    {
+      id: "routines-matter",
+      title: "⏰ Why Routines Help (& How to Build Them)",
+      icon: "📅",
+      tips: [
+        "Routines reduce stress: when kids know what's coming, they feel safer.",
+        "Use visuals: draw/print pictures of each step (get up, brush teeth, eat breakfast, etc.).",
+        "Same time, same order: try to do routines at the same time each day.",
+        "Use timers: kids understand \"5 minutes until bedtime\" when they see a timer.",
+        "First-then planning: \"First brush teeth, then story\" — simple, clear expectations.",
+        "Celebrate completion: make a big deal when they finish a routine (dance, high-five, cheer).",
+        "Start small: build one routine at a time. Master morning before adding bedtime.",
+        "Be flexible: some days will be harder than others — that's normal and okay."
+      ]
+    },
+    {
+      id: "math-at-home",
+      title: "🔢 Math is Everywhere",
+      icon: "🧮",
+      tips: [
+        "Count everything: fingers, steps, toys, snacks — make it a game.",
+        "Use real things: blocks, coins, or crackers teach math better than worksheets.",
+        "Cooking together: measuring cups and spoons teach quantities and fractions.",
+        "Play board games: simple games teach counting and turn-taking.",
+        "Point out patterns: stripes on clothes, tiles on the floor — math is visual.",
+        "Don't rush: kids develop at different speeds. No pressure.",
+        "Celebrate attempts: \"You tried counting!\" is more important than getting the right answer.",
+        "Avoid words like 'dumb' or 'bad at math' — kids believe what we say about them."
+      ]
+    },
+    {
+      id: "sensory-needs",
+      title: "🌈 Understanding Your Child's Sensory Preferences",
+      icon: "✨",
+      tips: [
+        "Notice patterns: Does your child cover ears at loud noises? Spin often? Avoid certain textures?",
+        "Some kids need MORE input: they might seek heavy pressure, spinning, or loud sounds.",
+        "Some kids need LESS input: they might be bothered by tags, loud noises, or certain foods.",
+        "Provide sensory breaks: swing time, squeezing play dough, jumping — all help regulate.",
+        "Protect sensitive times: lower lights & sounds during calm-down times.",
+        "Respect preferences: if your child hates certain textures (sand, wet grass), don't force it.",
+        "Fidget tools help: stress balls, chewies, pop-its can help kids stay focused.",
+        "Talk to occupational therapist if: your child seems to be struggling significantly with sensory stuff."
+      ]
+    },
+    {
+      id: "focus-and-attention",
+      title: "🎯 Helping Your Child Focus",
+      icon: "👁️",
+      tips: [
+        "Reduce distractions: put phones away during activities, dim lights if needed.",
+        "Use timers: \"Focus for 5 minutes, then we'll take a break\" works better than open-ended tasks.",
+        "Give one instruction at a time: not \"get dressed, brush teeth, eat breakfast\" — do one step.",
+        "Break big tasks into small steps: instead of \"clean your room,\" say \"put toys in the bin.\"",
+        "Make it interesting: bored kids can't focus — switch activities if they're losing interest.",
+        "Physical activity first: a 10-minute run or jump often helps kids settle down better.",
+        "Use rewards: a sticker chart or simple praise goes a long way.",
+        "Some days are harder: if your child's not focusing, that's not failure — just try again tomorrow."
+      ]
+    },
+    {
+      id: "daily-living",
+      title: "🎒 Teaching Daily Skills (Getting Dressed, Teeth, Bathroom)",
+      icon: "🏠",
+      tips: [
+        "Use picture sequences: draw or print pictures of each step — kids learn visually.",
+        "One step at a time: don't rush. \"Put one sock on\" then wait, then \"other sock.\"",
+        "Celebrate small wins: \"You brushed your tooth!\" even if it's not perfect.",
+        "Hand-over-hand help: guide their hand gently if they're stuck, then step back.",
+        "Make it fun: sing while brushing teeth, dance while getting dressed.",
+        "Practice at calm times: don't teach toilet training on a stressful day.",
+        "Accidents happen: never shame or punish. Just clean up and try again tomorrow.",
+        "Patience pays off: it might take months, but kids DO learn these skills eventually."
+      ]
+    },
+    {
+      id: "emotions",
+      title: "❤️ Talking About Feelings",
+      icon: "💙",
+      tips: [
+        "Name feelings: \"You look sad\" or \"I think you're frustrated\" — teach emotional vocabulary.",
+        "Feelings are okay: never say \"don't cry\" or \"don't be angry\" — help them express it safely.",
+        "Model emotions: let your child see you say \"I'm frustrated but I'll take a deep breath.\"",
+        "Create a calm space: a quiet corner with pillows, soft toys where kids can cool down.",
+        "Breathing & movement: teach deep breaths, jump jacks, or slow walks to calm down.",
+        "Ask instead of assuming: \"What happened?\" lets kids explain in their own words.",
+        "Validate feelings: \"That was scary\" is better than \"Don't be scared.\"",
+        "Seek support if: your child shows signs of anxiety or depression — professional help is available."
+      ]
+    },
+    {
+      id: "when-frustrated",
+      title: "😤 When Things Get Frustrating",
+      icon: "💪",
+      tips: [
+        "Take breaks: if something's not working after 10 minutes, switch activities.",
+        "It's not laziness: if your child is struggling, they're usually doing their best.",
+        "Model self-care: show your child that it's okay to step away and breathe.",
+        "Celebrate effort, not perfection: \"You kept trying!\" matters more than \"You did it perfectly.\"",
+        "Identify triggers: if your child melts down at transitions, practice transitions more gently.",
+        "Provide choices: \"Do you want to take a break now or in 2 minutes?\" gives them control.",
+        "Have a plan: know what helps your child calm down (music, movement, quiet time, etc.)",
+        "You're not failing: parenting a neurodivergent child is HARD. It's okay to feel frustrated too."
+      ]
+    }
+  ];
+
+  app.innerHTML = \`
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon">📚</div>
+        <h1 style="margin:0;">Parent Learning Guides</h1>
+      </div>
+      <p style="color:var(--muted-foreground);margin:0 0 20px 0;font-size:.95rem;">
+        Practical tips based on what works at home. Not medical advice — just real strategies parents use.
+      </p>
+      <div class="more-menu-grid">
+        \${guides.map(g => \`
+          <div class="more-menu-item" data-guide-id="\${g.id}">
+            <div class="more-menu-icon">\${g.icon}</div>
+            <div class="more-menu-text">
+              <div class="more-menu-label">\${escapeHtml(g.title)}</div>
+              <div class="more-menu-desc">\${g.tips.length} practical tips</div>
+            </div>
+            <div class="more-menu-arrow">→</div>
+          </div>
+        \`).join("")}
+      </div>
+    </div>
+  \`;
+
+  document.querySelectorAll("[data-guide-id]").forEach(el => {
+    el.addEventListener("click", () => {
+      const guideId = el.dataset.guideId;
+      const guide = guides.find(g => g.id === guideId);
+      if(guide) renderGuideDetail(guide, child);
+    });
+  });
+}
+
+function renderGuideDetail(guide, child){
+  app.innerHTML = \`
+    <div class="card">
+      <div class="card-head">
+        <button class="btn-icon" id="guideBackBtn">←</button>
+        <h1 style="margin:0;">\${escapeHtml(guide.title)}</h1>
+      </div>
+      <div style="padding:16px 0;">
+        \${guide.tips.map((tip, i) => \`
+          <div style="margin-bottom:16px;padding:12px;background:var(--bg-secondary, #f5f5f5);border-radius:8px;border-left:3px solid var(--primary, #ff6b4a);">
+            <div style="font-weight:600;color:var(--navy);margin-bottom:6px;">\${i + 1}. \${escapeHtml(tip.split(':')[0])}</div>
+            <div style="color:var(--slate-light);font-size:.9rem;">\${escapeHtml(tip)}</div>
+          </div>
+        \`).join("")}
+      </div>
+      <div style="padding:16px;background:var(--bg-secondary, #f5f5f5);border-radius:8px;margin-top:20px;border-left:3px solid #4ade80;">
+        <div style="font-weight:600;color:var(--navy);margin-bottom:8px;">💡 Remember</div>
+        <div style="color:var(--slate-light);font-size:.9rem;">Every child is different. What works for one might not work for another. Be patient with yourself and your child — you're doing better than you think.</div>
+      </div>
+    </div>
+  \`;
+
+  document.getElementById("guideBackBtn").addEventListener("click", () => {
+    navigateTo("renderParentGuides", child);
+  });
+}
+
+// ─── Phase 2: LITERACY & NUMERACY ───
+
+function renderReadingSupport(child){
+  setActiveBottomTab("more");
+  const texts = [
+    { title: "The Cat", text: "The cat sat on the mat. The cat was happy." },
+    { title: "The Dog", text: "A dog ran in the park. The dog was fast and fun." },
+    { title: "My Family", text: "I have a mom and a dad. My family loves me very much." }
+  ];
+
+  if(!window.readingState){
+    window.readingState = { selectedText: null, fontSize: 16, fontSpacing: 1, textColor: "#000", bgColor: "#fff" };
+  }
+
+  const state = window.readingState;
+
+  if(!state.selectedText){
+    // Choose text
+    app.innerHTML = \`
+      <div class="card">
+        <div class="card-head">
+          <div class="card-icon">📖</div>
+          <h1 style="margin:0;">Reading Support</h1>
+        </div>
+        <p style="color:var(--muted-foreground);font-size:.9rem;margin-bottom:16px;">Pick a story to read. You can adjust fonts, colors, and listen along.</p>
+        <div class="more-menu-grid">
+          \${texts.map((t, i) => \`
+            <div class="more-menu-item" data-idx="\${i}">
+              <div class="more-menu-icon">📚</div>
+              <div class="more-menu-text">
+                <div class="more-menu-label">\${escapeHtml(t.title)}</div>
+                <div class="more-menu-desc">Simple story</div>
+              </div>
+              <div class="more-menu-arrow">→</div>
+            </div>
+          \`).join("")}
+        </div>
+      </div>
+    \`;
+    document.querySelectorAll("[data-idx]").forEach(el => {
+      el.addEventListener("click", () => {
+        state.selectedText = parseInt(el.dataset.idx);
+        renderReadingSupport(child);
+      });
+    });
+  } else {
+    // Reading mode
+    const text = texts[state.selectedText];
+    app.innerHTML = \`
+      <div class="card">
+        <div class="card-head">
+          <button class="btn-icon" id="readBackBtn">←</button>
+          <h1 style="margin:0;">\${escapeHtml(text.title)}</h1>
+        </div>
+
+        <div style="background:var(--bg-secondary);padding:12px;border-radius:8px;margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn small" id="readPlayBtn">🔊 Read Aloud</button>
+          <button class="btn small secondary" id="readAdjustBtn">⚙️ Text Options</button>
+        </div>
+
+        <div id="readingArea" style="background:\${state.bgColor};color:\${state.textColor};padding:20px;border-radius:12px;line-height:1.8;font-size:\${state.fontSize}px;letter-spacing:\${state.fontSpacing}px;margin-bottom:16px;border:2px solid #ddd;">
+          \${escapeHtml(text.text)}
+        </div>
+
+        <div style="padding:12px;background:#e0f2fe;border-radius:8px;border-left:3px solid #0ea5e9;">
+          <div style="font-weight:600;color:#082f49;margin-bottom:6px;">💡 Tip</div>
+          <div style="color:#082f49;font-size:.9rem;">Try the text options to find what's easiest to read. Some kids like bigger letters, others like different colors.</div>
+        </div>
+      </div>
+    \`;
+
+    document.getElementById("readBackBtn").addEventListener("click", () => {
+      state.selectedText = null;
+      renderReadingSupport(child);
+    });
+
+    document.getElementById("readPlayBtn").addEventListener("click", () => {
+      const utterance = new SpeechSynthesisUtterance(text.text);
+      utterance.rate = 0.9;
+      window.speechSynthesis.speak(utterance);
+    });
+
+    document.getElementById("readAdjustBtn").addEventListener("click", () => {
+      const existing = document.getElementById("readAdjustModal");
+      if(existing) existing.remove();
+      const modal = document.createElement("div");
+      modal.id = "readAdjustModal";
+      modal.style.cssText = "position:fixed;inset:0;z-index:999;background:rgba(20,20,20,.55);display:flex;align-items:flex-end;justify-content:center;";
+      modal.innerHTML = \`
+        <div style="background:var(--card, #fff);border-radius:22px 22px 0 0;max-width:500px;width:100%;padding:24px 20px;max-height:80vh;overflow-y:auto;">
+          <div style="font-weight:700;font-size:1.05rem;margin-bottom:16px;">Adjust Reading Options</div>
+
+          <div style="margin-bottom:16px;">
+            <label style="display:block;font-weight:600;margin-bottom:8px;font-size:.9rem;">Font Size: \${state.fontSize}px</label>
+            <input type="range" min="14" max="32" value="\${state.fontSize}" id="fontSizeSlider" style="width:100%;">
+          </div>
+
+          <div style="margin-bottom:16px;">
+            <label style="display:block;font-weight:600;margin-bottom:8px;font-size:.9rem;">Letter Spacing: \${state.fontSpacing}px</label>
+            <input type="range" min="0.5" max="3" step="0.5" value="\${state.fontSpacing}" id="spacingSlider" style="width:100%;">
+          </div>
+
+          <div style="margin-bottom:16px;">
+            <label style="display:block;font-weight:600;margin-bottom:8px;font-size:.9rem;">Text Color</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="color-btn" data-color="#000" style="background:#000;border:2px solid \${state.textColor === '#000' ? '#ff6b4a' : '#ccc'};width:40px;height:40px;border-radius:8px;"></button>
+              <button class="color-btn" data-color="#444" style="background:#444;border:2px solid \${state.textColor === '#444' ? '#ff6b4a' : '#ccc'};width:40px;height:40px;border-radius:8px;"></button>
+              <button class="color-btn" data-color="#1e40af" style="background:#1e40af;border:2px solid \${state.textColor === '#1e40af' ? '#ff6b4a' : '#ccc'};width:40px;height:40px;border-radius:8px;"></button>
+              <button class="color-btn" data-color="#7c3aed" style="background:#7c3aed;border:2px solid \${state.textColor === '#7c3aed' ? '#ff6b4a' : '#ccc'};width:40px;height:40px;border-radius:8px;"></button>
+            </div>
+          </div>
+
+          <div style="margin-bottom:20px;">
+            <label style="display:block;font-weight:600;margin-bottom:8px;font-size:.9rem;">Background Color</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="bg-btn" data-color="#fff" style="background:#fff;border:2px solid \${state.bgColor === '#fff' ? '#ff6b4a' : '#999'};width:40px;height:40px;border-radius:8px;"></button>
+              <button class="bg-btn" data-color="#fffacd" style="background:#fffacd;border:2px solid \${state.bgColor === '#fffacd' ? '#ff6b4a' : '#999'};width:40px;height:40px;border-radius:8px;"></button>
+              <button class="bg-btn" data-color="#e0f2fe" style="background:#e0f2fe;border:2px solid \${state.bgColor === '#e0f2fe' ? '#ff6b4a' : '#999'};width:40px;height:40px;border-radius:8px;"></button>
+              <button class="bg-btn" data-color="#fce7f3" style="background:#fce7f3;border:2px solid \${state.bgColor === '#fce7f3' ? '#ff6b4a' : '#999'};width:40px;height:40px;border-radius:8px;"></button>
+              <button class="bg-btn" data-color="#dbeafe" style="background:#dbeafe;border:2px solid \${state.bgColor === '#dbeafe' ? '#ff6b4a' : '#999'};width:40px;height:40px;border-radius:8px;"></button>
+            </div>
+          </div>
+
+          <button class="btn" id="readAdjustCloseBtn" style="width:100%;">Done</button>
+        </div>
+      \`;
+      document.body.appendChild(modal);
+
+      document.getElementById("fontSizeSlider").addEventListener("input", (e) => {
+        state.fontSize = parseInt(e.target.value);
+        renderReadingSupport(child);
+        document.getElementById("readAdjustModal").remove();
+        document.getElementById("readAdjustBtn").click();
+      });
+
+      document.getElementById("spacingSlider").addEventListener("input", (e) => {
+        state.fontSpacing = parseFloat(e.target.value);
+        renderReadingSupport(child);
+        document.getElementById("readAdjustModal").remove();
+        document.getElementById("readAdjustBtn").click();
+      });
+
+      document.querySelectorAll(".color-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.textColor = btn.dataset.color;
+          renderReadingSupport(child);
+          document.getElementById("readAdjustModal").remove();
+          document.getElementById("readAdjustBtn").click();
+        });
+      });
+
+      document.querySelectorAll(".bg-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.bgColor = btn.dataset.color;
+          renderReadingSupport(child);
+          document.getElementById("readAdjustModal").remove();
+          document.getElementById("readAdjustBtn").click();
+        });
+      });
+
+      document.getElementById("readAdjustCloseBtn").addEventListener("click", () => modal.remove());
+    });
+  }
+}
+
+function renderMathGames(child){
+  setActiveBottomTab("more");
+  const games = [
+    {
+      id: "counting",
+      title: "🔢 Count the Objects",
+      desc: "See a picture with objects. Count and tap the right number.",
+      levels: 3
+    },
+    {
+      id: "addition",
+      title: "➕ Addition with Pictures",
+      desc: "2 apples + 3 apples = ? Use visual blocks to learn.",
+      levels: 3
+    },
+    {
+      id: "patterns",
+      title: "🎨 Find the Pattern",
+      desc: "Red, blue, red, blue... what comes next?",
+      levels: 3
+    }
+  ];
+
+  app.innerHTML = \`
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon">🧮</div>
+        <h1 style="margin:0;">Math Games</h1>
+      </div>
+      <p style="color:var(--muted-foreground);font-size:.9rem;margin-bottom:16px;">Visual math games. No pressure — just play and learn!</p>
+      <div class="more-menu-grid">
+        \${games.map(g => \`
+          <div class="more-menu-item" data-game="\${g.id}">
+            <div class="more-menu-icon">\${g.title.split(' ')[0]}</div>
+            <div class="more-menu-text">
+              <div class="more-menu-label">\${escapeHtml(g.title.split(' ').slice(1).join(' '))}</div>
+              <div class="more-menu-desc">\${escapeHtml(g.desc)}</div>
+            </div>
+            <div class="more-menu-arrow">→</div>
+          </div>
+        \`).join("")}
+      </div>
+    </div>
+  \`;
+
+  document.querySelectorAll("[data-game]").forEach(el => {
+    el.addEventListener("click", () => {
+      const gameId = el.dataset.game;
+      playMathGame(gameId, child);
+    });
+  });
+}
+
+function playMathGame(gameId, child){
+  if(gameId === "counting"){
+    const level = Math.floor(Math.random() * 3) + 1;
+    const counts = [
+      { num: 3, pic: "🍎🍎🍎" },
+      { num: 5, pic: "🌟🌟🌟🌟🌟" },
+      { num: 4, pic: "🎈🎈🎈🎈" },
+      { num: 2, pic: "🐱🐱" }
+    ];
+    const current = counts[Math.floor(Math.random() * counts.length)];
+    const options = [current.num - 1, current.num, current.num + 1].filter(n => n > 0).sort(() => Math.random() - 0.5);
+
+    app.innerHTML = \`
+      <div class="card">
+        <div class="card-head">
+          <button class="btn-icon" id="mathBackBtn">←</button>
+          <h1 style="margin:0;">Count the Objects</h1>
+        </div>
+        <div style="text-align:center;padding:40px 20px;background:linear-gradient(135deg, #ffd89b 0%, #19547b 100%);border-radius:16px;margin:20px 0;">
+          <div style="font-size:4rem;margin-bottom:20px;">\${current.pic}</div>
+          <div style="font-size:1.3rem;color:#fff;font-weight:600;">How many?</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;margin:20px 0;">
+          \${options.map(opt => \`
+            <button class="btn answer-btn" data-answer="\${opt}" style="font-size:1.5rem;height:60px;border-radius:12px;">
+              \${opt}
+            </button>
+          \`).join("")}
+        </div>
+      </div>
+    \`;
+
+    document.getElementById("mathBackBtn").addEventListener("click", () => renderMathGames(child));
+
+    document.querySelectorAll(".answer-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const answer = parseInt(btn.dataset.answer);
+        const isCorrect = answer === current.num;
+        app.innerHTML = \`
+          <div class="card">
+            <div style="text-align:center;padding:40px 20px;">
+              <div style="font-size:3rem;margin-bottom:16px;">\${isCorrect ? '🎉' : '💪'}</div>
+              <div style="font-size:1.3rem;font-weight:700;color:var(--navy);margin-bottom:8px;">
+                \${isCorrect ? 'Perfect! You got it! 🌟' : \`The answer is \${current.num}. Nice try! 💙\`}
+              </div>
+              <button class="btn" id="mathAgainBtn" style="margin-top:24px;width:100%;">Try Another</button>
+            </div>
+          </div>
+        \`;
+        document.getElementById("mathAgainBtn").addEventListener("click", () => playMathGame("counting", child));
+      });
+    });
+  } else if(gameId === "addition"){
+    const addProblems = [
+      { a: 2, b: 1, pic1: "🍎🍎", pic2: "🍎" },
+      { a: 3, b: 2, pic1: "⭐⭐⭐", pic2: "⭐⭐" },
+      { a: 1, b: 3, pic1: "🎈", pic2: "🎈🎈🎈" }
+    ];
+    const p = addProblems[Math.floor(Math.random() * addProblems.length)];
+    const answer = p.a + p.b;
+    const options = [answer - 1, answer, answer + 1].filter(n => n > 0).sort(() => Math.random() - 0.5);
+
+    app.innerHTML = \`
+      <div class="card">
+        <div class="card-head">
+          <button class="btn-icon" id="mathBackBtn">←</button>
+          <h1 style="margin:0;">Addition</h1>
+        </div>
+        <div style="padding:20px;background:var(--bg-secondary);border-radius:12px;margin:20px 0;">
+          <div style="display:flex;align-items:center;justify-content:center;gap:20px;font-size:2.5rem;margin-bottom:20px;">
+            <div>\${p.pic1}</div>
+            <div style="font-weight:700;color:var(--primary);">+</div>
+            <div>\${p.pic2}</div>
+            <div style="font-weight:700;color:var(--slate-light);">=</div>
+            <div style="font-size:3rem;color:var(--primary);">?</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;">
+          \${options.map(opt => \`
+            <button class="btn add-answer-btn" data-answer="\${opt}" style="font-size:1.5rem;height:60px;border-radius:12px;">\${opt}</button>
+          \`).join("")}
+        </div>
+      </div>
+    \`;
+
+    document.getElementById("mathBackBtn").addEventListener("click", () => renderMathGames(child));
+
+    document.querySelectorAll(".add-answer-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const userAnswer = parseInt(btn.dataset.answer);
+        const isCorrect = userAnswer === answer;
+        app.innerHTML = \`
+          <div class="card">
+            <div style="text-align:center;padding:40px 20px;">
+              <div style="font-size:3rem;margin-bottom:16px;">\${isCorrect ? '🎉' : '💪'}</div>
+              <div style="font-size:1.3rem;font-weight:700;color:var(--navy);margin-bottom:8px;">
+                \${isCorrect ? 'Excellent! You solved it! ✨' : \`The answer is \${answer}. Great effort! 💙\`}
+              </div>
+              <button class="btn" id="mathAgainBtn" style="margin-top:24px;width:100%;">Try Another</button>
+            </div>
+          </div>
+        \`;
+        document.getElementById("mathAgainBtn").addEventListener("click", () => playMathGame("addition", child));
+      });
+    });
+  } else if(gameId === "patterns"){
+    const patterns = [
+      { sequence: ["🔴", "🔵", "🔴", "🔵"], answer: "🔴", label: "Red, Blue, Red, Blue, ?" },
+      { sequence: ["⭐", "⭐", "🌙", "⭐", "⭐", "🌙"], answer: "⭐", label: "Star, Star, Moon, Star, Star, Moon, ?" },
+      { sequence: ["🍎", "🍊", "🍋"], answer: "🍎", label: "Apple, Orange, Lemon, ?" }
+    ];
+    const p = patterns[Math.floor(Math.random() * patterns.length)];
+    const wrongAnswers = ["🔴", "🔵", "🌙", "⭐", "🍎", "🍊"].filter(x => x !== p.answer).slice(0, 2);
+    const options = [p.answer, ...wrongAnswers].sort(() => Math.random() - 0.5);
+
+    app.innerHTML = \`
+      <div class="card">
+        <div class="card-head">
+          <button class="btn-icon" id="mathBackBtn">←</button>
+          <h1 style="margin:0;">Find the Pattern</h1>
+        </div>
+        <div style="padding:20px;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);border-radius:12px;margin:20px 0;text-align:center;color:#fff;font-size:1rem;font-weight:600;margin-bottom:20px;">\${p.label}</div>
+        <div style="font-size:3rem;text-align:center;margin-bottom:30px;word-spacing:12px;">\${p.sequence.join(" ")}</div>
+        <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;">
+          \${options.map(opt => \`
+            <button class="btn pattern-btn" data-answer="\${opt === p.answer}" style="font-size:2rem;height:70px;border-radius:12px;">\${opt}</button>
+          \`).join("")}
+        </div>
+      </div>
+    \`;
+
+    document.getElementById("mathBackBtn").addEventListener("click", () => renderMathGames(child));
+
+    document.querySelectorAll(".pattern-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const isCorrect = btn.dataset.answer === "true";
+        app.innerHTML = \`
+          <div class="card">
+            <div style="text-align:center;padding:40px 20px;">
+              <div style="font-size:3rem;margin-bottom:16px;">\${isCorrect ? '🎉' : '💪'}</div>
+              <div style="font-size:1.3rem;font-weight:700;color:var(--navy);margin-bottom:8px;">
+                \${isCorrect ? 'You found the pattern! 🧠' : \`The answer was \${p.answer}. You\'re getting better! 💙\`}
+              </div>
+              <button class="btn" id="mathAgainBtn" style="margin-top:24px;width:100%;">Try Another Pattern</button>
+            </div>
+          </div>
+        \`;
+        document.getElementById("mathAgainBtn").addEventListener("click", () => playMathGame("patterns", child));
+      });
+    });
+  }
+}
+
+function renderWritingPractice(child){
+  setActiveBottomTab("more");
+  const exercises = [
+    { id: "letters", title: "🔤 Trace Letters", desc: "Practice writing A-Z with visual guides." },
+    { id: "words", title: "✏️ Simple Words", desc: "Write short words: cat, dog, sun." },
+    { id: "speech2text", title: "🎤 Speak & Write", desc: "Say it, we'll write it." }
+  ];
+
+  app.innerHTML = \`
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon">✏️</div>
+        <h1 style="margin:0;">Writing Practice</h1>
+      </div>
+      <p style="color:var(--muted-foreground);font-size:.9rem;margin-bottom:16px;">Get comfortable with writing. No pressure!</p>
+      <div class="more-menu-grid">
+        \${exercises.map(e => \`
+          <div class="more-menu-item" data-exercise="\${e.id}">
+            <div class="more-menu-icon">\${e.title.split(' ')[0]}</div>
+            <div class="more-menu-text">
+              <div class="more-menu-label">\${escapeHtml(e.title.split(' ').slice(1).join(' '))}</div>
+              <div class="more-menu-desc">\${escapeHtml(e.desc)}</div>
+            </div>
+            <div class="more-menu-arrow">→</div>
+          </div>
+        \`).join("")}
+      </div>
+    </div>
+  \`;
+
+  document.querySelectorAll("[data-exercise]").forEach(el => {
+    el.addEventListener("click", () => {
+      const exId = el.dataset.exercise;
+      if(exId === "letters"){
+        doLetterTracing(child);
+      } else if(exId === "words"){
+        doWordWriting(child);
+      } else if(exId === "speech2text"){
+        doSpeechToText(child);
+      }
+    });
+  });
+}
+
+function doLetterTracing(child){
+  const letters = ["A", "B", "C", "D", "E"];
+  const currentLetter = letters[Math.floor(Math.random() * letters.length)];
+
+  app.innerHTML = \`
+    <div class="card">
+      <div class="card-head">
+        <button class="btn-icon" id="writingBackBtn">←</button>
+        <h1 style="margin:0;">Trace the Letter</h1>
+      </div>
+      <div style="background:linear-gradient(135deg, #fbbf24 0%, #f97316 100%);padding:40px;border-radius:16px;margin:20px 0;text-align:center;">
+        <div style="font-size:5rem;font-weight:900;color:#fff;font-family:Arial;">\${currentLetter}</div>
+      </div>
+      <p style="color:var(--slate);margin-bottom:16px;">Practice writing this letter. Take your time!</p>
+      <canvas id="tracingCanvas" width="100%" height="200" style="border:2px dashed var(--primary);border-radius:12px;background:#fafafa;cursor:crosshair;display:block;margin-bottom:16px;"></canvas>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" id="tracingDoneBtn" style="flex:1;">Done ✓</button>
+        <button class="btn secondary" id="tracingClearBtn" style="flex:1;">Clear</button>
+      </div>
+    </div>
+  \`;
+
+  const canvas = document.getElementById("tracingCanvas");
+  const ctx = canvas.getContext("2d");
+  let isDrawing = false;
+
+  canvas.addEventListener("mousedown", () => isDrawing = true);
+  canvas.addEventListener("mouseup", () => isDrawing = false);
+  canvas.addEventListener("mousemove", (e) => {
+    if(!isDrawing) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + 2, y + 2);
+    ctx.strokeStyle = "var(--primary)";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  });
+
+  document.getElementById("tracingBackBtn").addEventListener("click", () => renderWritingPractice(child));
+  document.getElementById("tracingClearBtn").addEventListener("click", () => ctx.clearRect(0, 0, canvas.width, canvas.height));
+  document.getElementById("tracingDoneBtn").addEventListener("click", () => {
+    app.innerHTML = \`
+      <div class="card">
+        <div style="text-align:center;padding:40px 20px;">
+          <div style="font-size:3rem;margin-bottom:16px;">🌟</div>
+          <div style="font-size:1.2rem;font-weight:700;color:var(--navy);margin-bottom:8px;">Great practice!</div>
+          <p style="color:var(--slate);margin-bottom:24px;">Keep practicing and your writing will get even better.</p>
+          <button class="btn" id="writingContinueBtn" style="width:100%;">Try Another Letter</button>
+        </div>
+      </div>
+    \`;
+    document.getElementById("writingContinueBtn").addEventListener("click", () => doLetterTracing(child));
+  });
+}
+
+function doWordWriting(child){
+  const words = ["cat", "dog", "sun", "run", "hop"];
+  const word = words[Math.floor(Math.random() * words.length)];
+
+  app.innerHTML = \`
+    <div class="card">
+      <div class="card-head">
+        <button class="btn-icon" id="writingBackBtn">←</button>
+        <h1 style="margin:0;">Write the Word</h1>
+      </div>
+      <div style="background:linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);padding:30px;border-radius:16px;margin:20px 0;text-align:center;">
+        <div style="font-size:2rem;color:#fff;font-weight:600;font-family:Arial;">\${word.toUpperCase()}</div>
+      </div>
+      <p style="color:var(--slate);margin-bottom:16px;">Type or write this word:</p>
+      <input type="text" id="wordInput" placeholder="Type here..." style="width:100%;padding:12px;border:2px solid var(--primary);border-radius:8px;font-size:1.1rem;margin-bottom:16px;">
+      <button class="btn" id="wordCheckBtn" style="width:100%;">Check ✓</button>
+    </div>
+  \`;
+
+  document.getElementById("writingBackBtn").addEventListener("click", () => renderWritingPractice(child));
+  document.getElementById("wordCheckBtn").addEventListener("click", () => {
+    const userText = document.getElementById("wordInput").value.toLowerCase().trim();
+    const isCorrect = userText === word;
+    app.innerHTML = \`
+      <div class="card">
+        <div style="text-align:center;padding:40px 20px;">
+          <div style="font-size:3rem;margin-bottom:16px;">\${isCorrect ? '🎉' : '💪'}</div>
+          <div style="font-size:1.2rem;font-weight:700;color:var(--navy);margin-bottom:16px;">
+            \${isCorrect ? 'Perfect spelling! 🌟' : \`The word is: \${word}\`}
+          </div>
+          <button class="btn" id="wordAgainBtn" style="width:100%;">Try Another Word</button>
+        </div>
+      </div>
+    \`;
+    document.getElementById("wordAgainBtn").addEventListener("click", () => doWordWriting(child));
+  });
+}
+
+function doSpeechToText(child){
+  app.innerHTML = \`
+    <div class="card">
+      <div class="card-head">
+        <button class="btn-icon" id="writingBackBtn">←</button>
+        <h1 style="margin:0;">Speak & Write</h1>
+      </div>
+      <p style="color:var(--slate);margin-bottom:20px;">Tap the button and speak. We'll write down what you say.</p>
+      <button class="btn" id="speakBtn" style="width:100%;height:80px;font-size:1.2rem;margin-bottom:20px;background:linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+        🎤 TAP & SPEAK
+      </button>
+      <div id="transcriptArea" style="background:var(--bg-secondary);padding:16px;border-radius:8px;min-height:60px;color:var(--slate);font-size:.95rem;">
+        (Your words will appear here...)
+      </div>
+    </div>
+  \`;
+
+  document.getElementById("writingBackBtn").addEventListener("click", () => renderWritingPractice(child));
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition){
+    document.getElementById("transcriptArea").textContent = "Speech recognition not available on this device.";
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+
+  document.getElementById("speakBtn").addEventListener("click", () => {
+    document.getElementById("transcriptArea").textContent = "Listening...";
+    document.getElementById("speakBtn").textContent = "🎤 LISTENING...";
+    document.getElementById("speakBtn").disabled = true;
+    recognition.start();
+  });
+
+  recognition.onresult = (e) => {
+    let transcript = "";
+    for(let i = e.resultIndex; i < e.results.length; i++){
+      transcript += e.results[i][0].transcript;
+    }
+    document.getElementById("transcriptArea").textContent = transcript;
+    document.getElementById("speakBtn").textContent = "🎤 TAP & SPEAK";
+    document.getElementById("speakBtn").disabled = false;
+  };
+
+  recognition.onerror = () => {
+    document.getElementById("transcriptArea").textContent = "Couldn't hear you. Try again!";
+    document.getElementById("speakBtn").textContent = "🎤 TAP & SPEAK";
+    document.getElementById("speakBtn").disabled = false;
+  };
+}
+
+function renderPhonicsGames(child){
+  setActiveBottomTab("more");
+  app.innerHTML = \`
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon">🔤</div>
+        <h1 style="margin:0;">Phonics & Sight-Words</h1>
+      </div>
+      <p style="color:var(--muted-foreground);font-size:.9rem;margin-bottom:20px;">Learn letter sounds and common words.</p>
+      <div class="more-menu-grid">
+        <div class="more-menu-item" id="lettersoundBtn">
+          <div class="more-menu-icon">🔊</div>
+          <div class="more-menu-text">
+            <div class="more-menu-label">Letter Sounds</div>
+            <div class="more-menu-desc">Learn A-Z sounds and practice them</div>
+          </div>
+          <div class="more-menu-arrow">→</div>
+        </div>
+        <div class="more-menu-item" id="sightwordBtn">
+          <div class="more-menu-icon">👁️</div>
+          <div class="more-menu-text">
+            <div class="more-menu-label">Sight Words</div>
+            <div class="more-menu-desc">Recognize common words instantly</div>
+          </div>
+          <div class="more-menu-arrow">→</div>
+        </div>
+      </div>
+    </div>
+  \`;
+
+  document.getElementById("lettersoundBtn").addEventListener("click", () => doLetterSounds(child));
+  document.getElementById("sightwordBtn").addEventListener("click", () => doSightWords(child));
+}
+
+function doLetterSounds(child){
+  const sounds = [
+    { letter: "A", sound: "ah", example: "Apple" },
+    { letter: "B", sound: "buh", example: "Ball" },
+    { letter: "C", sound: "kuh", example: "Cat" },
+    { letter: "D", sound: "duh", example: "Dog" },
+    { letter: "E", sound: "eh", example: "Egg" }
+  ];
+  const current = sounds[Math.floor(Math.random() * sounds.length)];
+
+  app.innerHTML = \`
+    <div class="card">
+      <div class="card-head">
+        <button class="btn-icon" id="phonicsBackBtn">←</button>
+        <h1 style="margin:0;">Letter Sounds</h1>
+      </div>
+      <div style="background:linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);padding:50px 20px;border-radius:16px;margin:20px 0;text-align:center;">
+        <div style="font-size:5rem;font-weight:900;color:#fff;">\${current.letter}</div>
+        <div style="font-size:1.1rem;color:#fff;margin-top:16px;">Says: "<strong>\${current.sound}</strong>"</div>
+      </div>
+      <p style="color:var(--slate);text-align:center;margin-bottom:20px;">Example: <strong>\${current.example}</strong></p>
+      <button class="btn" id="soundPlayBtn" style="width:100%;height:60px;font-size:1.1rem;margin-bottom:16px;">
+        🔊 HEAR THE SOUND
+      </button>
+      <button class="btn secondary" id="soundNextBtn" style="width:100%;">Next Letter →</button>
+    </div>
+  \`;
+
+  document.getElementById("phonicsBackBtn").addEventListener("click", () => renderPhonicsGames(child));
+  document.getElementById("soundPlayBtn").addEventListener("click", () => {
+    const utterance = new SpeechSynthesisUtterance(current.sound);
+    utterance.rate = 0.8;
+    window.speechSynthesis.speak(utterance);
+  });
+  document.getElementById("soundNextBtn").addEventListener("click", () => doLetterSounds(child));
+}
+
+function doSightWords(child){
+  const sightWords = ["the", "and", "is", "a", "to", "in", "of", "that", "it", "you"];
+  const word = sightWords[Math.floor(Math.random() * sightWords.length)];
+  const wrongWords = sightWords.filter(w => w !== word).slice(0, 2).sort(() => Math.random() - 0.5);
+  const options = [word, ...wrongWords].sort(() => Math.random() - 0.5);
+
+  app.innerHTML = \`
+    <div class="card">
+      <div class="card-head">
+        <button class="btn-icon" id="phonicsBackBtn">←</button>
+        <h1 style="margin:0;">Sight Words</h1>
+      </div>
+      <p style="color:var(--muted-foreground);font-size:.9rem;margin-bottom:20px;">Which word is correct? (Hint: look at the big one)</p>
+      <div style="background:linear-gradient(135deg, #f472b6 0%, #ec4899 100%);padding:40px;border-radius:16px;margin:20px 0;text-align:center;">
+        <div style="font-size:3rem;font-weight:700;color:#fff;">\${word}</div>
+      </div>
+      <p style="text-align:center;color:var(--slate);margin-bottom:20px;">Which one matches?</p>
+      <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;margin-bottom:20px;">
+        \${options.map(opt => \`
+          <button class="btn sightword-btn" data-correct="\${opt === word}" style="height:50px;font-weight:600;">\${opt}</button>
+        \`).join("")}
+      </div>
+    </div>
+  \`;
+
+  document.getElementById("phonicsBackBtn").addEventListener("click", () => renderPhonicsGames(child));
+
+  document.querySelectorAll(".sightword-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const isCorrect = btn.dataset.correct === "true";
+      app.innerHTML = \`
+        <div class="card">
+          <div style="text-align:center;padding:40px 20px;">
+            <div style="font-size:3rem;margin-bottom:16px;">\${isCorrect ? '🎉' : '💪'}</div>
+            <div style="font-size:1.2rem;font-weight:700;color:var(--navy);margin-bottom:16px;">
+              \${isCorrect ? 'You got it! 🌟' : \`Good try! The answer is: <strong>\${word}</strong>\`}
+            </div>
+            <button class="btn" id="sightwordAgainBtn" style="width:100%;">Another Word</button>
+          </div>
+        </div>
+      \`;
+      document.getElementById("sightwordAgainBtn").addEventListener("click", () => doSightWords(child));
+    });
+  });
+}
+
+// ─── Phase 3: SPEECH & COMMUNICATION ───
+
+function renderVocabularyBuilder(child){
+  setActiveBottomTab("more");
+
+  if(!window.vocabState){
+    window.vocabState = { words: [], newWord: "", newPic: "" };
+  }
+  const state = window.vocabState;
+
+  app.innerHTML = \`
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon">💬</div>
+        <h1 style="margin:0;">Vocabulary Builder</h1>
+      </div>
+      <p style="color:var(--muted-foreground);font-size:.9rem;margin-bottom:16px;">Add words your child learns. Practice them anytime.</p>
+
+      <div style="background:var(--bg-secondary);padding:12px;border-radius:8px;margin-bottom:16px;">
+        <input type="text" id="newWordInput" placeholder="New word..." style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ccc;border-radius:6px;font-size:.95rem;">
+        <input type="text" id="newPicInput" placeholder="Emoji or description..." style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ccc;border-radius:6px;font-size:.95rem;">
+        <button class="btn" id="addWordBtn" style="width:100%;font-size:.95rem;">+ Add Word</button>
+      </div>
+
+      \${state.words.length > 0 ? \`
+        <div style="margin-bottom:20px;">
+          <div style="font-weight:600;margin-bottom:12px;font-size:.95rem;">Your Words (\${state.words.length})</div>
+          <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:8px;">
+            \${state.words.map((w, i) => \`
+              <button class="btn secondary word-card" data-idx="\${i}" style="height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
+                <span style="font-size:2rem;">\${w.pic}</span>
+                <span style="font-size:.9rem;font-weight:600;">\${w.word}</span>
+              </button>
+            \`).join("")}
+          </div>
+        </div>
+      \` : \`<p style="color:var(--muted-foreground);text-align:center;margin:30px 0;">No words yet. Add your first word!</p>\`}
+    </div>
+  \`;
+
+  document.getElementById("addWordBtn").addEventListener("click", () => {
+    const word = document.getElementById("newWordInput").value.trim();
+    const pic = document.getElementById("newPicInput").value.trim() || "📝";
+    if(word){
+      state.words.push({ word, pic });
+      renderVocabularyBuilder(child);
+    }
+  });
+
+  document.querySelectorAll(".word-card").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = parseInt(btn.dataset.idx);
+      const w = state.words[idx];
+      const utterance = new SpeechSynthesisUtterance(w.word);
+      utterance.rate = 0.9;
+      window.speechSynthesis.speak(utterance);
+    });
+  });
+}
+
+function renderEmotionsSocial(child){
+  setActiveBottomTab("more");
+  const activities = [
+    { id: "emotions", title: "😊 Recognize Emotions", desc: "What feeling is this picture showing?" },
+    { id: "social", title: "🤝 Social Situations", desc: "What do you do in this situation?" }
+  ];
+
+  app.innerHTML = \`
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon">💙</div>
+        <h1 style="margin:0;">Emotions & Social</h1>
+      </div>
+      <p style="color:var(--muted-foreground);font-size:.9rem;margin-bottom:16px;">Learn to recognize feelings and handle social situations.</p>
+      <div class="more-menu-grid">
+        \${activities.map(a => \`
+          <div class="more-menu-item" data-activity="\${a.id}">
+            <div class="more-menu-icon">\${a.title.split(' ')[0]}</div>
+            <div class="more-menu-text">
+              <div class="more-menu-label">\${escapeHtml(a.title.split(' ').slice(1).join(' '))}</div>
+              <div class="more-menu-desc">\${escapeHtml(a.desc)}</div>
+            </div>
+            <div class="more-menu-arrow">→</div>
+          </div>
+        \`).join("")}
+      </div>
+    </div>
+  \`;
+
+  document.querySelectorAll("[data-activity]").forEach(el => {
+    el.addEventListener("click", () => {
+      const actId = el.dataset.activity;
+      if(actId === "emotions") doEmotionRecognition(child);
+      else if(actId === "social") doSocialScenarios(child);
+    });
+  });
+}
+
+function doEmotionRecognition(child){
+  const emotions = [
+    { emoji: "😊", emotion: "Happy", desc: "This person feels happy and joyful!" },
+    { emoji: "😢", emotion: "Sad", desc: "This person feels sad and needs comfort." },
+    { emoji: "😡", emotion: "Angry", desc: "This person feels angry and frustrated." },
+    { emoji: "😨", emotion: "Scared", desc: "This person feels afraid or nervous." },
+    { emoji: "😴", emotion: "Tired", desc: "This person feels sleepy and tired." }
+  ];
+  const current = emotions[Math.floor(Math.random() * emotions.length)];
+
+  app.innerHTML = \`
+    <div class="card">
+      <div class="card-head">
+        <button class="btn-icon" id="emotionBackBtn">←</button>
+        <h1 style="margin:0;">What's This Feeling?</h1>
+      </div>
+      <div style="background:linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);padding:50px 20px;border-radius:16px;margin:20px 0;text-align:center;">
+        <div style="font-size:5rem;margin-bottom:16px;">\${current.emoji}</div>
+        <div style="font-size:1.1rem;color:#fff;font-weight:600;">\${current.emotion}</div>
+      </div>
+      <div style="background:var(--bg-secondary);padding:16px;border-radius:8px;margin-bottom:20px;color:var(--slate);line-height:1.6;">
+        \${current.desc}
+      </div>
+      <p style="color:var(--slate-light);text-align:center;margin-bottom:16px;">Do you feel like this sometimes? That's totally normal!</p>
+      <button class="btn secondary" id="emotionNextBtn" style="width:100%;">Next Emotion →</button>
+    </div>
+  \`;
+
+  document.getElementById("emotionBackBtn").addEventListener("click", () => renderEmotionsSocial(child));
+  document.getElementById("emotionNextBtn").addEventListener("click", () => doEmotionRecognition(child));
+}
+
+function doSocialScenarios(child){
+  const scenarios = [
+    {
+      situation: "Your friend takes your toy. What do you do?",
+      options: ["Ask politely to get it back", "Cry and run away", "Take someone else's toy"],
+      correct: 0,
+      explanation: "Asking nicely is the best way! You might say: 'Can I have my toy back, please?'"
+    },
+    {
+      situation: "Someone says 'Hi!' What do you do?",
+      options: ["Wave or say 'Hi!' back", "Ignore them", "Run away"],
+      correct: 0,
+      explanation: "Saying 'Hi!' back shows you're friendly and interested in talking!"
+    },
+    {
+      situation: "You bump into someone. What do you do?",
+      options: ["Say 'Sorry!'", "Keep going", "Say they're clumsy"],
+      correct: 0,
+      explanation: "Saying sorry shows kindness. It helps others feel better!"
+    }
+  ];
+  const current = scenarios[Math.floor(Math.random() * scenarios.length)];
+
+  app.innerHTML = \`
+    <div class="card">
+      <div class="card-head">
+        <button class="btn-icon" id="socialBackBtn">←</button>
+        <h1 style="margin:0;">Social Situation</h1>
+      </div>
+      <div style="background:linear-gradient(135deg, #ec4899 0%, #f43f5e 100%);padding:24px;border-radius:12px;margin:20px 0;">
+        <div style="color:#fff;font-size:1.1rem;font-weight:600;text-align:center;">\${current.situation}</div>
+      </div>
+      <div style="display:grid;gap:10px;margin:20px 0;">
+        \${current.options.map((opt, i) => \`
+          <button class="btn social-option" data-correct="\${i === current.correct}" style="text-align:left;height:auto;padding:12px;white-space:normal;">\${escapeHtml(opt)}</button>
+        \`).join("")}
+      </div>
+    </div>
+  \`;
+
+  document.getElementById("socialBackBtn").addEventListener("click", () => renderEmotionsSocial(child));
+
+  document.querySelectorAll(".social-option").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const isCorrect = btn.dataset.correct === "true";
+      app.innerHTML = \`
+        <div class="card">
+          <div style="text-align:center;padding:40px 20px;">
+            <div style="font-size:3rem;margin-bottom:16px;">\${isCorrect ? '🎉' : '💡'}</div>
+            <div style="font-size:1.2rem;font-weight:700;color:var(--navy);margin-bottom:16px;">
+              \${isCorrect ? 'Perfect choice! 🌟' : 'Let\'s try another way...'}
+            </div>
+            <div style="background:var(--bg-secondary);padding:16px;border-radius:8px;margin-bottom:20px;color:var(--slate);font-size:.95rem;line-height:1.6;">
+              \${current.explanation}
+            </div>
+            <button class="btn" id="socialAgainBtn" style="width:100%;">Try Another Situation</button>
+          </div>
+        </div>
+      \`;
+      document.getElementById("socialAgainBtn").addEventListener("click", () => doSocialScenarios(child));
+    });
+  });
+}
+
+// ─── Phase 4: ACCESSIBILITY & SUPPORT ───
+
+function renderSensoryModes(child){
+  setActiveBottomTab("more");
+  if(!window.sensorySettings){
+    window.sensorySettings = {
+      animationsOn: true,
+      soundOn: true,
+      brightness: 100,
+      colorMode: "normal"
+    };
+  }
+  const settings = window.sensorySettings;
+
+  app.innerHTML = \`
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon">🎨</div>
+        <h1 style="margin:0;">Sensory Settings</h1>
+      </div>
+      <p style="color:var(--muted-foreground);font-size:.9rem;margin-bottom:20px;">Customize how the app looks and sounds.</p>
+
+      <div style="space-y:3;">
+        <div style="margin-bottom:20px;padding:12px;background:var(--bg-secondary);border-radius:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <label style="font-weight:600;font-size:.95rem;">🎬 Animations</label>
+            <input type="checkbox" id="animToggle" \${settings.animationsOn ? 'checked' : ''} style="width:24px;height:24px;cursor:pointer;">
+          </div>
+          <div style="font-size:.85rem;color:var(--slate-light);">Smooth movements on buttons & transitions</div>
+        </div>
+
+        <div style="margin-bottom:20px;padding:12px;background:var(--bg-secondary);border-radius:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <label style="font-weight:600;font-size:.95rem;">🔊 Sounds</label>
+            <input type="checkbox" id="soundToggle" \${settings.soundOn ? 'checked' : ''} style="width:24px;height:24px;cursor:pointer;">
+          </div>
+          <div style="font-size:.85rem;color:var(--slate-light);">Tap sounds & audio feedback</div>
+        </div>
+
+        <div style="margin-bottom:20px;padding:12px;background:var(--bg-secondary);border-radius:8px;">
+          <label style="font-weight:600;font-size:.95rem;display:block;margin-bottom:8px;">☀️ Brightness: \${settings.brightness}%</label>
+          <input type="range" min="50" max="150" value="\${settings.brightness}" id="brightnessSlider" style="width:100%;">
+          <div style="font-size:.85rem;color:var(--slate-light);">Adjust screen brightness</div>
+        </div>
+
+        <div style="margin-bottom:20px;padding:12px;background:var(--bg-secondary);border-radius:8px;">
+          <label style="font-weight:600;font-size:.95rem;display:block;margin-bottom:8px;">🎨 Color Mode</label>
+          <select id="colorModeSelect" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:.95rem;">
+            <option value="normal" \${settings.colorMode === 'normal' ? 'selected' : ''}>Normal</option>
+            <option value="calm" \${settings.colorMode === 'calm' ? 'selected' : ''}>Calm (Soft Colors)</option>
+            <option value="highcontrast" \${settings.colorMode === 'highcontrast' ? 'selected' : ''}>High Contrast</option>
+          </select>
+          <div style="font-size:.85rem;color:var(--slate-light);margin-top:8px;">Choose colors that feel comfortable</div>
+        </div>
+      </div>
+
+      <button class="btn secondary" id="sensoryResetBtn" style="width:100%;margin-top:16px;">Reset to Default</button>
+    </div>
+  \`;
+
+  document.getElementById("animToggle").addEventListener("change", (e) => {
+    settings.animationsOn = e.target.checked;
+    renderSensoryModes(child);
+  });
+
+  document.getElementById("soundToggle").addEventListener("change", (e) => {
+    settings.soundOn = e.target.checked;
+    renderSensoryModes(child);
+  });
+
+  document.getElementById("brightnessSlider").addEventListener("input", (e) => {
+    settings.brightness = parseInt(e.target.value);
+    renderSensoryModes(child);
+  });
+
+  document.getElementById("colorModeSelect").addEventListener("change", (e) => {
+    settings.colorMode = e.target.value;
+    renderSensoryModes(child);
+  });
+
+  document.getElementById("sensoryResetBtn").addEventListener("click", () => {
+    window.sensorySettings = {
+      animationsOn: true,
+      soundOn: true,
+      brightness: 100,
+      colorMode: "normal"
+    };
+    renderSensoryModes(child);
+  });
+}
+
+function renderFocusTools(child){
+  setActiveBottomTab("more");
+  const tools = [
+    { id: "timer", title: "⏱️ Focus Timer", desc: "Set time to focus, then take a break." },
+    { id: "tasks", title: "📋 Task Breakdown", desc: "Break big tasks into small, easy steps." },
+    { id: "games", title: "🎯 Focus Games", desc: "Play games to build attention skills." }
+  ];
+
+  app.innerHTML = \`
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon">⚡</div>
+        <h1 style="margin:0;">Focus & ADHD Tools</h1>
+      </div>
+      <p style="color:var(--muted-foreground);font-size:.9rem;margin-bottom:16px;">Tools to help your child stay focused and calm.</p>
+      <div class="more-menu-grid">
+        \${tools.map(t => \`
+          <div class="more-menu-item" data-tool="\${t.id}">
+            <div class="more-menu-icon">\${t.title.split(' ')[0]}</div>
+            <div class="more-menu-text">
+              <div class="more-menu-label">\${escapeHtml(t.title.split(' ').slice(1).join(' '))}</div>
+              <div class="more-menu-desc">\${escapeHtml(t.desc)}</div>
+            </div>
+            <div class="more-menu-arrow">→</div>
+          </div>
+        \`).join("")}
+      </div>
+    </div>
+  \`;
+
+  document.querySelectorAll("[data-tool]").forEach(el => {
+    el.addEventListener("click", () => {
+      const toolId = el.dataset.tool;
+      if(toolId === "timer") doFocusTimer(child);
+      else if(toolId === "tasks") doTaskBreakdown(child);
+      else if(toolId === "games") doFocusGames(child);
+    });
+  });
+}
+
+function doFocusTimer(child){
+  app.innerHTML = \`
+    <div class="card">
+      <div class="card-head">
+        <button class="btn-icon" id="timerBackBtn">←</button>
+        <h1 style="margin:0;">Focus Timer</h1>
+      </div>
+      <p style="color:var(--slate);text-align:center;margin-bottom:20px;">How long to focus? (Pick one)</p>
+      <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:10px;margin-bottom:20px;">
+        <button class="btn timer-option" data-minutes="5" style="height:70px;font-size:1.2rem;">5 min</button>
+        <button class="btn timer-option" data-minutes="10" style="height:70px;font-size:1.2rem;">10 min</button>
+        <button class="btn timer-option" data-minutes="15" style="height:70px;font-size:1.2rem;">15 min</button>
+        <button class="btn timer-option" data-minutes="20" style="height:70px;font-size:1.2rem;">20 min</button>
+      </div>
+    </div>
+  \`;
+
+  document.getElementById("timerBackBtn").addEventListener("click", () => renderFocusTools(child));
+
+  document.querySelectorAll(".timer-option").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const minutes = parseInt(btn.dataset.minutes);
+      runFocusTimer(minutes, child);
+    });
+  });
+}
+
+function runFocusTimer(minutes, child){
+  let remaining = minutes * 60;
+  const startTime = Date.now();
+  const endTime = startTime + (minutes * 60 * 1000);
+
+  const updateTimer = () => {
+    const now = Date.now();
+    remaining = Math.max(0, Math.ceil((endTime - now) / 1000));
+    const mins = Math.floor(remaining / 60);
+    const secs = remaining % 60;
+    const display = \`\${mins}:\${secs.toString().padStart(2, '0')}\`;
+
+    app.innerHTML = \`
+      <div class="card">
+        <div class="card-head">
+          <h1 style="margin:0;">Focus Timer</h1>
+        </div>
+        <div style="background:linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);padding:60px 20px;border-radius:16px;text-align:center;margin:40px 0;">
+          <div style="font-size:5rem;font-weight:900;color:#fff;font-family:monospace;letter-spacing:8px;">\${display}</div>
+          <div style="color:#fff;font-size:1.1rem;margin-top:20px;">Keep going! You're doing great! 💪</div>
+        </div>
+        <button class="btn secondary" id="timerStopBtn" style="width:100%;">Stop</button>
+      </div>
+    \`;
+
+    if(remaining <= 0){
+      app.innerHTML = \`
+        <div class="card">
+          <div style="text-align:center;padding:40px 20px;">
+            <div style="font-size:4rem;margin-bottom:16px;">🎉</div>
+            <div style="font-size:1.3rem;font-weight:700;color:var(--navy);margin-bottom:16px;">Time's Up!</div>
+            <p style="color:var(--slate);margin-bottom:24px;">You focused for \${minutes} minutes. Awesome! Take a break now — you earned it! 🌟</p>
+            <button class="btn" id="timerDoneBtn" style="width:100%;">Cool! Take a Break →</button>
+          </div>
+        </div>
+      \`;
+      document.getElementById("timerDoneBtn").addEventListener("click", () => renderFocusTools(child));
+      return;
+    }
+
+    document.getElementById("timerStopBtn").addEventListener("click", () => renderFocusTools(child));
+    requestAnimationFrame(updateTimer);
+  };
+
+  updateTimer();
+}
+
+function doTaskBreakdown(child){
+  const sampleTask = "Clean up my room";
+  const steps = [
+    "Put all clothes in the hamper",
+    "Put toys in the toy box",
+    "Make the bed",
+    "Sweep the floor"
+  ];
+
+  app.innerHTML = \`
+    <div class="card">
+      <div class="card-head">
+        <button class="btn-icon" id="taskBackBtn">←</button>
+        <h1 style="margin:0;">Task Breakdown</h1>
+      </div>
+      <div style="background:linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);padding:20px;border-radius:12px;margin:20px 0;">
+        <div style="color:#fff;font-weight:700;font-size:1.1rem;text-align:center;">"\${sampleTask}" is really:</div>
+      </div>
+      <div style="space-y:3;">
+        \${steps.map((step, i) => \`
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-secondary);border-radius:8px;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:var(--primary);color:#fff;border-radius:50%;font-weight:700;">\${i + 1}</div>
+            <div style="flex:1;color:var(--slate);">\${step}</div>
+            <div style="font-size:1.5rem;cursor:pointer;user-select:none;" onclick="this.textContent = (this.textContent === '⭕' ? '✅' : '⭕');">⭕</div>
+          </div>
+        \`).join("")}
+      </div>
+      <p style="color:var(--slate-light);text-align:center;margin-top:24px;font-size:.9rem;">Do one step at a time. Tap the circle to mark it done!</p>
+    </div>
+  \`;
+
+  document.getElementById("taskBackBtn").addEventListener("click", () => renderFocusTools(child));
+}
+
+function doFocusGames(child){
+  const games = ["Simon Says", "Follow the Dot", "Memory"];
+  const game = games[0]; // Just show first for now
+
+  app.innerHTML = \`
+    <div class="card">
+      <div class="card-head">
+        <button class="btn-icon" id="focusGameBackBtn">←</button>
+        <h1 style="margin:0;">Focus Games</h1>
+      </div>
+      <p style="color:var(--slate);margin-bottom:20px;">These games help build focus and attention!</p>
+      <div style="background:linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);padding:40px;border-radius:16px;text-align:center;margin:20px 0;">
+        <div style="font-size:3rem;margin-bottom:16px;">👀</div>
+        <div style="font-size:1.2rem;font-weight:700;color:#fff;margin-bottom:20px;">Follow the Dot</div>
+        <div style="width:50px;height:50px;background:#fff;border-radius:50%;margin:0 auto;position:relative;top:0;animation:bounce 1s infinite;"></div>
+      </div>
+      <p style="color:var(--slate-light);text-align:center;font-size:.9rem;">Watch the dot move. Try to keep your eyes on it!</p>
+      <style>
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-20px); }
+        }
+      </style>
+    </div>
+  \`;
+
+  document.getElementById("focusGameBackBtn").addEventListener("click", () => renderFocusTools(child));
 }
 
 // ─── Avatar Intake (Phase 2) ───

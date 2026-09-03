@@ -44,6 +44,8 @@
   .provider-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:14px;margin-bottom:10px;cursor:pointer;background:#f4f2ee}
   .profile-photo-lg{width:96px;height:96px;border-radius:50%;object-fit:cover;margin:0 auto 12px;display:block;background:#f4f2ee}
   .profile-avatar-placeholder{width:96px;height:96px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;background:#ffe4d6;color:#ff8a5c;font-size:2.2rem;font-weight:800;font-family:'Space Grotesk',sans-serif}
+  .social-icon-link{text-decoration:none;filter:grayscale(0);opacity:.85}
+  .social-icon-link:hover{opacity:1}
   .modal{background:#fff;border-radius:20px 20px 0 0;padding:24px 20px 32px;width:100%;max-width:480px}
   .modal h3{font-size:1.15rem;margin-bottom:6px}
   .modal .sub{font-size:.85rem;color:#7b8194;margin-bottom:18px}
@@ -199,11 +201,11 @@ async function loadProviders(){
   try{
     const [{ data: pros, error: proErr }, { data: cgs, error: cgErr }, { data: agcs, error: agcErr }] = await Promise.all([
       sb.from('professionals')
-        .select('id, user_id, professional_type, display_name, city, state, area, bio, consultation_fee_min, consultation_fee_max, verification_status, qualifications, years_of_experience, intro_video_url, languages_spoken, photo_url'),
+        .select('id, user_id, professional_type, display_name, city, state, area, bio, consultation_fee_min, consultation_fee_max, verification_status, qualifications, years_of_experience, intro_video_url, languages_spoken, photo_url, photo_urls, success_stories, facebook_url, instagram_url, website_url'),
       sb.from('caregivers')
-        .select('user_id, caregiver_type, display_name, city, state, area, bio, hourly_rate_min, hourly_rate_max, verification_status, qualifications, years_experience, intro_video_url, languages_spoken, photo_url'),
+        .select('user_id, caregiver_type, display_name, city, state, area, bio, hourly_rate_min, hourly_rate_max, verification_status, qualifications, years_experience, intro_video_url, languages_spoken, photo_url, photo_urls, success_stories, facebook_url, instagram_url, website_url'),
       sb.from('agencies')
-        .select('id, user_id, agency_name, city, state, area, bio, hourly_rate_min, hourly_rate_max, verification_status, languages_spoken, intro_video_url, photo_url'),
+        .select('id, user_id, agency_name, city, state, area, bio, hourly_rate_min, hourly_rate_max, verification_status, languages_spoken, intro_video_url, photo_url, photo_urls, success_stories, facebook_url, instagram_url, website_url'),
     ]);
     if (proErr) console.error(proErr);
     if (cgErr) console.error(cgErr);
@@ -220,6 +222,11 @@ async function loadProviders(){
       qualifications: p.qualifications, yearsExp: p.years_of_experience, videoUrl: p.intro_video_url,
       languages: p.languages_spoken || [],
       photoUrl: p.photo_url || null,
+      photoUrls: p.photo_urls || [],
+      successStories: p.success_stories || [],
+      facebookUrl: p.facebook_url || null,
+      instagramUrl: p.instagram_url || null,
+      websiteUrl: p.website_url || null,
     }));
     const cgList = (cgs || []).map(c => ({
       kind: 'caregiver',
@@ -232,6 +239,11 @@ async function loadProviders(){
       qualifications: c.qualifications, yearsExp: c.years_experience, videoUrl: c.intro_video_url,
       languages: c.languages_spoken || [],
       photoUrl: c.photo_url || null,
+      photoUrls: c.photo_urls || [],
+      successStories: c.success_stories || [],
+      facebookUrl: c.facebook_url || null,
+      instagramUrl: c.instagram_url || null,
+      websiteUrl: c.website_url || null,
     }));
 
     let rosterByAgency = {};
@@ -260,6 +272,11 @@ async function loadProviders(){
       languages: a.languages_spoken || [],
       roster: rosterByAgency[a.id] || [],
       photoUrl: a.photo_url || null,
+      photoUrls: a.photo_urls || [],
+      successStories: a.success_stories || [],
+      facebookUrl: a.facebook_url || null,
+      instagramUrl: a.instagram_url || null,
+      websiteUrl: a.website_url || null,
     }));
 
     allProviders = [...proList, ...cgList, ...agencyList];
@@ -460,26 +477,60 @@ function openProviderProfile(p){
   const feeLabel = feeRangeLabel(p);
   const ratingKey = p.kind + ':' + p.providerId;
   const rs = ratingsSummary[ratingKey];
-  const ratingLabel = rs ? `★ ${(rs.sum / rs.count).toFixed(1)} (${rs.count})` : 'No ratings yet';
-  const ratingHtml = rs ? `<span style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted" onclick='openReviewsModal(${JSON.stringify(p.kind)}, ${JSON.stringify(p.providerId)}, ${JSON.stringify(p.name)})'>${escapeHtml(ratingLabel)}</span>` : escapeHtml(ratingLabel);
+  const ratingLabel = rs ? (rs.sum / rs.count).toFixed(1) : '—';
+  const ratingCountLabel = rs ? `${rs.count} review${rs.count===1?'':'s'}` : 'No reviews yet';
   const initial = (p.name || '?').trim().charAt(0).toUpperCase();
   const rosterCount = (p.roster || []).length;
+  const photos = p.photoUrls && p.photoUrls.length ? p.photoUrls : (p.photoUrl ? [p.photoUrl] : []);
+  const stories = p.successStories || [];
+
+  const socialIcons = [
+    p.instagramUrl ? `<a href="${escapeHtml(p.instagramUrl)}" target="_blank" rel="noopener" class="social-icon-link">📷</a>` : '',
+    p.facebookUrl ? `<a href="${escapeHtml(p.facebookUrl)}" target="_blank" rel="noopener" class="social-icon-link">👍</a>` : '',
+    p.websiteUrl ? `<a href="${escapeHtml(p.websiteUrl)}" target="_blank" rel="noopener" class="social-icon-link">🌐</a>` : '',
+  ].filter(Boolean).join('');
 
   const actionHtml = p.kind === 'agency'
     ? `<button class="book-btn" ${rosterCount ? '' : 'disabled'} onclick='closeProviderProfile();openRosterViewModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'>${rosterCount ? `View Caregivers (${rosterCount}) →` : 'No caregivers listed yet'}</button>`
     : `<button class="book-btn" ${p.feeMin ? '' : 'disabled'} onclick='closeProviderProfile();openBookModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'>${p.feeMin ? 'Book & Pay →' : 'Fee not listed yet'}</button>`;
 
   document.getElementById('profileModalBody').innerHTML = `
-    ${p.photoUrl ? `<img src="${escapeHtml(p.photoUrl)}" class="profile-photo-lg" alt="">` : `<div class="profile-avatar-placeholder">${escapeHtml(initial)}</div>`}
-    <div class="type-tag" style="text-align:center;display:block">${escapeHtml(kindLabel(p.kind))}</div>
-    <h3 style="text-align:center;margin-bottom:4px">${escapeHtml(p.name)}</h3>
-    <div class="sub" style="text-align:center;margin-bottom:14px">${p.typeLabel ? escapeHtml(p.typeLabel) + ' · ' : ''}${loc ? escapeHtml(loc) + ' · ' : ''}${ratingHtml}</div>
-    ${p.qualifications ? `<div style="font-size:.85rem;color:#57534E;margin-bottom:8px"><strong>Qualifications:</strong> ${escapeHtml(p.qualifications)}</div>` : ''}
-    ${p.yearsExp ? `<div style="font-size:.85rem;color:#57534E;margin-bottom:8px"><strong>Experience:</strong> ${p.yearsExp} years</div>` : ''}
-    ${p.languages && p.languages.length ? `<div style="font-size:.85rem;color:#57534E;margin-bottom:8px"><strong>Speaks:</strong> ${escapeHtml(p.languages.join(', '))}</div>` : ''}
-    ${p.bio ? `<div class="bio" style="margin-top:10px">${escapeHtml(p.bio)}</div>` : ''}
-    ${p.videoUrl ? renderVideoEmbed(p.videoUrl) : ''}
-    <div class="fee" style="margin-top:12px">${feeLabel}</div>
+    <div style="display:flex;gap:16px;align-items:center;margin-bottom:6px">
+      ${p.photoUrl ? `<img src="${escapeHtml(p.photoUrl)}" class="profile-photo-lg" style="margin:0" alt="">` : `<div class="profile-avatar-placeholder" style="margin:0">${escapeHtml(initial)}</div>`}
+      <div style="flex:1;display:flex;justify-content:space-around;text-align:center">
+        <div><div style="font-weight:800;font-size:1.05rem">${p.yearsExp || '—'}</div><div style="font-size:.7rem;color:#A8A29E">Years Exp</div></div>
+        <div><div style="font-weight:800;font-size:1.05rem">${escapeHtml(ratingLabel)} ★</div><div style="font-size:.7rem;color:#A8A29E;cursor:pointer;text-decoration:underline;text-decoration-style:dotted" onclick='closeProviderProfile();openReviewsModal(${JSON.stringify(p.kind)}, ${JSON.stringify(p.providerId)}, ${JSON.stringify(p.name)})'>${escapeHtml(ratingCountLabel)}</div></div>
+        <div><div style="font-weight:800;font-size:1.05rem">${photos.length}</div><div style="font-size:.7rem;color:#A8A29E">Photos</div></div>
+      </div>
+    </div>
+    <div class="type-tag">${escapeHtml(kindLabel(p.kind))}</div>
+    <h3 style="margin-bottom:2px">${escapeHtml(p.name)}</h3>
+    <div class="sub" style="margin-bottom:8px">${p.typeLabel ? escapeHtml(p.typeLabel) + ' · ' : ''}${loc ? escapeHtml(loc) : ''}</div>
+    ${socialIcons ? `<div style="display:flex;gap:14px;margin-bottom:12px;font-size:1.3rem">${socialIcons}</div>` : ''}
+    ${p.qualifications ? `<div style="font-size:.85rem;color:#57534E;margin-bottom:6px"><strong>Qualifications:</strong> ${escapeHtml(p.qualifications)}</div>` : ''}
+    ${p.languages && p.languages.length ? `<div style="font-size:.85rem;color:#57534E;margin-bottom:6px"><strong>Speaks:</strong> ${escapeHtml(p.languages.join(', '))}</div>` : ''}
+    ${p.bio ? `<div class="bio" style="margin-top:8px">${escapeHtml(p.bio)}</div>` : ''}
+
+    ${photos.length ? `
+      <div style="font-weight:700;font-size:.85rem;margin-top:16px;margin-bottom:8px">📷 Photos</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px">
+        ${photos.map(url => `<img src="${escapeHtml(url)}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;cursor:pointer" onclick="window.open('${escapeHtml(url)}','_blank')" loading="lazy">`).join('')}
+      </div>
+    ` : ''}
+
+    ${p.videoUrl ? `<div style="font-weight:700;font-size:.85rem;margin-top:16px;margin-bottom:8px">🎬 Intro Video</div>${renderVideoEmbed(p.videoUrl)}` : ''}
+
+    ${stories.length ? `
+      <div style="font-weight:700;font-size:.85rem;margin-top:16px;margin-bottom:8px">✨ Success Stories</div>
+      ${stories.map(s => `
+        <div class="roster-item" style="margin-bottom:8px">
+          ${s.title ? `<div style="font-weight:700;font-size:.88rem;margin-bottom:4px">${escapeHtml(s.title)}</div>` : ''}
+          <div class="rbio">${escapeHtml(s.text || '')}</div>
+        </div>
+      `).join('')}
+    ` : ''}
+
+    <div class="fee" style="margin-top:16px">${feeLabel}</div>
     <div class="modal-actions" style="margin-top:16px;gap:10px">
       ${actionHtml}
       <button class="btn-cancel" style="flex:1" onclick="closeProviderProfile()">Close</button>

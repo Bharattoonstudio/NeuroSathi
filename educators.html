@@ -1,5 +1,4 @@
-
-aPage_UpPage_UpPage_UpPage_UpPage_Uphonclick="profSignup()"  onclick="showTermsModal()"﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -133,12 +132,32 @@ aPage_UpPage_UpPage_UpPage_UpPage_Uphonclick="profSignup()"  onclick="showTermsM
         <label>Profile Photo (optional)</label>
         <div style="display:flex;align-items:center;gap:14px">
           <div id="photoPreviewWrap" style="width:64px;height:64px;border-radius:50%;background:#F1F5F9;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;border:2px solid #E5E7EB">
-            <span id="photoPreviewIcon" style="font-size:22px;color:#A8A29E">ðŸ‘¤</span>
+            <span id="photoPreviewIcon" style="font-size:22px;color:#A8A29E">👤</span>
             <img id="photoPreviewImg" alt="Preview of your uploaded photo" style="display:none;width:100%;height:100%;object-fit:cover" loading="lazy">
           </div>
           <input type="file" id="profPhotoFile" accept="image/*" onchange="previewProfilePhoto(event)" style="font-size:13px">
         </div>
         <div id="photoUploadStatus" style="font-size:11.5px;color:#7b8194;margin-top:6px"></div>
+      </div>
+
+      <div class="prof-field">
+        <label>Gallery Photos (optional — up to 6, shown on your profile)</label>
+        <input type="file" id="profGalleryFiles" accept="image/*" multiple onchange="previewGalleryPhotos(event)" style="font-size:13px">
+        <div id="galleryPreviewGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px"></div>
+        <div id="galleryUploadStatus" style="font-size:11.5px;color:#7b8194;margin-top:6px"></div>
+      </div>
+
+      <div class="prof-field">
+        <label>Success Stories (optional)</label>
+        <div id="successStoriesList"></div>
+        <button type="button" onclick="addSuccessStoryField()" style="background:none;border:1px dashed #ff8a5c;color:#ff8a5c;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;margin-top:4px">+ Add a success story</button>
+      </div>
+
+      <div class="prof-field">
+        <label>Social & Website Links (optional)</label>
+        <input type="text" id="profFacebook" placeholder="Facebook page URL">
+        <input type="text" id="profInstagram" placeholder="Instagram profile URL" style="margin-top:8px">
+        <input type="text" id="profWebsite" placeholder="Website URL" style="margin-top:8px">
       </div>
 
       <div class="prof-field">
@@ -692,6 +711,16 @@ function fillProfileForm(data){
     const icon = document.getElementById('photoPreviewIcon');
     if(img && icon){ img.src = data.photo_url; img.style.display = 'block'; icon.style.display = 'none'; }
   }
+  existingGalleryUrls = Array.isArray(data.photo_urls) ? data.photo_urls : [];
+  renderGalleryPreview();
+  setVal('profFacebook', data.facebook_url);
+  setVal('profInstagram', data.instagram_url);
+  setVal('profWebsite', data.website_url);
+  const savedStories = Array.isArray(data.success_stories) ? data.success_stories : [];
+  document.getElementById('successStoriesList').innerHTML = '';
+  if(savedStories.length){
+    savedStories.forEach(s => addSuccessStoryField(s.title, s.text));
+  }
 }
 
 async function loadExistingProfile(){
@@ -738,13 +767,86 @@ async function uploadProfilePhotoIfSelected(sb, userId){
   const path = `${userId}/photo.${ext}`;
   const { error: uploadError } = await sb.storage.from('profile-photos').upload(path, selectedPhotoFile, { upsert: true });
   if(uploadError){
-    statusEl.textContent = 'Photo upload failed â€” you can add it later from Edit Profile.';
+    statusEl.textContent = 'Photo upload failed — you can add it later from Edit Profile.';
     console.error(uploadError);
     return null;
   }
   const { data } = sb.storage.from('profile-photos').getPublicUrl(path);
-  statusEl.textContent = 'Photo uploaded âœ“';
+  statusEl.textContent = 'Photo uploaded ✓';
   return data?.publicUrl || null;
+}
+
+let selectedGalleryFiles = [];
+let existingGalleryUrls = [];
+const MAX_GALLERY_PHOTOS = 6;
+
+function previewGalleryPhotos(event){
+  const files = Array.from(event.target.files || []);
+  const oversized = files.find(f => f.size > 3 * 1024 * 1024);
+  if(oversized){
+    alert('Please choose images smaller than 3MB each.');
+    event.target.value = '';
+    return;
+  }
+  if(files.length > MAX_GALLERY_PHOTOS){
+    alert(`Please choose up to ${MAX_GALLERY_PHOTOS} photos.`);
+    event.target.value = '';
+    return;
+  }
+  selectedGalleryFiles = files;
+  renderGalleryPreview();
+}
+
+function renderGalleryPreview(){
+  const grid = document.getElementById('galleryPreviewGrid');
+  if(!grid) return;
+  const newPreviews = selectedGalleryFiles.map(f => URL.createObjectURL(f));
+  const allPreviews = selectedGalleryFiles.length ? newPreviews : existingGalleryUrls;
+  grid.innerHTML = allPreviews.map(src => `<img src="${src}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;background:#F1F5F9" loading="lazy">`).join('');
+}
+
+async function uploadGalleryPhotosIfSelected(sb, userId){
+  if(!selectedGalleryFiles.length) return existingGalleryUrls;
+  const statusEl = document.getElementById('galleryUploadStatus');
+  statusEl.textContent = 'Uploading gallery photos...';
+  const urls = [];
+  for(let i = 0; i < selectedGalleryFiles.length; i++){
+    const file = selectedGalleryFiles[i];
+    const ext = file.name.split('.').pop();
+    const path = `${userId}/gallery-${i}-${Date.now()}.${ext}`;
+    const { error: uploadError } = await sb.storage.from('profile-photos').upload(path, file, { upsert: true });
+    if(uploadError){
+      console.error(uploadError);
+      continue;
+    }
+    const { data } = sb.storage.from('profile-photos').getPublicUrl(path);
+    if(data?.publicUrl) urls.push(data.publicUrl);
+  }
+  statusEl.textContent = urls.length ? `${urls.length} photo(s) uploaded ✓` : 'Gallery upload failed — you can add it later from Edit Profile.';
+  return urls;
+}
+
+let successStoryFieldCount = 0;
+
+function addSuccessStoryField(title, text){
+  const list = document.getElementById('successStoriesList');
+  const id = 'story_' + (successStoryFieldCount++);
+  const wrap = document.createElement('div');
+  wrap.id = id;
+  wrap.style.cssText = 'border:1px solid #E5E7EB;border-radius:10px;padding:10px;margin-top:8px';
+  wrap.innerHTML = `
+    <input type="text" class="story-title" placeholder="Short title (e.g. 'Learning to speak in sentences')" value="${title ? escapeHtml(title) : ''}" style="margin-bottom:6px">
+    <textarea class="story-text" rows="3" placeholder="Tell the story briefly...">${text ? escapeHtml(text) : ''}</textarea>
+    <button type="button" onclick="document.getElementById('${id}').remove()" style="background:none;border:none;color:#c0392b;font-size:12px;font-weight:700;cursor:pointer;margin-top:4px">Remove</button>
+  `;
+  list.appendChild(wrap);
+}
+
+function collectSuccessStories(){
+  return Array.from(document.querySelectorAll('#successStoriesList > div')).map(wrap => ({
+    title: wrap.querySelector('.story-title').value.trim(),
+    text: wrap.querySelector('.story-text').value.trim(),
+  })).filter(s => s.title || s.text);
 }
 
 let selectedCredentialFile = null;
@@ -793,6 +895,7 @@ async function submitProfessionalRegistration(event){
     const toArray = (val) => val.split(',').map(s => s.trim()).filter(Boolean);
 
     const photoUrl = await uploadProfilePhotoIfSelected(sb, userId);
+    const galleryUrls = await uploadGalleryPhotosIfSelected(sb, userId);
     const credentialPath = await uploadCredentialFileIfSelected(sb, userId);
 
     const pincode = document.getElementById('profPincode').value.trim();
@@ -829,6 +932,11 @@ async function submitProfessionalRegistration(event){
       years_of_experience: document.getElementById('profYearsExp').value ? parseInt(document.getElementById('profYearsExp').value) : null,
       intro_video_url: document.getElementById('profIntroVideo').value.trim() || null,
       is_active: true,
+      photo_urls: galleryUrls,
+      success_stories: collectSuccessStories(),
+      facebook_url: document.getElementById('profFacebook').value.trim() || null,
+      instagram_url: document.getElementById('profInstagram').value.trim() || null,
+      website_url: document.getElementById('profWebsite').value.trim() || null,
     };
     if(photoUrl) payload.photo_url = photoUrl;
     if(credentialPath) payload.credential_doc_path = credentialPath;

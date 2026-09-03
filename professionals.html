@@ -902,6 +902,7 @@ async function submitProfessionalRegistration(event){
       qualifications: document.getElementById('profQualifications').value.trim() || null,
       years_of_experience: document.getElementById('profYearsExp').value ? parseInt(document.getElementById('profYearsExp').value) : null,
       intro_video_url: document.getElementById('profIntroVideo').value.trim() || null,
+      is_active: true,
     };
     if(photoUrl) payload.photo_url = photoUrl;
     if(credentialPath) payload.credential_doc_path = credentialPath;

@@ -192,14 +192,11 @@ async function loadProviders(){
   try{
     const [{ data: pros, error: proErr }, { data: cgs, error: cgErr }, { data: agcs, error: agcErr }] = await Promise.all([
       sb.from('professionals')
-        .select('id, user_id, professional_type, display_name, city, state, area, bio, consultation_fee_min, consultation_fee_max, verification_status, qualifications, years_of_experience, intro_video_url, languages_spoken')
-        .eq('verification_status', 'verified'),
+        .select('id, user_id, professional_type, display_name, city, state, area, bio, consultation_fee_min, consultation_fee_max, verification_status, qualifications, years_of_experience, intro_video_url, languages_spoken'),
       sb.from('caregivers')
-        .select('user_id, caregiver_type, display_name, city, state, area, bio, hourly_rate_min, hourly_rate_max, verification_status, qualifications, years_experience, intro_video_url, languages_spoken')
-        .eq('verification_status', 'verified'),
+        .select('user_id, caregiver_type, display_name, city, state, area, bio, hourly_rate_min, hourly_rate_max, verification_status, qualifications, years_experience, intro_video_url, languages_spoken'),
       sb.from('agencies')
-        .select('id, user_id, agency_name, city, state, area, bio, hourly_rate_min, hourly_rate_max, verification_status, languages_spoken, intro_video_url')
-        .eq('verification_status', 'verified'),
+        .select('id, user_id, agency_name, city, state, area, bio, hourly_rate_min, hourly_rate_max, verification_status, languages_spoken, intro_video_url'),
     ]);
     if (proErr) console.error(proErr);
     if (cgErr) console.error(cgErr);
@@ -294,7 +291,7 @@ function renderList(){
     ((p.name || '').toLowerCase().includes(q) || (p.city || '').toLowerCase().includes(q) || (p.languages || []).some(l => l.toLowerCase().includes(q)))
   );
   if (!filtered.length){
-    mount.innerHTML = `<div class="empty-note">${allProviders.length ? 'No matches. Try a different search.' : 'No verified providers listed yet — check back soon.'}</div>`;
+    mount.innerHTML = `<div class="empty-note">${allProviders.length ? 'No matches. Try a different search.' : 'No providers listed yet — check back soon.'}</div>`;
     return;
   }
   mount.innerHTML = filtered.map((p, i) => {
@@ -311,7 +308,7 @@ function renderList(){
       const rosterCount = (p.roster || []).length;
       return `
         <div class="card">
-          <div class="type-tag">${escapeHtml(kindLabel(p.kind))}<span class="verified-tag">✓ Verified</span></div>
+          <div class="type-tag">${escapeHtml(kindLabel(p.kind))}</div>
           <div class="name">${escapeHtml(p.name)}</div>
           <div class="meta">${loc ? escapeHtml(loc) : ''} · ${ratingHtml}</div>
           ${p.languages && p.languages.length ? `<div style="font-size:.82rem;color:#57534E;margin-bottom:6px"><strong>Speaks:</strong> ${escapeHtml(p.languages.join(', '))}</div>` : ''}
@@ -325,7 +322,7 @@ function renderList(){
 
     return `
       <div class="card">
-        <div class="type-tag">${escapeHtml(kindLabel(p.kind))}<span class="verified-tag">✓ Verified</span></div>
+        <div class="type-tag">${escapeHtml(kindLabel(p.kind))}</div>
         <div class="name">${escapeHtml(p.name)}</div>
         <div class="meta">${escapeHtml(p.typeLabel)}${loc ? ' · ' + escapeHtml(loc) : ''}${expLabel} · ${ratingHtml}</div>
         ${p.qualifications ? `<div style="font-size:.82rem;color:#57534E;margin-bottom:6px"><strong>Qualifications:</strong> ${escapeHtml(p.qualifications)}</div>` : ''}

@@ -41,6 +41,9 @@
   .empty-note{color:#888;font-size:.88rem;padding:40px 20px;text-align:center}
   .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end;justify-content:center}
   .modal-bg.active{display:flex}
+  .provider-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:14px;margin-bottom:10px;cursor:pointer;background:#f4f2ee}
+  .profile-photo-lg{width:96px;height:96px;border-radius:50%;object-fit:cover;margin:0 auto 12px;display:block;background:#f4f2ee}
+  .profile-avatar-placeholder{width:96px;height:96px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;background:#ffe4d6;color:#ff8a5c;font-size:2.2rem;font-weight:800;font-family:'Space Grotesk',sans-serif}
   .modal{background:#fff;border-radius:20px 20px 0 0;padding:24px 20px 32px;width:100%;max-width:480px}
   .modal h3{font-size:1.15rem;margin-bottom:6px}
   .modal .sub{font-size:.85rem;color:#7b8194;margin-bottom:18px}
@@ -149,6 +152,10 @@
   </div>
 </div>
 
+<div class="modal-bg" id="profileModalBg">
+  <div class="modal" id="profileModalBody" style="max-height:85vh;overflow-y:auto"></div>
+</div>
+
 <script>
 const NS_URL = 'https://qvuenvngwgcknawfsnxl.supabase.co';
 const NS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2dWVudm5nd2dja25hd2ZzbnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MzI1OTksImV4cCI6MjA5ODMwODU5OX0.MZgac469tvi9Xq9gyaRbHDc9t88Ww9dN8ldZ8JvKGVI';
@@ -192,11 +199,11 @@ async function loadProviders(){
   try{
     const [{ data: pros, error: proErr }, { data: cgs, error: cgErr }, { data: agcs, error: agcErr }] = await Promise.all([
       sb.from('professionals')
-        .select('id, user_id, professional_type, display_name, city, state, area, bio, consultation_fee_min, consultation_fee_max, verification_status, qualifications, years_of_experience, intro_video_url, languages_spoken'),
+        .select('id, user_id, professional_type, display_name, city, state, area, bio, consultation_fee_min, consultation_fee_max, verification_status, qualifications, years_of_experience, intro_video_url, languages_spoken, photo_url'),
       sb.from('caregivers')
-        .select('user_id, caregiver_type, display_name, city, state, area, bio, hourly_rate_min, hourly_rate_max, verification_status, qualifications, years_experience, intro_video_url, languages_spoken'),
+        .select('user_id, caregiver_type, display_name, city, state, area, bio, hourly_rate_min, hourly_rate_max, verification_status, qualifications, years_experience, intro_video_url, languages_spoken, photo_url'),
       sb.from('agencies')
-        .select('id, user_id, agency_name, city, state, area, bio, hourly_rate_min, hourly_rate_max, verification_status, languages_spoken, intro_video_url'),
+        .select('id, user_id, agency_name, city, state, area, bio, hourly_rate_min, hourly_rate_max, verification_status, languages_spoken, intro_video_url, photo_url'),
     ]);
     if (proErr) console.error(proErr);
     if (cgErr) console.error(cgErr);
@@ -212,6 +219,7 @@ async function loadProviders(){
       feeMin: p.consultation_fee_min, feeMax: p.consultation_fee_max,
       qualifications: p.qualifications, yearsExp: p.years_of_experience, videoUrl: p.intro_video_url,
       languages: p.languages_spoken || [],
+      photoUrl: p.photo_url || null,
     }));
     const cgList = (cgs || []).map(c => ({
       kind: 'caregiver',
@@ -223,6 +231,7 @@ async function loadProviders(){
       feeMin: c.hourly_rate_min, feeMax: c.hourly_rate_max,
       qualifications: c.qualifications, yearsExp: c.years_experience, videoUrl: c.intro_video_url,
       languages: c.languages_spoken || [],
+      photoUrl: c.photo_url || null,
     }));
 
     let rosterByAgency = {};
@@ -250,6 +259,7 @@ async function loadProviders(){
       videoUrl: a.intro_video_url,
       languages: a.languages_spoken || [],
       roster: rosterByAgency[a.id] || [],
+      photoUrl: a.photo_url || null,
     }));
 
     allProviders = [...proList, ...cgList, ...agencyList];
@@ -308,8 +318,9 @@ function renderList(){
       const rosterCount = (p.roster || []).length;
       return `
         <div class="card">
+          ${p.photoUrl ? `<img src="${escapeHtml(p.photoUrl)}" class="provider-thumb" alt="" loading="lazy" onclick='openProviderProfile(${JSON.stringify(p).replace(/'/g, "&#39;")})'>` : ''}
           <div class="type-tag">${escapeHtml(kindLabel(p.kind))}</div>
-          <div class="name">${escapeHtml(p.name)}</div>
+          <div class="name" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted" onclick='openProviderProfile(${JSON.stringify(p).replace(/'/g, "&#39;")})'>${escapeHtml(p.name)}</div>
           <div class="meta">${loc ? escapeHtml(loc) : ''} · ${ratingHtml}</div>
           ${p.languages && p.languages.length ? `<div style="font-size:.82rem;color:#57534E;margin-bottom:6px"><strong>Speaks:</strong> ${escapeHtml(p.languages.join(', '))}</div>` : ''}
           ${p.bio ? `<div class="bio">${escapeHtml(p.bio)}</div>` : ''}
@@ -322,8 +333,9 @@ function renderList(){
 
     return `
       <div class="card">
+        ${p.photoUrl ? `<img src="${escapeHtml(p.photoUrl)}" class="provider-thumb" alt="" loading="lazy" onclick='openProviderProfile(${JSON.stringify(p).replace(/'/g, "&#39;")})'>` : ''}
         <div class="type-tag">${escapeHtml(kindLabel(p.kind))}</div>
-        <div class="name">${escapeHtml(p.name)}</div>
+        <div class="name" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted" onclick='openProviderProfile(${JSON.stringify(p).replace(/'/g, "&#39;")})'>${escapeHtml(p.name)}</div>
         <div class="meta">${escapeHtml(p.typeLabel)}${loc ? ' · ' + escapeHtml(loc) : ''}${expLabel} · ${ratingHtml}</div>
         ${p.qualifications ? `<div style="font-size:.82rem;color:#57534E;margin-bottom:6px"><strong>Qualifications:</strong> ${escapeHtml(p.qualifications)}</div>` : ''}
         ${p.languages && p.languages.length ? `<div style="font-size:.82rem;color:#57534E;margin-bottom:6px"><strong>Speaks:</strong> ${escapeHtml(p.languages.join(', '))}</div>` : ''}
@@ -441,6 +453,43 @@ async function openReviewsModal(kind, providerId, name){
 }
 function closeReviewsModal(){
   document.getElementById('reviewsModalBg').classList.remove('active');
+}
+
+function openProviderProfile(p){
+  const loc = [p.area, p.city, p.state].filter(Boolean).join(', ');
+  const feeLabel = feeRangeLabel(p);
+  const ratingKey = p.kind + ':' + p.providerId;
+  const rs = ratingsSummary[ratingKey];
+  const ratingLabel = rs ? `★ ${(rs.sum / rs.count).toFixed(1)} (${rs.count})` : 'No ratings yet';
+  const ratingHtml = rs ? `<span style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted" onclick='openReviewsModal(${JSON.stringify(p.kind)}, ${JSON.stringify(p.providerId)}, ${JSON.stringify(p.name)})'>${escapeHtml(ratingLabel)}</span>` : escapeHtml(ratingLabel);
+  const initial = (p.name || '?').trim().charAt(0).toUpperCase();
+  const rosterCount = (p.roster || []).length;
+
+  const actionHtml = p.kind === 'agency'
+    ? `<button class="book-btn" ${rosterCount ? '' : 'disabled'} onclick='closeProviderProfile();openRosterViewModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'>${rosterCount ? `View Caregivers (${rosterCount}) →` : 'No caregivers listed yet'}</button>`
+    : `<button class="book-btn" ${p.feeMin ? '' : 'disabled'} onclick='closeProviderProfile();openBookModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'>${p.feeMin ? 'Book & Pay →' : 'Fee not listed yet'}</button>`;
+
+  document.getElementById('profileModalBody').innerHTML = `
+    ${p.photoUrl ? `<img src="${escapeHtml(p.photoUrl)}" class="profile-photo-lg" alt="">` : `<div class="profile-avatar-placeholder">${escapeHtml(initial)}</div>`}
+    <div class="type-tag" style="text-align:center;display:block">${escapeHtml(kindLabel(p.kind))}</div>
+    <h3 style="text-align:center;margin-bottom:4px">${escapeHtml(p.name)}</h3>
+    <div class="sub" style="text-align:center;margin-bottom:14px">${p.typeLabel ? escapeHtml(p.typeLabel) + ' · ' : ''}${loc ? escapeHtml(loc) + ' · ' : ''}${ratingHtml}</div>
+    ${p.qualifications ? `<div style="font-size:.85rem;color:#57534E;margin-bottom:8px"><strong>Qualifications:</strong> ${escapeHtml(p.qualifications)}</div>` : ''}
+    ${p.yearsExp ? `<div style="font-size:.85rem;color:#57534E;margin-bottom:8px"><strong>Experience:</strong> ${p.yearsExp} years</div>` : ''}
+    ${p.languages && p.languages.length ? `<div style="font-size:.85rem;color:#57534E;margin-bottom:8px"><strong>Speaks:</strong> ${escapeHtml(p.languages.join(', '))}</div>` : ''}
+    ${p.bio ? `<div class="bio" style="margin-top:10px">${escapeHtml(p.bio)}</div>` : ''}
+    ${p.videoUrl ? renderVideoEmbed(p.videoUrl) : ''}
+    <div class="fee" style="margin-top:12px">${feeLabel}</div>
+    <div class="modal-actions" style="margin-top:16px;gap:10px">
+      ${actionHtml}
+      <button class="btn-cancel" style="flex:1" onclick="closeProviderProfile()">Close</button>
+    </div>
+  `;
+  document.getElementById('profileModalBg').classList.add('active');
+}
+
+function closeProviderProfile(){
+  document.getElementById('profileModalBg').classList.remove('active');
 }
 
 async function startPayment(){

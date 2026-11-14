@@ -332,7 +332,7 @@ function switchTab(panelId) {
 async function loadOverview() {
   const statEls = document.querySelectorAll('#overviewStats .num');
   try {
-    const [{ count: totalProf }, { count: pending }, { count: verified }, { count: children }, { count: newBookings }, { count: pendingPayouts }] = await Promise.all([
+    const results = await Promise.all([
       sbAdmin.from('professionals').select('*', { count: 'exact', head: true }),
       sbAdmin.from('professionals').select('*', { count: 'exact', head: true }).in('verification_status', ['submitted', 'under_review']),
       sbAdmin.from('professionals').select('*', { count: 'exact', head: true }).eq('verification_status', 'verified'),
@@ -340,6 +340,9 @@ async function loadOverview() {
       sbAdmin.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'requested'),
       sbAdmin.from('payouts').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     ]);
+    const labels = ['total providers', 'pending review', 'verified providers', 'children', 'requested bookings', 'pending payouts'];
+    results.forEach((r, i) => { if (r.error) console.error('Overview: ' + labels[i] + ' query failed:', r.error); });
+    const [totalProf, pending, verified, children, newBookings, pendingPayouts] = results.map(r => r.count);
     statEls[0].textContent = totalProf ?? '—';
     statEls[1].textContent = pending ?? '—';
     statEls[2].textContent = verified ?? '—';

@@ -78,6 +78,15 @@
   .fb-reviews{border-top:1px solid #F1F5F9;padding-top:16px;margin-top:4px;margin-bottom:22px}
   .fb-reviews-stars{font-size:16px;color:#E5E7EB;letter-spacing:2px;margin-bottom:4px}
   .fb-reviews-note{font-size:12.5px;color:#A8A29E}
+
+/* Phone layout only (under 768px). Desktop/laptop styles are unchanged. */
+@media (max-width: 767px) {
+  .resp-2col { grid-template-columns: 1fr !important; }
+  .resp-4col { grid-template-columns: repeat(2, 1fr) !important; }
+  .prof-form-wrap { padding: 0 14px; }
+  .prof-form-wrap button, .prof-form-wrap .btn { width: 100%; }
+  input, select, textarea { font-size: 16px; max-width: 100%; box-sizing: border-box; }
+}
 </style>
 </head>
 <body>
@@ -143,7 +152,7 @@
       <div class="prof-field">
         <label>Gallery Photos (optional — up to 6, shown on your profile)</label>
         <input type="file" id="profGalleryFiles" accept="image/*" multiple onchange="previewGalleryPhotos(event)" style="font-size:13px">
-        <div id="galleryPreviewGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px"></div>
+        <div id="galleryPreviewGrid" class="resp-4col" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px"></div>
         <div id="galleryUploadStatus" style="font-size:11.5px;color:#7b8194;margin-top:6px"></div>
       </div>
 
@@ -202,7 +211,7 @@
         </select>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="resp-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div class="prof-field">
           <label>City *</label>
           <input type="text" id="profCity" required list="cityList" placeholder="e.g. Mumbai">
@@ -236,7 +245,7 @@
         <input type="text" id="profConditionsOther" placeholder="e.g. Dyspraxia, Selective Mutism">
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="resp-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div class="prof-field">
           <label>Consultation fee — from (₹)</label>
           <input type="number" id="profFeeMin" placeholder="e.g. 500">

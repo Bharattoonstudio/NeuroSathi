@@ -166,7 +166,7 @@ let currentSession = null;
     const { data, error } = await sbAdmin.auth.getSession();
     if (error) { console.error('Session error:', error); return; }
     currentSession = data.session;
-    if (currentSession && currentSession.user && ADMIN_EMAILS.includes(currentSession.user.email)) {
+    if (currentSession && currentSession.user && await verifyAdmin()) {
       showDashboard();
     } else {
       if (currentSession) { await sbAdmin.auth.signOut(); currentSession = null; }
@@ -218,6 +218,11 @@ async function sendAdminPasswordReset() {
   }
 }
 
+async function verifyAdmin() {
+  const { error } = await sbAdmin.rpc('admin_user_summary');
+  return !error;
+}
+
 async function doAdminLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
@@ -231,16 +236,17 @@ async function doAdminLogin() {
       errEl.textContent = 'Enter both email and password.';
       btn.disabled = false; btn.textContent = 'Log In'; return;
     }
-    if (!ADMIN_EMAILS.includes(email)) {
-      errEl.textContent = 'This email is not authorized for admin access.';
-      btn.disabled = false; btn.textContent = 'Log In'; return;
-    }
     const { data, error } = await sbAdmin.auth.signInWithPassword({ email, password });
     if (error) {
       errEl.textContent = error.message;
       btn.disabled = false; btn.textContent = 'Log In'; return;
     }
     if (data && data.session) {
+      if (!(await verifyAdmin())) {
+        await sbAdmin.auth.signOut();
+        errEl.textContent = 'This account is not authorized for admin access.';
+        btn.disabled = false; btn.textContent = 'Log In'; return;
+      }
       currentSession = data.session;
       showDashboard();
     } else {

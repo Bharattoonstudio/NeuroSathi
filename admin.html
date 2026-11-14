@@ -12,6 +12,7 @@
 <meta name="robots" content="noindex, nofollow">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Inter',sans-serif;background:#f4f2ee;color:#0e1524;min-height:100vh}
@@ -30,7 +31,7 @@
   .topbar{background:#0e1524;color:#fff;padding:14px 24px;display:flex;justify-content:space-between;align-items:center}
   .topbar .brand{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1.15rem}
   .topbar button{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:7px 16px;border-radius:50px;font-size:.8rem;cursor:pointer}
-  .tabs{display:flex;gap:8px;padding:16px 24px 0;background:#fff;border-bottom:1px solid #eee}
+  .tabs{display:flex;gap:8px;padding:16px 24px 0;background:#fff;border-bottom:1px solid #eee;overflow-x:auto;white-space:nowrap}
   .tab{padding:10px 18px;border-radius:12px 12px 0 0;font-size:.88rem;font-weight:600;cursor:pointer;color:#888}
   .tab.active{color:#ff8a5c;border-bottom:3px solid #ff8a5c}
   .content{padding:24px;max-width:900px;margin:0 auto}
@@ -39,9 +40,26 @@
   .panel h2{font-size:1.3rem;margin-bottom:4px}
   .panel .sub{color:#888;font-size:.88rem;margin-bottom:20px}
   .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
-  .stat-card{background:#fff;border-radius:16px;padding:16px;border:1px solid #eee}
+  .stat-card{background:#fff;border-radius:16px;padding:16px;border:1px solid #eee;border-top:4px solid #ff8a5c;transition:transform .15s,box-shadow .15s}
+  .stat-card.clickable{cursor:pointer}
+  .stat-card.clickable:hover{transform:translateY(-2px);box-shadow:0 10px 22px -12px rgba(0,0,0,.3)}
+  .stat-card .icon{font-size:1.1rem;margin-bottom:4px}
   .stat-card .num{font-size:1.6rem;font-weight:700;font-family:'Space Grotesk',sans-serif;color:#0e1524}
   .stat-card .label{font-size:.75rem;color:#888;text-transform:uppercase;letter-spacing:.3px}
+  .c-orange{border-top-color:#ff8a5c}
+  .c-teal{border-top-color:#0f766e}
+  .c-blue{border-top-color:#1976d2}
+  .c-green{border-top-color:#2a7b47}
+  .c-amber{border-top-color:#e8a33d}
+  .c-red{border-top-color:#c0392b}
+  .c-purple{border-top-color:#7c5cff}
+  .c-pink{border-top-color:#e84393}
+  .chart-grid{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px}
+  .chart-card{background:#fff;border:1px solid #eee;border-radius:16px;padding:16px;margin-bottom:12px}
+  .chart-grid .chart-card{margin-bottom:0}
+  .chart-card h3{font-size:.95rem;margin-bottom:10px}
+  .chart-box{position:relative;height:260px}
+  @media (max-width:700px){.chart-grid{grid-template-columns:1fr}}
   .item-card{background:#fff;border:1px solid #eee;border-radius:16px;padding:16px;margin-bottom:10px}
   .item-card .name{font-weight:700;font-size:1rem}
   .item-card .meta{font-size:.8rem;color:#888;margin:4px 0 10px}
@@ -57,7 +75,10 @@
   .btn-review{background:#e8a33d}
   .btn-reject{background:#c0392b}
   .empty-note{color:#888;font-size:.88rem;padding:20px;text-align:center}
-  .search-box{width:100%;padding:11px 14px;border-radius:12px;border:1px solid #ddd;margin-bottom:16px;font-family:inherit;box-sizing:border-box}
+  .search-box{width:100%;padding:11px 14px;border-radius:12px;border:1px solid #ddd;margin-bottom:12px;font-family:inherit;box-sizing:border-box}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .chip{border:1px solid #ddd;background:#fff;border-radius:50px;padding:6px 14px;font-size:.8rem;cursor:pointer;color:#555;font-family:inherit}
+  .chip.active{background:#0e1524;color:#fff;border-color:#0e1524}
 </style>
 </head>
 <body>
@@ -94,31 +115,37 @@
   <div class="content">
     <div class="panel active" id="panelOverview">
       <h2>Overview</h2>
-      <p class="sub">Snapshot of platform activity.</p>
+      <p class="sub">Snapshot of platform activity. Tap a card to open that section.</p>
       <div class="stat-row" id="overviewStats">
-        <div class="stat-card"><div class="num">—</div><div class="label">Professionals</div></div>
-        <div class="stat-card"><div class="num">—</div><div class="label">Pending Review</div></div>
-        <div class="stat-card"><div class="num">—</div><div class="label">Verified</div></div>
-        <div class="stat-card"><div class="num">—</div><div class="label">Children Registered</div></div>
-        <div class="stat-card"><div class="num">—</div><div class="label">New Bookings</div></div>
-        <div class="stat-card"><div class="num">—</div><div class="label">Payouts Pending</div></div>
+        <div class="stat-card clickable c-teal" onclick="switchTab('panelProfessionals')"><div class="icon">👥</div><div class="num">—</div><div class="label">Professionals</div></div>
+        <div class="stat-card clickable c-amber" onclick="openPendingQueue()"><div class="icon">⏳</div><div class="num">—</div><div class="label">Pending Review</div></div>
+        <div class="stat-card clickable c-green" onclick="openVerifiedList()"><div class="icon">✅</div><div class="num">—</div><div class="label">Verified</div></div>
+        <div class="stat-card clickable c-pink" onclick="switchTab('panelUsers')"><div class="icon">🧒</div><div class="num">—</div><div class="label">Children Registered</div></div>
+        <div class="stat-card clickable c-blue" onclick="switchTab('panelBookings')"><div class="icon">📅</div><div class="num">—</div><div class="label">New Bookings</div></div>
+        <div class="stat-card clickable c-purple" onclick="switchTab('panelPayouts')"><div class="icon">💸</div><div class="num">—</div><div class="label">Payouts Pending</div></div>
       </div>
+      <div class="chart-grid">
+        <div class="chart-card"><h3>Sign-ups, last 30 days</h3><div class="chart-box"><canvas id="chartSignups"></canvas></div></div>
+        <div class="chart-card"><h3>Bookings by status</h3><div class="chart-box"><canvas id="chartBookings"></canvas></div></div>
+      </div>
+      <div class="chart-card"><h3>Verification status by account type</h3><div class="chart-box"><canvas id="chartVerification"></canvas></div></div>
     </div>
     <div class="panel" id="panelAnalytics">
       <h2>Analytics</h2>
       <p class="sub">User counts and platform totals. Visits and login history are not tracked yet.</p>
       <div class="stat-row">
-        <div class="stat-card" id="anaTotal"><div class="num">—</div><div class="label">Total accounts</div></div>
-        <div class="stat-card" id="anaNew"><div class="num">—</div><div class="label">New (30 days)</div></div>
-        <div class="stat-card" id="anaActive"><div class="num">—</div><div class="label">Signed in (30 days)</div></div>
-        <div class="stat-card" id="anaFamilies"><div class="num">—</div><div class="label">Families</div></div>
-        <div class="stat-card" id="anaChildren"><div class="num">—</div><div class="label">Children</div></div>
-        <div class="stat-card" id="anaProvVerified"><div class="num">—</div><div class="label">Providers verified</div></div>
-        <div class="stat-card" id="anaProvPending"><div class="num">—</div><div class="label">Providers pending</div></div>
-        <div class="stat-card" id="anaCaregivers"><div class="num">—</div><div class="label">Caregivers</div></div>
-        <div class="stat-card" id="anaBookings"><div class="num">—</div><div class="label">Bookings</div></div>
-        <div class="stat-card" id="anaActivities"><div class="num">—</div><div class="label">Activities</div></div>
+        <div class="stat-card c-orange" id="anaTotal"><div class="num">—</div><div class="label">Total accounts</div></div>
+        <div class="stat-card c-teal" id="anaNew"><div class="num">—</div><div class="label">New (30 days)</div></div>
+        <div class="stat-card c-blue" id="anaActive"><div class="num">—</div><div class="label">Signed in (30 days)</div></div>
+        <div class="stat-card c-orange" id="anaFamilies"><div class="num">—</div><div class="label">Families</div></div>
+        <div class="stat-card c-pink" id="anaChildren"><div class="num">—</div><div class="label">Children</div></div>
+        <div class="stat-card c-green" id="anaProvVerified"><div class="num">—</div><div class="label">Providers verified</div></div>
+        <div class="stat-card c-amber" id="anaProvPending"><div class="num">—</div><div class="label">Providers pending</div></div>
+        <div class="stat-card c-purple" id="anaCaregivers"><div class="num">—</div><div class="label">Caregivers</div></div>
+        <div class="stat-card c-blue" id="anaBookings"><div class="num">—</div><div class="label">Bookings</div></div>
+        <div class="stat-card c-teal" id="anaActivities"><div class="num">—</div><div class="label">Activities</div></div>
       </div>
+      <div class="chart-card"><h3>Accounts and activity</h3><div class="chart-box"><canvas id="anaChart"></canvas></div></div>
       <p class="error-msg" id="analyticsError"></p>
     </div>
     <div class="panel" id="panelProfessionals">
@@ -149,16 +176,22 @@
       <h2>Payouts</h2>
       <p class="sub">90% of each completed booking is owed to the provider. Pay them manually via UPI, then mark it paid here.</p>
       <div class="stat-row" id="payoutStats">
-        <div class="stat-card"><div class="num">—</div><div class="label">Total Collected</div></div>
-        <div class="stat-card"><div class="num">—</div><div class="label">Platform Fee Earned</div></div>
-        <div class="stat-card"><div class="num">—</div><div class="label">Pending Payout</div></div>
+        <div class="stat-card c-teal"><div class="num">—</div><div class="label">Total Collected</div></div>
+        <div class="stat-card c-purple"><div class="num">—</div><div class="label">Platform Fee Earned</div></div>
+        <div class="stat-card c-amber"><div class="num">—</div><div class="label">Pending Payout</div></div>
       </div>
       <input class="search-box" id="payoutSearch" placeholder="Search by provider name…" oninput="renderPayouts()">
       <div id="payoutList"><div class="empty-note">Loading…</div></div>
     </div>
     <div class="panel" id="panelUsers">
       <h2>Users</h2>
-      <p class="sub">Registered families, based on child profiles on file. Full account management (email, password resets) requires Supabase Dashboard access directly, since that needs service-role permissions this page intentionally doesn't hold.</p>
+      <p class="sub">Registered families, based on child profiles on file (latest 200). Full account management (email, password resets) requires Supabase Dashboard access directly, since that needs service-role permissions this page intentionally doesn't hold.</p>
+      <div class="stat-row">
+        <div class="stat-card c-pink"><div class="num" id="usrChildren">—</div><div class="label">Child profiles</div></div>
+        <div class="stat-card c-orange"><div class="num" id="usrFamilies">—</div><div class="label">Families</div></div>
+        <div class="stat-card c-amber"><div class="num" id="usrConcerns">—</div><div class="label">With concerns noted</div></div>
+      </div>
+      <div class="chart-card"><h3>Children by age</h3><div class="chart-box"><canvas id="chartAges"></canvas></div></div>
       <input class="search-box" id="userSearch" placeholder="Search by child name or condition…" oninput="renderUsers()">
       <div id="userList"><div class="empty-note">Loading…</div></div>
     </div>
@@ -168,13 +201,22 @@
 <script>
 const SUPABASE_URL = "https://qvuenvngwgcknawfsnxl.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2dWVudm5nd2dja25hd2ZzbnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MzI1OTksImV4cCI6MjA5ODMwODU5OX0.MZgac469tvi9Xq9gyaRbHDc9t88Ww9dN8ldZ8JvKGVI";
+// Used only to gate the password-reset email on the login screen (before anyone is signed in).
+// All admin access after login is checked against the admin_allowlist table via admin_user_summary().
 const ADMIN_EMAILS = ['bharattoonstudio@gmail.com'];
+
+const PALETTE = { orange:'#ff8a5c', teal:'#0f766e', blue:'#1976d2', green:'#2a7b47', amber:'#e8a33d', red:'#c0392b', purple:'#7c5cff', pink:'#e84393', grey:'#aaaaaa' };
+const STATUS_FILTERS = [['all','All'],['pending','Pending review'],['submitted','Submitted'],['under_review','Under review'],['verified','Verified'],['rejected','Rejected']];
+const statusFilter = { prof:'all', caregiver:'all', agency:'all' };
+const charts = {};
 
 let sbAdmin = null;
 let professionalsCache = [];
 let usersCache = [];
 let bookingsCache = [];
 let payoutsCache = [];
+let caregiversCache = [];
+let agenciesCache = [];
 let currentSession = null;
 
 (async function init() {
@@ -241,6 +283,17 @@ async function verifyAdmin() {
   return !error;
 }
 
+// Used before every admin write. Confirms the session is still on the allowlist.
+async function ensureAdmin() {
+  const { data: { session } } = await sbAdmin.auth.getSession();
+  if (!session || !session.user || !(await verifyAdmin())) {
+    alert('Your admin session has expired. Please log in again.');
+    doAdminLogout();
+    return false;
+  }
+  return true;
+}
+
 async function doAdminLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
@@ -303,6 +356,40 @@ function showDashboard() {
   loadUsers();
 }
 
+function switchTab(panelId) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.panel === panelId));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === panelId));
+  window.scrollTo(0, 0);
+}
+
+// ---------- Chart helpers ----------
+
+function drawChart(key, canvasId, config) {
+  if (typeof Chart === 'undefined') { console.error('Chart.js did not load; charts are unavailable.'); return; }
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  if (charts[key]) charts[key].destroy();
+  charts[key] = new Chart(canvas, config);
+}
+
+function localDayKey(value) {
+  const d = new Date(value);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function lastNDays(n) {
+  const days = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - i);
+    days.push(d);
+  }
+  return days;
+}
+
+// ---------- Analytics ----------
+
 async function loadAnalytics() {
   const errEl = document.getElementById('analyticsError');
   errEl.textContent = '';
@@ -322,15 +409,32 @@ async function loadAnalytics() {
   fill('anaCaregivers', 'caregivers');
   fill('anaBookings', 'bookings');
   fill('anaActivities', 'activities');
+
+  drawChart('analytics', 'anaChart', {
+    type: 'bar',
+    data: {
+      labels: ['Families', 'Providers verified', 'Providers pending', 'Caregivers', 'Children', 'Bookings', 'Activities'],
+      datasets: [{
+        label: 'Count',
+        data: [data.families, data.providers_verified, data.providers_pending, data.caregivers, data.children, data.bookings, data.activities].map(v => Number(v) || 0),
+        backgroundColor: [PALETTE.orange, PALETTE.green, PALETTE.amber, PALETTE.purple, PALETTE.pink, PALETTE.blue, PALETTE.teal],
+        borderRadius: 8,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+    },
+  });
 }
 
-function switchTab(panelId) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.panel === panelId));
-  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === panelId));
-}
+// ---------- Overview ----------
 
 async function loadOverview() {
   const statEls = document.querySelectorAll('#overviewStats .num');
+  const since30 = new Date(Date.now() - 30 * 864e5).toISOString();
   try {
     const results = await Promise.all([
       sbAdmin.from('professionals').select('*', { count: 'exact', head: true }),
@@ -339,18 +443,144 @@ async function loadOverview() {
       sbAdmin.from('children').select('*', { count: 'exact', head: true }),
       sbAdmin.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'requested'),
       sbAdmin.from('payouts').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      sbAdmin.from('children').select('created_at').gte('created_at', since30).limit(5000),
+      sbAdmin.from('professionals').select('created_at, verification_status').limit(5000),
+      sbAdmin.from('caregivers').select('created_at, verification_status').limit(5000),
+      sbAdmin.from('agencies').select('created_at, verification_status').limit(5000),
+      sbAdmin.from('bookings').select('status').limit(5000),
     ]);
-    const labels = ['total providers', 'pending review', 'verified providers', 'children', 'requested bookings', 'pending payouts'];
+    const labels = ['total providers', 'pending review', 'verified providers', 'children', 'requested bookings', 'pending payouts', 'signup children', 'professionals list', 'caregivers list', 'agencies list', 'bookings list'];
     results.forEach((r, i) => { if (r.error) console.error('Overview: ' + labels[i] + ' query failed:', r.error); });
-    const [totalProf, pending, verified, children, newBookings, pendingPayouts] = results.map(r => r.count);
+
+    const [totalProf, pending, verified, children, newBookings, pendingPayouts] = results.slice(0, 6).map(r => r.count);
     statEls[0].textContent = totalProf ?? '—';
     statEls[1].textContent = pending ?? '—';
     statEls[2].textContent = verified ?? '—';
     statEls[3].textContent = children ?? '—';
     statEls[4].textContent = newBookings ?? '—';
     statEls[5].textContent = pendingPayouts ?? '—';
+
+    renderSignupChart(results[6].data || [], results[7].data || [], results[8].data || [], results[9].data || []);
+    renderVerificationChart([results[7].data || [], results[8].data || [], results[9].data || []]);
+    renderBookingChart(results[10].data || []);
   } catch (err) { console.error('Overview error:', err); }
 }
+
+function renderSignupChart(childRows, profRows, careRows, agRows) {
+  const days = lastNDays(30);
+  const keys = days.map(localDayKey);
+  const bucket = rows => {
+    const counts = Object.fromEntries(keys.map(k => [k, 0]));
+    rows.forEach(r => { if (!r.created_at) return; const k = localDayKey(r.created_at); if (k in counts) counts[k]++; });
+    return keys.map(k => counts[k]);
+  };
+  drawChart('signups', 'chartSignups', {
+    type: 'line',
+    data: {
+      labels: days.map(d => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })),
+      datasets: [
+        { label: 'Child profiles', data: bucket(childRows), borderColor: PALETTE.orange, backgroundColor: PALETTE.orange + '33', fill: true, tension: .35 },
+        { label: 'Professionals', data: bucket(profRows), borderColor: PALETTE.teal, tension: .35 },
+        { label: 'Caregivers', data: bucket(careRows), borderColor: PALETTE.purple, tension: .35 },
+        { label: 'Agencies', data: bucket(agRows), borderColor: PALETTE.amber, tension: .35 },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'bottom' } },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+    },
+  });
+}
+
+function renderVerificationChart(groups) {
+  const types = ['Providers', 'Caregivers', 'Agencies'];
+  const statuses = ['submitted', 'under_review', 'verified', 'rejected'];
+  const colors = { submitted: PALETTE.amber, under_review: PALETTE.blue, verified: PALETTE.green, rejected: PALETTE.red };
+  const counts = groups.map(rows => {
+    const m = { submitted: 0, under_review: 0, verified: 0, rejected: 0 };
+    rows.forEach(r => { const s = r.verification_status || 'submitted'; if (s in m) m[s]++; });
+    return m;
+  });
+  drawChart('verification', 'chartVerification', {
+    type: 'bar',
+    data: {
+      labels: types,
+      datasets: statuses.map(s => ({
+        label: s.replace('_', ' '),
+        data: counts.map(c => c[s]),
+        backgroundColor: colors[s],
+        borderRadius: 6,
+      })),
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom' } },
+      scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } },
+    },
+  });
+}
+
+function renderBookingChart(rows) {
+  const order = ['requested', 'confirmed', 'completed', 'cancelled'];
+  const colors = [PALETTE.amber, PALETTE.blue, PALETTE.green, PALETTE.red, PALETTE.purple, PALETTE.pink];
+  const counts = {};
+  rows.forEach(r => { const s = r.status || 'other'; counts[s] = (counts[s] || 0) + 1; });
+  const labels = [...order, ...Object.keys(counts).filter(k => !order.includes(k))];
+  drawChart('bookings', 'chartBookings', {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data: labels.map(l => counts[l] || 0), backgroundColor: colors.slice(0, labels.length), borderWidth: 0 }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom' } },
+    },
+  });
+}
+
+// Stat-card shortcuts
+function openPendingQueue() {
+  statusFilter.prof = 'pending';
+  renderProfessionals();
+  switchTab('panelProfessionals');
+}
+
+function openVerifiedList() {
+  statusFilter.prof = 'verified';
+  renderProfessionals();
+  switchTab('panelProfessionals');
+}
+
+// ---------- Status filter chips (shared by the verification panels) ----------
+
+function chipsHtml(key) {
+  return `<div class="chips">${STATUS_FILTERS.map(([value, label]) =>
+    `<button class="chip${statusFilter[key] === value ? ' active' : ''}" onclick="setStatusFilter('${key}','${value}')">${label}</button>`
+  ).join('')}</div>`;
+}
+
+function matchesStatus(key, status) {
+  const s = status || 'submitted';
+  const f = statusFilter[key];
+  if (f === 'all') return true;
+  if (f === 'pending') return s === 'submitted' || s === 'under_review';
+  return s === f;
+}
+
+function setStatusFilter(key, value) {
+  statusFilter[key] = value;
+  if (key === 'prof') renderProfessionals();
+  if (key === 'caregiver') renderCaregivers();
+  if (key === 'agency') renderAgencies();
+}
+
+// ---------- Professionals ----------
 
 async function loadProfessionals() {
   const el = document.getElementById('profList');
@@ -375,13 +605,14 @@ function renderProfessionals() {
   const el = document.getElementById('profList');
   const q = (document.getElementById('profSearch').value || '').toLowerCase();
   const filtered = professionalsCache.filter(p =>
-    (p.display_name || '').toLowerCase().includes(q) || (p.city || '').toLowerCase().includes(q)
+    matchesStatus('prof', p.verification_status) &&
+    ((p.display_name || '').toLowerCase().includes(q) || (p.city || '').toLowerCase().includes(q))
   );
   if (!filtered.length) {
-    el.innerHTML = `<div class="empty-note">${professionalsCache.length ? 'No matches.' : 'No professionals registered yet.'}</div>`;
+    el.innerHTML = chipsHtml('prof') + `<div class="empty-note">${professionalsCache.length ? 'No matches.' : 'No professionals registered yet.'}</div>`;
     return;
   }
-  el.innerHTML = filtered.map(p => `
+  el.innerHTML = chipsHtml('prof') + filtered.map(p => `
     <div class="item-card">
       <div class="name">${escapeHtml(p.display_name)}</div>
       <div class="meta">${escapeHtml(p.professional_type || '')} · ${escapeHtml(p.city || '')}${p.state ? ', ' + escapeHtml(p.state) : ''}
@@ -410,12 +641,7 @@ async function viewCredentialDoc(path){
 
 async function setVerification(id, status) {
   try {
-    const { data: { session } } = await sbAdmin.auth.getSession();
-    if (!session || !session.user || !ADMIN_EMAILS.includes(session.user.email)) {
-      alert('Your admin session has expired. Please log in again.');
-      doAdminLogout();
-      return;
-    }
+    if (!(await ensureAdmin())) return;
     const { error } = await sbAdmin
       .from('professionals')
       .update({ verification_status: status, verification_date: new Date().toISOString() })
@@ -429,7 +655,7 @@ async function setVerification(id, status) {
   }
 }
 
-let caregiversCache = [];
+// ---------- Caregivers ----------
 
 async function loadCaregivers() {
   const el = document.getElementById('caregiverList');
@@ -454,13 +680,14 @@ function renderCaregivers() {
   const el = document.getElementById('caregiverList');
   const q = (document.getElementById('caregiverSearch').value || '').toLowerCase();
   const filtered = caregiversCache.filter(c =>
-    (c.display_name || '').toLowerCase().includes(q) || (c.city || '').toLowerCase().includes(q)
+    matchesStatus('caregiver', c.verification_status) &&
+    ((c.display_name || '').toLowerCase().includes(q) || (c.city || '').toLowerCase().includes(q))
   );
   if (!filtered.length) {
-    el.innerHTML = `<div class="empty-note">${caregiversCache.length ? 'No matches.' : 'No caregivers registered yet.'}</div>`;
+    el.innerHTML = chipsHtml('caregiver') + `<div class="empty-note">${caregiversCache.length ? 'No matches.' : 'No caregivers registered yet.'}</div>`;
     return;
   }
-  el.innerHTML = filtered.map(c => `
+  el.innerHTML = chipsHtml('caregiver') + filtered.map(c => `
     <div class="item-card">
       <div class="name">${escapeHtml(c.display_name)}</div>
       <div class="meta">${escapeHtml(c.caregiver_type || '')} · ${escapeHtml(c.city || '')}${c.state ? ', ' + escapeHtml(c.state) : ''}
@@ -478,12 +705,7 @@ function renderCaregivers() {
 
 async function setCaregiverVerification(userId, status) {
   try {
-    const { data: { session } } = await sbAdmin.auth.getSession();
-    if (!session || !session.user || !ADMIN_EMAILS.includes(session.user.email)) {
-      alert('Your admin session has expired. Please log in again.');
-      doAdminLogout();
-      return;
-    }
+    if (!(await ensureAdmin())) return;
     const { error } = await sbAdmin
       .from('caregivers')
       .update({ verification_status: status })
@@ -496,7 +718,7 @@ async function setCaregiverVerification(userId, status) {
   }
 }
 
-let agenciesCache = [];
+// ---------- Agencies ----------
 
 async function loadAgencies() {
   const el = document.getElementById('agencyList');
@@ -537,13 +759,14 @@ function renderAgencies() {
   const el = document.getElementById('agencyList');
   const q = (document.getElementById('agencySearch').value || '').toLowerCase();
   const filtered = agenciesCache.filter(a =>
-    (a.agency_name || '').toLowerCase().includes(q) || (a.city || '').toLowerCase().includes(q)
+    matchesStatus('agency', a.verification_status) &&
+    ((a.agency_name || '').toLowerCase().includes(q) || (a.city || '').toLowerCase().includes(q))
   );
   if (!filtered.length) {
-    el.innerHTML = `<div class="empty-note">${agenciesCache.length ? 'No matches.' : 'No agencies registered yet.'}</div>`;
+    el.innerHTML = chipsHtml('agency') + `<div class="empty-note">${agenciesCache.length ? 'No matches.' : 'No agencies registered yet.'}</div>`;
     return;
   }
-  el.innerHTML = filtered.map(a => `
+  el.innerHTML = chipsHtml('agency') + filtered.map(a => `
     <div class="item-card">
       <div class="name">${escapeHtml(a.agency_name)}</div>
       <div class="meta">${a._rosterCount || 0} caregiver${a._rosterCount === 1 ? '' : 's'} on roster · ${escapeHtml(a.city || '')}${a.state ? ', ' + escapeHtml(a.state) : ''}
@@ -561,12 +784,7 @@ function renderAgencies() {
 
 async function setAgencyVerification(userId, status) {
   try {
-    const { data: { session } } = await sbAdmin.auth.getSession();
-    if (!session || !session.user || !ADMIN_EMAILS.includes(session.user.email)) {
-      alert('Your admin session has expired. Please log in again.');
-      doAdminLogout();
-      return;
-    }
+    if (!(await ensureAdmin())) return;
     const { error } = await sbAdmin
       .from('agencies')
       .update({ verification_status: status })
@@ -578,6 +796,8 @@ async function setAgencyVerification(userId, status) {
     alert('Error updating verification status.');
   }
 }
+
+// ---------- Users (families, from child profiles) ----------
 
 async function loadUsers() {
   const el = document.getElementById('userList');
@@ -592,11 +812,46 @@ async function loadUsers() {
       return;
     }
     usersCache = data || [];
+    renderUserCharts();
     renderUsers();
   } catch (err) {
     console.error('Load users error:', err);
     el.innerHTML = `<div class="empty-note">Error loading users.</div>`;
   }
+}
+
+function renderUserCharts() {
+  document.getElementById('usrChildren').textContent = usersCache.length;
+  document.getElementById('usrFamilies').textContent = new Set(usersCache.map(c => c.user_id).filter(Boolean)).size;
+  document.getElementById('usrConcerns').textContent = usersCache.filter(c => (c.conditions || '').trim()).length;
+
+  const buckets = [['0–2', 0, 2], ['3–5', 3, 5], ['6–8', 6, 8], ['9–12', 9, 12], ['13+', 13, 200]];
+  const counts = buckets.map(() => 0);
+  let unknown = 0;
+  usersCache.forEach(c => {
+    const age = Number(c.age);
+    if (c.age === null || c.age === '' || !Number.isFinite(age)) { unknown++; return; }
+    const i = buckets.findIndex(([, lo, hi]) => age >= lo && age <= hi);
+    if (i >= 0) counts[i]++; else unknown++;
+  });
+  drawChart('ages', 'chartAges', {
+    type: 'bar',
+    data: {
+      labels: [...buckets.map(b => b[0]), 'Unknown'],
+      datasets: [{
+        label: 'Children',
+        data: [...counts, unknown],
+        backgroundColor: [PALETTE.orange, PALETTE.amber, PALETTE.green, PALETTE.blue, PALETTE.purple, PALETTE.grey],
+        borderRadius: 8,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+    },
+  });
 }
 
 function renderUsers() {
@@ -616,6 +871,8 @@ function renderUsers() {
     </div>
   `).join('');
 }
+
+// ---------- Bookings ----------
 
 async function loadBookings() {
   const el = document.getElementById('bookingList');
@@ -673,6 +930,8 @@ async function setBookingStatus(id, status) {
     alert('Error updating booking.');
   }
 }
+
+// ---------- Payouts ----------
 
 async function loadPayouts() {
   const el = document.getElementById('payoutList');

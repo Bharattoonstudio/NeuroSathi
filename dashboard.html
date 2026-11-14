@@ -3781,7 +3781,7 @@ async function searchProfessionalsByPincode(){
 
     const { data: pros, error } = await dash2Client
       .from("professionals")
-      .select("*")
+      .select("id, user_id, professional_type, display_name, city, state, area, bio, consultation_fee_min, consultation_fee_max, verification_status, qualifications, years_of_experience, intro_video_url, languages_spoken, photo_url, photo_urls, success_stories, facebook_url, instagram_url, website_url, created_at, is_active")
       .eq("is_active", true);
 
     if(error) throw error;

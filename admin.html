@@ -83,6 +83,7 @@
   </div>
   <div class="tabs">
     <div class="tab active" data-panel="panelOverview" onclick="switchTab('panelOverview')">Overview</div>
+    <div class="tab" data-panel="panelAnalytics" onclick="switchTab('panelAnalytics')">Analytics</div>
     <div class="tab" data-panel="panelProfessionals" onclick="switchTab('panelProfessionals')">Professionals</div>
     <div class="tab" data-panel="panelCaregivers" onclick="switchTab('panelCaregivers')">Caregivers</div>
     <div class="tab" data-panel="panelAgencies" onclick="switchTab('panelAgencies')">Agencies</div>
@@ -102,6 +103,23 @@
         <div class="stat-card"><div class="num">—</div><div class="label">New Bookings</div></div>
         <div class="stat-card"><div class="num">—</div><div class="label">Payouts Pending</div></div>
       </div>
+    </div>
+    <div class="panel" id="panelAnalytics">
+      <h2>Analytics</h2>
+      <p class="sub">User counts and platform totals. Visits and login history are not tracked yet.</p>
+      <div class="stat-row">
+        <div class="stat-card" id="anaTotal"><div class="num">—</div><div class="label">Total accounts</div></div>
+        <div class="stat-card" id="anaNew"><div class="num">—</div><div class="label">New (30 days)</div></div>
+        <div class="stat-card" id="anaActive"><div class="num">—</div><div class="label">Signed in (30 days)</div></div>
+        <div class="stat-card" id="anaFamilies"><div class="num">—</div><div class="label">Families</div></div>
+        <div class="stat-card" id="anaChildren"><div class="num">—</div><div class="label">Children</div></div>
+        <div class="stat-card" id="anaProvVerified"><div class="num">—</div><div class="label">Providers verified</div></div>
+        <div class="stat-card" id="anaProvPending"><div class="num">—</div><div class="label">Providers pending</div></div>
+        <div class="stat-card" id="anaCaregivers"><div class="num">—</div><div class="label">Caregivers</div></div>
+        <div class="stat-card" id="anaBookings"><div class="num">—</div><div class="label">Bookings</div></div>
+        <div class="stat-card" id="anaActivities"><div class="num">—</div><div class="label">Activities</div></div>
+      </div>
+      <p class="error-msg" id="analyticsError"></p>
     </div>
     <div class="panel" id="panelProfessionals">
       <h2>Professional Verification</h2>
@@ -276,12 +294,34 @@ function showDashboard() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   loadOverview();
+  loadAnalytics();
   loadProfessionals();
   loadCaregivers();
   loadAgencies();
   loadBookings();
   loadPayouts();
   loadUsers();
+}
+
+async function loadAnalytics() {
+  const errEl = document.getElementById('analyticsError');
+  errEl.textContent = '';
+  const { data, error } = await sbAdmin.rpc('admin_user_summary');
+  if (error) { errEl.textContent = 'Could not load analytics: ' + error.message; return; }
+  const fill = (id, key) => {
+    const el = document.getElementById(id);
+    if (el) el.querySelector('.num').textContent = data[key] ?? 0;
+  };
+  fill('anaTotal', 'total_accounts');
+  fill('anaNew', 'new_accounts_30_days');
+  fill('anaActive', 'active_30_days');
+  fill('anaFamilies', 'families');
+  fill('anaChildren', 'children');
+  fill('anaProvVerified', 'providers_verified');
+  fill('anaProvPending', 'providers_pending');
+  fill('anaCaregivers', 'caregivers');
+  fill('anaBookings', 'bookings');
+  fill('anaActivities', 'activities');
 }
 
 function switchTab(panelId) {
